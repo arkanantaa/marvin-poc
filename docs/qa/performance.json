@@ -1,0 +1,30 @@
+{
+  "browser": "156.0.8078.4",
+  "profile": "Windows Chromium, 390x844 DPR1 touch emulation; 4x CPU; 1.6Mbps down, 750Kbps up, 150ms latency, cache disabled; HTTP local preview; local transport uncompressed",
+  "results": [
+    {
+      "run": 1,
+      "lcp": 1544,
+      "cls": 0,
+      "longestEvent": 0,
+      "transferBytes": 153278,
+      "longestObservedEvent": 320
+    },
+    {
+      "run": 2,
+      "lcp": 1540,
+      "cls": 0,
+      "longestEvent": 0,
+      "transferBytes": 153278,
+      "longestObservedEvent": 88
+    },
+    {
+      "run": 3,
+      "lcp": 1584,
+      "cls": 0,
+      "longestEvent": 0,
+      "transferBytes": 153278,
+      "longestObservedEvent": 104
+    }
+  ]
+}

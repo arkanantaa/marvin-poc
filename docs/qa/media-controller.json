@@ -1,0 +1,186 @@
+{
+  "browser": "156.0.8078.4",
+  "note": "Development fixture only: rejected choreography; no claim of approved-video release readiness",
+  "results": [
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "samples": [
+        {
+          "time": 0.114047,
+          "paused": true,
+          "seeking": false,
+          "ready": 4
+        },
+        {
+          "time": 0.684285,
+          "paused": true,
+          "seeking": false,
+          "ready": 4
+        },
+        {
+          "time": 1.254523,
+          "paused": true,
+          "seeking": false,
+          "ready": 4
+        },
+        {
+          "time": 1.824762,
+          "paused": true,
+          "seeking": false,
+          "ready": 4
+        },
+        {
+          "time": 2.395,
+          "paused": true,
+          "seeking": false,
+          "ready": 4
+        },
+        {
+          "time": 2.965238,
+          "paused": true,
+          "seeking": false,
+          "ready": 4
+        },
+        {
+          "time": 3.535476,
+          "paused": true,
+          "seeking": false,
+          "ready": 4
+        },
+        {
+          "time": 3.991667,
+          "paused": true,
+          "seeking": false,
+          "ready": 4
+        },
+        {
+          "time": 2.965238,
+          "paused": true,
+          "seeking": false,
+          "ready": 4
+        },
+        {
+          "time": 1.824762,
+          "paused": true,
+          "seeking": false,
+          "ready": 4
+        },
+        {
+          "time": 0.684285,
+          "paused": true,
+          "seeking": false,
+          "ready": 4
+        },
+        {
+          "time": 0.000527,
+          "paused": true,
+          "seeking": false,
+          "ready": 4
+        }
+      ],
+      "stop": 2.851718,
+      "held": 2.851718,
+      "latest": {
+        "time": 1.996361,
+        "paused": true,
+        "seeking": false
+      }
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "samples": [
+        {
+          "time": 0.115173,
+          "paused": true,
+          "seeking": false,
+          "ready": 4
+        },
+        {
+          "time": 0.683722,
+          "paused": true,
+          "seeking": false,
+          "ready": 4
+        },
+        {
+          "time": 1.255086,
+          "paused": true,
+          "seeking": false,
+          "ready": 4
+        },
+        {
+          "time": 1.823636,
+          "paused": true,
+          "seeking": false,
+          "ready": 4
+        },
+        {
+          "time": 2.395,
+          "paused": true,
+          "seeking": false,
+          "ready": 4
+        },
+        {
+          "time": 2.966364,
+          "paused": true,
+          "seeking": false,
+          "ready": 4
+        },
+        {
+          "time": 3.534913,
+          "paused": true,
+          "seeking": false,
+          "ready": 4
+        },
+        {
+          "time": 3.990878,
+          "paused": true,
+          "seeking": false,
+          "ready": 4
+        },
+        {
+          "time": 2.966364,
+          "paused": true,
+          "seeking": false,
+          "ready": 4
+        },
+        {
+          "time": 1.823636,
+          "paused": true,
+          "seeking": false,
+          "ready": 4
+        },
+        {
+          "time": 0.683722,
+          "paused": true,
+          "seeking": false,
+          "ready": 4
+        },
+        {
+          "time": 0,
+          "paused": true,
+          "seeking": false,
+          "ready": 4
+        }
+      ],
+      "stop": 2.850965,
+      "held": 2.850965,
+      "latest": {
+        "time": 1.995326,
+        "paused": true,
+        "seeking": false
+      }
+    },
+    {
+      "blockedVideo": "usable monitor after failure"
+    },
+    {
+      "stalledVideo": "usable monitor within 6 seconds after intent"
+    }
+  ]
+}

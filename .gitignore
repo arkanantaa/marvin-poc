@@ -1,0 +1,5 @@
+/marvin-web/node_modules/
+/marvin-web/dist/
+/marvin-web/test-results/
+/marvin-web/playwright-report/
+/docs/qa/*.webm
