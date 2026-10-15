@@ -434,7 +434,7 @@ Configure E2E to start a production-preview server and visit the configured base
 | 6 | Integrated single-video entrance | Scroll/stop/reverse browser review | Controller implemented and tested with development fixture; compliant production integration blocked |
 | 7 | Full QA evidence | Applicable PRD requirements pass | Foundation evidence recorded; full physical-device/zoom audit and final performance acceptance outstanding |
 | 8 | Production build/workflow | Artifact and base-path acceptance | Production artifact and pinned workflows implemented; project-path checks run |
-| 9 | Live deployment and handoff | Production visual/functional acceptance | Authorized target arkanantaa/marvin-poc; publication and live review recorded in docs/deployment.md |
+| 9 | Live deployment and handoff | Production visual/functional acceptance | Foundation deployed to arkanantaa.github.io/marvin-poc; live desktop/mobile browser flows and AI-viewed screenshots pass. Exact commit/run and remaining final-release gaps in docs/deployment.md |
 | Future | Extracted-frame/canvas animation | Separate follow-up after version 1 succeeds | Deferred; outside current scope |
 
 Official deployment references were consulted on 2026-10-15. Recheck them when implementing because supported runtimes and action revisions can change.

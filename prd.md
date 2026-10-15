@@ -1,7 +1,7 @@
 # Marvin Studio portfolio — Product requirements
 
 Date: 2026-10-15  
-Status: Specification for implementation; the rebuilt website has not yet been implemented or tested.  
+Status: Foundation preview implemented, tested and deployed on 2026-10-15; single-video version 1 remains blocked by compliant footage and final-release gates. See [QA acceptance](docs/qa/acceptance.md).  
 Execution companion: [implementation-plan.md](implementation-plan.md)
 
 ## 1. Purpose and desired outcome

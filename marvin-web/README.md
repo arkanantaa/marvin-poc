@@ -37,4 +37,4 @@ npm run test:e2e
 Remove-Item Env:PAGES_BASE_PATH
 ```
 
-See [deployment and rollback](../docs/deployment.md), [baseline](../docs/qa/baseline.md), and [acceptance evidence](../docs/qa/acceptance.md). No deployment has occurred without a configured remote and verified Pages destination.
+Live foundation preview: [arkanantaa.github.io/marvin-poc](https://arkanantaa.github.io/marvin-poc/). See [deployment and rollback](../docs/deployment.md), [baseline](../docs/qa/baseline.md), and [acceptance evidence](../docs/qa/acceptance.md). Re-run live checks with `node tests/inspect-production.mjs https://arkanantaa.github.io/marvin-poc/`, then view the resulting screenshots.
