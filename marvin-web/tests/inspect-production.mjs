@@ -38,6 +38,9 @@ for (const viewport of [
       ),
     });
   await page.goto(url, { waitUntil: "networkidle" });
+  const moduleAsset = await page.locator('script[type="module"]').getAttribute('src');
+  if (process.env.EXPECTED_ASSET && !moduleAsset?.endsWith(process.env.EXPECTED_ASSET))
+    throw new Error(`Production still serves a different build: ${moduleAsset}`);
   await capture("hero");
   const range = await page
     .locator(".journey")
@@ -93,6 +96,7 @@ for (const viewport of [
   evidence.profiles.push({
     viewport,
     dpr: 1,
+    moduleAsset,
     network: "live HTTPS, new browser context/cold visit",
     errors,
     failed,

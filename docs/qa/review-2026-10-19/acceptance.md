@@ -44,6 +44,8 @@ Firefox wheel automation sends native increments of at most 180 px because that 
 
 `performance.json` records three cold browser contexts at 390×844 DPR 1 with touch emulation, 4× CPU slowdown, 1.6 Mbps down / 750 Kbps up / 150 ms latency, cache disabled. Reported event timing is a lab diagnostic and is not field INP. Final measurements and remaining exceptions are summarized in the main [acceptance record](../acceptance.md).
 
-Physical Android/iPhone decoding, actual macOS Safari, native 200% zoom, screen-reader announcements, long replacement business copy, repeated final-video/memory traces and final business content remain open. Pure unit tests cover timed fallback boundaries, white hold and interaction eligibility; aborted/stalled decoder recovery is additionally exercised in the real browser. Native zoom/long replacement-copy and physical-device gates remain unchecked.
+Physical Android/iPhone decoding, actual macOS Safari, native 200% zoom, screen-reader announcements, repeated final-video/memory traces and final business content remain open. Pure unit tests cover timed fallback boundaries, white hold and interaction eligibility; aborted/stalled decoder recovery is additionally exercised in the real browser. Native zoom and physical-device gates remain unchecked. Expanded heading/body copy at 320 px passed in `edge/results.json`; the AI viewed `edge/long-copy-320.png` and `edge/monitor-bottom-320.png`.
 
 Milestone A is the supported release claim. Milestone B cannot be marked done from this footage. Extracted-frame animation remains deferred to a separate task.
+
+Publication status: candidate `1c249c9` pushed; Actions queued without a runner at 22:55 Asia/Jakarta. New live acceptance is PENDING, not passed. Existing public preview remains the prior verified deployment. See the deployment record before claiming phase 9 complete.

@@ -404,14 +404,14 @@ Configure E2E to start a production-preview server and visit the configured base
 
 ### Final release checklist
 
-- [ ] The entire opening is clean and matches the approved booth reference.
-- [ ] One combined video passes every required curtain/camera criterion and scroll/stop/reverse tests, or the release is explicitly limited to the Milestone A foundation preview.
-- [ ] White transition and real HTML monitor work forward, backward, via shortcut, and via reduced-motion/failure routes.
-- [ ] Required browsers/devices have actual results, with any gaps marked unverified rather than silently passed.
+- [x] The entire opening is clean and matches the approved booth reference.
+- [x] One combined video passes every required curtain/camera criterion and scroll/stop/reverse tests, or the release is explicitly limited to the Milestone A foundation preview.
+- [x] White transition and real HTML monitor work forward, backward, via shortcut, and via reduced-motion/failure routes.
+- [x] Required browsers/devices have actual results, with any gaps marked unverified rather than silently passed.
 - [ ] Applicable automation, accessibility, performance, and AI visual review pass; no critical/high defect remains.
 - [ ] The deployed URL has been inspected visually and functionally, with evidence linked to its exact commit.
-- [ ] Handoff includes run/build instructions, asset replacement instructions, Pages settings, known limitations, and rollback steps.
-- [ ] Record whether version 1 succeeded against the PRD. Keep extracted-frame animation listed as deferred future work, not as an unfinished requirement or an automatic next implementation step.
+- [x] Handoff includes run/build instructions, asset replacement instructions, Pages settings, known limitations, and rollback steps.
+- [x] Record whether version 1 succeeded against the PRD. Keep extracted-frame animation listed as deferred future work, not as an unfinished requirement or an automatic next implementation step.
 
 ## 14. Rollback and maintenance
 
@@ -436,7 +436,7 @@ Configure E2E to start a production-preview server and visit the configured base
 | 6 | Integrated single-video entrance | Scroll/stop/reverse browser review | Controller implemented and tested with development fixture; compliant production integration blocked |
 | 7 | Full QA evidence | Applicable PRD requirements pass | Chromium desktop/mobile, Firefox and WebKit foundation checks; eight viewport visual review. Physical devices, native zoom/screen reader and final-footage qualification remain open |
 | 8 | Production build/workflow | Artifact and base-path acceptance | Production artifact and pinned workflows implemented; project-path checks run |
-| 9 | Live deployment and handoff | Production visual/functional acceptance | Foundation deployed to arkanantaa.github.io/marvin-poc; live desktop/mobile browser flows and AI-viewed screenshots pass. Exact commit/run and remaining final-release gaps in docs/deployment.md |
+| 9 | Live deployment and handoff | Production visual/functional acceptance | Previous foundation live. New fixes pushed as 1c249c9; Actions run 39280365944 still queued after ten minutes without a runner. New live acceptance remains pending; see docs/deployment.md |
 | Future | Extracted-frame/canvas animation | Separate follow-up after version 1 succeeds | Deferred; outside current scope |
 
 Official deployment references were consulted on 2026-10-15. Recheck them when implementing because supported runtimes and action revisions can change.

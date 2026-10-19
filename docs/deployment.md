@@ -24,3 +24,15 @@ Record the actual commit, Actions run, artifact, UTC timestamp and returned Page
 Rollback: record a known-good commit and deployment before replacing a live release. Rebuild that commit with its lockfile and pinned runtime, redeploy through Actions, and repeat live visual and asset checks. Avoid destructive local resets. For a first deployment without a previous release, use the last verified foundation candidate or repair before claiming success.
 
 Official references: [Vite static deployment](https://vite.dev/guide/static-deploy.html#github-pages), [GitHub Pages workflows](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages).
+
+## 2026-10-19 candidate ? publication pending
+
+- Candidate source commit: `1c249c9852f5b53869c93213755d603c9b98fc0a`, pushed to `main`. The first push received HTTP 408; retry using HTTP/1.1 succeeded.
+- [Deployment run 39280365944](https://github.com/arkanantaa/marvin-poc/actions/runs/39280365944) and [CI run 39280365933](https://github.com/arkanantaa/marvin-poc/actions/runs/39280365933) were triggered at 2026-10-19 22:45:18 Asia/Jakarta.
+- Last API check at approximately 22:55 Asia/Jakarta: deployment still `queued`, no conclusion; validation/build jobs had no assigned runner. One monitoring request failed DNS resolution; a retry succeeded and still reported queued. No new successful deployment/artifact ID or completion timestamp is available.
+- The live document still served `/marvin-poc/assets/index-CY-CCmn0.js` at the last successful asset check. The candidate's project-path build emits `index-BUxdsv54.js`. The new runtime is **not confirmed published**; no new live visual pass is claimed. Previous verified foundation deployment remains the known-good release above.
+- Locally: clean installation, lint, strict typecheck, eleven unit tests, twenty browser tests at both root and `/marvin-poc/` paths; Chromium desktop/mobile, Firefox and WebKit. Exact candidate project-path production build was additionally opened in Chromium at `http://127.0.0.1:4177/marvin-poc/` and checked at eight sizes, with axe and screenshots. Artifact audit confirms no rejected MP4, QA files, private notes or legacy assets ship.
+- After GitHub supplies a runner, inspect the existing run rather than starting a second deployment. On success, record the artifact and completion timestamp, then run `tests/inspect-production.mjs` with `QA_REVIEW_DIR=review-2026-10-19/`, `BUILD_COMMIT=1c249c9852f5b53869c93213755d603c9b98fc0a`, and `EXPECTED_ASSET=index-BUxdsv54.js` against the exact public URL. View the captured images, including the new mobile `work-bottom` checkpoint, and update the phase 9 checks only after it passes.
+- Rollback reference remains runtime commit `f5ac43883fec2bb3b97d83dd1045afaa1b66a81b` / deployment run `38756754934`. There is no confirmed new release to roll back at this time.
+
+This is still a foundation preview. Compliant video, approved business content, physical-device/native zoom/screen-reader review and PERF-F01 remain required for the final release. Evidence-only follow-up commits do not alter candidate runtime assets.
