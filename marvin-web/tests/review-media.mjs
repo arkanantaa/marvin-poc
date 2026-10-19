@@ -1,12 +1,25 @@
 import { chromium } from "@playwright/test";
 import fs from "node:fs/promises";
+import { fileURLToPath } from "node:url";
+import { constants } from 'node:fs';
+const output = new URL('../../docs/qa/review-2026-10-19/', import.meta.url);
+await fs.mkdir(output, {recursive:true});
 const browser = await chromium.launch({ channel: "chromium" });
+// Temporary development fixture only. Exclusive creation protects real delivery media.
+const fixture = new URL('../public/media/entrance.mp4', import.meta.url);
+await fs.copyFile(new URL('../../curtain-open.mp4',import.meta.url), fixture, constants.COPYFILE_EXCL);
+try {
 const results = [];
 for (const viewport of [
   { width: 1440, height: 900 },
   { width: 390, height: 844 },
 ]) {
-  const page = await browser.newPage({ viewport });
+  const context = await browser.newContext({ viewport });
+  const page = await context.newPage();
+  await page.goto('http://127.0.0.1:4175/#work');
+  if (await page.locator('video').getAttribute('src')) throw new Error('Deep link downloaded video');
+  await page.getByRole('link', {name:'Marvin Studio home'}).click();
+  await page.waitForFunction(()=>document.querySelector('video').readyState>=2);
   await page.goto("http://127.0.0.1:4175/");
   await page.waitForFunction(
     () => document.querySelector("video").readyState >= 2,
@@ -33,6 +46,7 @@ for (const viewport of [
           ready: el.readyState,
         })),
     );
+    await page.screenshot({path:fileURLToPath(new URL(`fixture-${viewport.width}-${samples.length}.png`,output))});
   }
   await page.mouse.wheel(0, range * 0.5);
   await page.waitForTimeout(350);
@@ -52,9 +66,14 @@ for (const viewport of [
       seeking: el.seeking,
     }));
   if (samples.some((s) => !s.paused || s.ready < 2) || latest.seeking)
-    throw new Error("Seek did not settle");
+    throw new Error(`Seek did not settle: ${JSON.stringify({samples,latest})}`);
   results.push({ viewport, samples, stop, held, latest });
-  await page.close();
+  await page.getByRole('link',{name:'Our work'}).click();
+  await page.waitForFunction(()=>!document.querySelector('video').hasAttribute('src'));
+  await page.getByRole('tab',{name:'Say hello'}).click();
+  await page.emulateMedia({reducedMotion:'reduce'});
+  if (!(await page.getByRole('tab',{name:'Say hello'}).evaluate(el=>el===document.activeElement))) throw new Error('Motion toggle stole focus');
+  await context.close();
 }
 const blocked = await browser.newPage();
 await blocked.route("**/media/entrance.mp4", (route) => route.abort());
@@ -76,7 +95,7 @@ await delayed
   .waitFor({ state: "visible", timeout: 6000 });
 results.push({ stalledVideo: "usable monitor within 6 seconds after intent" });
 await fs.writeFile(
-  new URL("../../docs/qa/media-controller.json", import.meta.url),
+  new URL("media-controller.json", output),
   JSON.stringify(
     {
       browser: browser.version(),
@@ -91,3 +110,7 @@ await browser.close();
 console.log(
   "Single-video hold, reverse, latest-target, error and stalled-request checks passed.",
 );
+} finally {
+  await browser.close();
+  await fs.unlink(fixture);
+}

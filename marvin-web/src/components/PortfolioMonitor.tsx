@@ -91,6 +91,7 @@ export function PortfolioMonitor() {
           <div
             id="panel-0"
             role="tabpanel"
+            tabIndex={0}
             aria-labelledby="tab-0"
             hidden={tab !== 0}
             className="panel portraits-panel"
@@ -131,6 +132,7 @@ export function PortfolioMonitor() {
           <div
             id="panel-1"
             role="tabpanel"
+            tabIndex={0}
             aria-labelledby="tab-1"
             hidden={tab !== 1}
             className="panel text-panel"
@@ -154,6 +156,7 @@ export function PortfolioMonitor() {
           <div
             id="panel-2"
             role="tabpanel"
+            tabIndex={0}
             aria-labelledby="tab-2"
             hidden={tab !== 2}
             className="panel text-panel"

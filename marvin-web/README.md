@@ -17,7 +17,7 @@ npm run lint
 npm run typecheck
 npm run test:unit
 npm run build
-npx playwright install chromium
+npx playwright install chromium firefox webkit
 npm run test:e2e
 npm run preview -- --host 127.0.0.1
 ```
@@ -38,3 +38,5 @@ Remove-Item Env:PAGES_BASE_PATH
 ```
 
 Live foundation preview: [arkanantaa.github.io/marvin-poc](https://arkanantaa.github.io/marvin-poc/). See [deployment and rollback](../docs/deployment.md), [baseline](../docs/qa/baseline.md), and [acceptance evidence](../docs/qa/acceptance.md). Re-run live checks with `node tests/inspect-production.mjs https://arkanantaa.github.io/marvin-poc/`, then view the resulting screenshots.
+
+Latest review: [2026-10-19 foundation acceptance](../docs/qa/review-2026-10-19/acceptance.md). Browser tests cover Chromium desktop/mobile, Firefox and WebKit. The monitor supports natural page scrolling below the entrance, preserves reading offset on resize, and retains focus on motion-preference changes. Run the local media spike with `VITE_REVIEW_MEDIA=true` on port 4175 and `node tests/review-media.mjs`; it creates/removes a temporary rejected fixture and must finish before building a release.

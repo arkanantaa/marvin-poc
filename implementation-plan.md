@@ -1,7 +1,7 @@
 # Marvin Studio portfolio — Implementation and deployment plan
 
-Date: 2026-10-15  
-Status: Implementation executed for the foundation preview. See [QA acceptance](docs/qa/acceptance.md) and [deployment record](docs/deployment.md). Detailed checkboxes are the original plan; the execution tracker below records actual phase results.  
+Date: 2026-10-15; updated 2026-10-19
+Status: Implementation executed for the foundation preview. See [QA acceptance](docs/qa/acceptance.md) and [deployment record](docs/deployment.md). Detailed checkboxes now record verified work; unchecked items remain blocked or unverified. The execution tracker and 2026-10-19 review record explain the remaining gates.
 Product source of truth: [prd.md](prd.md)
 
 ## 1. Execution rules and completion standard
@@ -82,43 +82,45 @@ Website Mario/
 
 File names are proposed defaults. Keep component boundaries where they make state, media, and portfolio behavior testable; avoid unnecessary abstraction.
 
+**Checklist convention:** checked items include retained evidence from the original implementation and the new [2026-10-19 review](docs/qa/review-2026-10-19/acceptance.md). Checks in phases 4?6 validate the controller using a rejected development fixture; they do not approve that footage. Phase 3 uses local CSS feedback and selects zero React Bits effects. Phase 5 cannot pass without a compliant supplied video. Physical devices, native zoom/screen-reader review and final-media performance remain unverified.
+
 ## 3. Phase 0 — Baseline, assets, and release inputs
 
 ### Execute
 
-- [ ] Read applicable repository instructions; inspect Git status, branch, remotes, and existing files before changing anything. Preserve unrelated/untracked work.
-- [ ] Review legacy HTML, CSS, JavaScript, README, and any illustrated plan. Inventory reusable content and interactions separately from obsolete animation.
-- [ ] Run the existing PoC locally and capture desktop/mobile reference screenshots. View them to identify actual layout behavior, not only source structure.
-- [ ] Inspect `marvin_main.png` at full resolution, verify dimensions, record a checksum, and preserve it unchanged as the source reference.
-- [ ] Inventory the combined entrance video, photos, copy, contact destination, and repository/Pages access. Mark unavailable inputs explicitly; a separate second clip and exported open-curtain frame are not required deliverables.
-- [ ] Review the existing local `curtain-open.mp4` candidate (881,291 bytes at initial documentation time). Its filename does not establish whether it includes entry; preserve it, inspect its entire duration, and qualify both actions against MOTION-02–08 before reuse. If it only opens the curtain, record the need for one complete combined video.
-- [ ] Create `docs/qa/baseline.md` with current implementation, known demo content, missing inputs, and requirement IDs.
-- [ ] Choose the release target: foundation preview while footage is missing, final release only when its prerequisites exist.
+- [x] Read applicable repository instructions; inspect Git status, branch, remotes, and existing files before changing anything. Preserve unrelated/untracked work.
+- [x] Review legacy HTML, CSS, JavaScript, README, and any illustrated plan. Inventory reusable content and interactions separately from obsolete animation.
+- [x] Run the existing PoC locally and capture desktop/mobile reference screenshots. View them to identify actual layout behavior, not only source structure.
+- [x] Inspect `marvin_main.png` at full resolution, verify dimensions, record a checksum, and preserve it unchanged as the source reference.
+- [x] Inventory the combined entrance video, photos, copy, contact destination, and repository/Pages access. Mark unavailable inputs explicitly; a separate second clip and exported open-curtain frame are not required deliverables.
+- [x] Review the existing local `curtain-open.mp4` candidate (881,291 bytes at initial documentation time). Its filename does not establish whether it includes entry; preserve it, inspect its entire duration, and qualify both actions against MOTION-02–08 before reuse. If it only opens the curtain, record the need for one complete combined video.
+- [x] Create `docs/qa/baseline.md` with current implementation, known demo content, missing inputs, and requirement IDs.
+- [x] Choose the release target: foundation preview while footage is missing, final release only when its prerequisites exist.
 
 ### Verify and exit
 
-- [ ] Existing PoC remains intact and runnable.
-- [ ] Baseline screenshots have been viewed, and differences from HERO-01 and MOTION-02–08 are documented.
-- [ ] No final footage, genuine portfolio collection, or working booking service is assumed to exist without evidence.
+- [x] Existing PoC remains intact and runnable.
+- [x] Baseline screenshots have been viewed, and differences from HERO-01 and MOTION-02–08 are documented.
+- [x] No final footage, genuine portfolio collection, or working booking service is assumed to exist without evidence.
 
 ## 4. Phase 1 — React/Vite/TypeScript foundation
 
 ### Execute
 
-- [ ] Create `marvin-web/` with a current compatible React/TypeScript Vite template. Inspect the generated files before modifying them.
-- [ ] Use an actively supported Node LTS version compatible with selected tooling; pin it for local development and CI. Commit the dependency lockfile.
-- [ ] Configure strict TypeScript, linting, build, development, and production-preview scripts.
-- [ ] Establish CSS tokens for pure white, dark text, muted neutral surfaces, curtain-yellow accents, spacing, navbar height, focus, and layer order.
-- [ ] Create the application shell and component/data directories. Keep the application static and single-page.
-- [ ] Add meaningful unit/integration tests for timeline/navigation state and browser tests for the real flows. Proposed tooling: Vitest, React Testing Library, Playwright, and axe integration; use current compatible releases.
-- [ ] Define scripts: `dev`, `lint`, `typecheck`, `test:unit`, `test:e2e`, `build`, and `preview`. Make unit tests non-watch in CI.
-- [ ] Document setup commands and ignore only the new generated output, dependencies, and temporary test artifacts. Do not broadly delete or ignore the legacy source directory.
+- [x] Create `marvin-web/` with a current compatible React/TypeScript Vite template. Inspect the generated files before modifying them.
+- [x] Use an actively supported Node LTS version compatible with selected tooling; pin it for local development and CI. Commit the dependency lockfile.
+- [x] Configure strict TypeScript, linting, build, development, and production-preview scripts.
+- [x] Establish CSS tokens for pure white, dark text, muted neutral surfaces, curtain-yellow accents, spacing, navbar height, focus, and layer order.
+- [x] Create the application shell and component/data directories. Keep the application static and single-page.
+- [x] Add meaningful unit/integration tests for timeline/navigation state and browser tests for the real flows. Proposed tooling: Vitest, React Testing Library, Playwright, and axe integration; use current compatible releases.
+- [x] Define scripts: `dev`, `lint`, `typecheck`, `test:unit`, `test:e2e`, `build`, and `preview`. Make unit tests non-watch in CI.
+- [x] Document setup commands and ignore only the new generated output, dependencies, and temporary test artifacts. Do not broadly delete or ignore the legacy source directory.
 
 ### Verify and exit
 
-- [ ] Clean dependency installation succeeds; lint, typecheck, and build pass.
-- [ ] The production preview renders the React shell, with no application console errors.
-- [ ] Content and media configuration can be changed independently of timeline code.
+- [x] Clean dependency installation succeeds; lint, typecheck, and build pass.
+- [x] The production preview renders the React shell, with no application console errors.
+- [x] Content and media configuration can be changed independently of timeline code.
 
 ## 5. Phase 2 — Clean opening and navbar
 
@@ -126,19 +128,19 @@ Requirements: HERO-01–03, NAV-01–03, RES-01.
 
 ### Execute
 
-- [ ] Place the preserved/approved opening asset in the new app's media directory. Give it explicit intrinsic dimensions, meaningful alt text, and reserved layout space.
-- [ ] Use a viewport-aware stage beneath the persistent navbar. Account for mobile safe areas and dynamic browser chrome; avoid hard-coded heights that crop short screens.
-- [ ] Fit the whole 16:9 composition using contain behavior; retain full booth sign/base and generous white space. Do not stretch or crop merely to fill the viewport.
-- [ ] Remove legacy intro copy, hero buttons, captions, scroll hints, chapter controls, progress, and overlay curtains from the new opening.
-- [ ] Keep navbar above scene/white layers. Implement brand/home and semantic “Our work” navigation; keep concept links out of public navigation.
-- [ ] Use exactly the same media rectangle, object position, aspect ratio, and responsive rules for poster and video.
-- [ ] Compare the image boundary against pure white. If normalization is necessary, retain the original and produce matching poster/video source derivatives without changing booth detail.
+- [x] Place the preserved/approved opening asset in the new app's media directory. Give it explicit intrinsic dimensions, meaningful alt text, and reserved layout space.
+- [x] Use a viewport-aware stage beneath the persistent navbar. Account for mobile safe areas and dynamic browser chrome; avoid hard-coded heights that crop short screens.
+- [x] Fit the whole 16:9 composition using contain behavior; retain full booth sign/base and generous white space. Do not stretch or crop merely to fill the viewport.
+- [x] Remove legacy intro copy, hero buttons, captions, scroll hints, chapter controls, progress, and overlay curtains from the new opening.
+- [x] Keep navbar above scene/white layers. Implement brand/home and semantic “Our work” navigation; keep concept links out of public navigation.
+- [x] Use exactly the same media rectangle, object position, aspect ratio, and responsive rules for poster and video.
+- [x] Compare the image boundary against pure white. If normalization is necessary, retain the original and produce matching poster/video source derivatives without changing booth detail.
 
 ### Verify and exit
 
-- [ ] AI views screenshots at 1440×900, 1920×1080, 390×844, 360×800, and a short landscape viewport.
-- [ ] Check complete booth visibility, centering, navbar clearance, empty hero, absence of horizontal overflow, and any off-white rectangle around the image.
-- [ ] Confirm navbar controls work by mouse, touch, and keyboard. HERO-03 remains pending until an actual video first frame is available.
+- [x] AI views screenshots at 1440×900, 1920×1080, 390×844, 360×800, and a short landscape viewport.
+- [x] Check complete booth visibility, centering, navbar clearance, empty hero, absence of horizontal overflow, and any off-white rectangle around the image.
+- [x] Confirm navbar controls work by mouse, touch, and keyboard. HERO-03 remains pending until an actual video first frame is available.
 
 ## 6. Phase 3 — Interactive HTML portfolio
 
@@ -146,22 +148,22 @@ Requirements: WORK-01–06, A11Y-02–04.
 
 ### Execute
 
-- [ ] Port the decorative camera and monitor into React components; do not request camera/microphone permission.
-- [ ] Create typed local data for collections, image sources, alt text, captions, and experience/contact copy. Distinguish demo fixtures from launch-ready content.
-- [ ] Implement “The portraits,” “The experience,” and “Say hello” tabs with tablist/tab/tabpanel relationships, roving tabindex, selected state, and keyboard navigation.
-- [ ] Implement collection previous/next controls and a current-collection announcement. Define wraparound behavior and test both ends.
-- [ ] Optimize portfolio images and reserve their dimensions. Show a useful alternative if an image fails without collapsing the monitor layout.
-- [ ] Make mobile content readable at normal font sizes; let the monitor grow rather than scaling down its whole desktop UI. Avoid nested scroll traps.
-- [ ] Add only confirmed contact destinations. If none exists, omit the action or use honest unavailable/demo text within the monitor.
-- [ ] Select at most a small number of suitable React Bits effects after checking their current documentation, dependencies, and license. Use them for portfolio feedback only, with a reduced-motion equivalent.
-- [ ] Remove the legacy flash effect by default and remove any implication of a completed booking or sent message.
+- [x] Port the decorative camera and monitor into React components; do not request camera/microphone permission.
+- [x] Create typed local data for collections, image sources, alt text, captions, and experience/contact copy. Distinguish demo fixtures from launch-ready content.
+- [x] Implement “The portraits,” “The experience,” and “Say hello” tabs with tablist/tab/tabpanel relationships, roving tabindex, selected state, and keyboard navigation.
+- [x] Implement collection previous/next controls and a current-collection announcement. Define wraparound behavior and test both ends.
+- [x] Optimize portfolio images and reserve their dimensions. Show a useful alternative if an image fails without collapsing the monitor layout.
+- [x] Make mobile content readable at normal font sizes; let the monitor grow rather than scaling down its whole desktop UI. Avoid nested scroll traps.
+- [x] Add only confirmed contact destinations. If none exists, omit the action or use honest unavailable/demo text within the monitor.
+- [x] Select at most a small number of suitable React Bits effects after checking their current documentation, dependencies, and license. Use them for portfolio feedback only, with a reduced-motion equivalent.
+- [x] Remove the legacy flash effect by default and remove any implication of a completed booking or sent message.
 
 ### Verify and exit
 
-- [ ] Exercise every tab, collection, and available link in the browser; select rendered text and confirm controls are DOM elements independent of video.
-- [ ] Complete the full portfolio with keyboard only; check ArrowLeft/Right, Home, End, Tab, Shift+Tab, and focus visibility.
+- [x] Exercise every tab, collection, and available link in the browser; select rendered text and confirm controls are DOM elements independent of video.
+- [x] Complete the full portfolio with keyboard only; check ArrowLeft/Right, Home, End, Tab, Shift+Tab, and focus visibility.
 - [ ] Inspect long copy, narrow screen, 200% zoom, and broken-image cases. Confirm no unreadably tiny monitor UI or missing content.
-- [ ] Check accurate demo/contact labels and verify external destination URLs without sending messages.
+- [x] Check accurate demo/contact labels and verify external destination URLs without sending messages.
 
 ## 7. Phase 4 — Timeline, white transition, and media-independent routes
 
@@ -169,19 +171,19 @@ Requirements: MOTION-01, MOTION-09–10, TRANS-01–03, NAV-02–03, A11Y-01/03,
 
 ### Execute
 
-- [ ] Build a pure timeline mapper returning scene state, a timestamp in the single video, white opacity, monitor opacity, and interaction eligibility from clamped progress. No clip index, source switching, or frame-index renderer is needed.
-- [ ] Keep scene state separate from loading capability: `loading`, `ready`, `fallback`, and `reducedMotion` must not compete with visual timeline phases.
-- [ ] Start with the provisional timing below; store breakpoints in configuration and tune against actual footage.
-- [ ] Render white as a full-scene `#FFFFFF` layer below navbar. Use an opaque interval to separate footage from the monitor reveal.
-- [ ] Keep hidden monitor content inert/hidden to assistive technology until reveal completes. Remove transition input interception once the monitor is active.
-- [ ] Implement native scroll measurement, passive listeners, animation-frame coalescing, and cleanup. Do not hijack wheel/touch events or continuously rerender React for every scroll tick.
-- [ ] Implement “Our work” to bypass media immediately and synchronize scroll, route, reveal, and focus state. Use `#work` for refreshable direct entry; account for navbar offset.
-- [ ] Handle brand/home, history traversal, restored scroll, resize, and orientation without stale target progress or unexpected replay.
-- [ ] Ensure monitor browsing scroll does not unexpectedly re-enter the entrance; reverse only when scrolling back across the actual journey boundary.
-- [ ] Implement reduced-motion immediate/brief-white entry, including changes to the preference during a visit. Avoid downloading entrance media when it is not needed.
-- [ ] Implement static-to-white-to-monitor fallback for missing/error/stalled media. Proposed timeout: 5 seconds without useful progress after entrance intent, not simply 5 seconds from page load.
-- [ ] Prevent late video readiness from yanking someone out of the monitor or replaying an animation already skipped.
-- [ ] Preserve focus on passive scroll; safely relocate it only if its focused subtree is about to become hidden/inert.
+- [x] Build a pure timeline mapper returning scene state, a timestamp in the single video, white opacity, monitor opacity, and interaction eligibility from clamped progress. No clip index, source switching, or frame-index renderer is needed.
+- [x] Keep scene state separate from loading capability: `loading`, `ready`, `fallback`, and `reducedMotion` must not compete with visual timeline phases.
+- [x] Start with the provisional timing below; store breakpoints in configuration and tune against actual footage.
+- [x] Render white as a full-scene `#FFFFFF` layer below navbar. Use an opaque interval to separate footage from the monitor reveal.
+- [x] Keep hidden monitor content inert/hidden to assistive technology until reveal completes. Remove transition input interception once the monitor is active.
+- [x] Implement native scroll measurement, passive listeners, animation-frame coalescing, and cleanup. Do not hijack wheel/touch events or continuously rerender React for every scroll tick.
+- [x] Implement “Our work” to bypass media immediately and synchronize scroll, route, reveal, and focus state. Use `#work` for refreshable direct entry; account for navbar offset.
+- [x] Handle brand/home, history traversal, restored scroll, resize, and orientation without stale target progress or unexpected replay.
+- [x] Ensure monitor browsing scroll does not unexpectedly re-enter the entrance; reverse only when scrolling back across the actual journey boundary.
+- [x] Implement reduced-motion immediate/brief-white entry, including changes to the preference during a visit. Avoid downloading entrance media when it is not needed.
+- [x] Implement static-to-white-to-monitor fallback for missing/error/stalled media. Proposed timeout: 5 seconds without useful progress after entrance intent, not simply 5 seconds from page load.
+- [x] Prevent late video readiness from yanking someone out of the monitor or replaying an animation already skipped.
+- [x] Preserve focus on passive scroll; safely relocate it only if its focused subtree is about to become hidden/inert.
 
 ### Provisional normalized timeline
 
@@ -199,12 +201,12 @@ Within the video range, start with `videoProgress = clamp((progress - 0.08) / 0.
 
 ### Verify and exit
 
-- [ ] Unit-test exact boundaries, negative/overshoot progress, non-finite media duration, forward/reverse mapping, and fallback transitions.
-- [ ] Verify stop-and-hold after a seek settles and a rapid forward/backward change while a seek is pending; only the latest target should win, with no autonomous playback.
-- [ ] Browser-test direct shortcut before metadata loads, at mid-entrance, at white, and at monitor; refresh `#work` and use browser Back/Forward.
-- [ ] Block media requests and confirm a usable monitor. Toggle reduced motion during entry and confirm no stuck state or unnecessary replay.
-- [ ] AI views white coverage, fade midpoint, full monitor, focus visibility, and short-screen/mobile layouts.
-- [ ] Milestone A works without final video; video-specific criteria remain explicitly pending.
+- [x] Unit-test exact boundaries, negative/overshoot progress, non-finite media duration, forward/reverse mapping, and fallback transitions.
+- [x] Verify stop-and-hold after a seek settles and a rapid forward/backward change while a seek is pending; only the latest target should win, with no autonomous playback.
+- [x] Browser-test direct shortcut before metadata loads, at mid-entrance, at white, and at monitor; refresh `#work` and use browser Back/Forward.
+- [x] Block media requests and confirm a usable monitor. Toggle reduced motion during entry and confirm no stuck state or unnecessary replay.
+- [x] AI views white coverage, fade midpoint, full monitor, focus visibility, and short-screen/mobile layouts.
+- [x] Milestone A works without final video; video-specific criteria remain explicitly pending.
 
 ## 8. Phase 5 — Qualify and optimize one combined video
 
@@ -214,43 +216,43 @@ Requirements: HERO-03, MOTION-02–08, RES-03, PERF-01/03.
 
 - [ ] Inspect the supplied candidate end-to-end. Accept one video containing the complete closed-booth opening, curtain movement, doorway entry, and warm-white final view. If entry is absent, obtain a complete combined video before claiming animation completion.
 - [ ] Verify its initial composition matches `marvin_main.png` or the documented visually equivalent approved derivative. During opening, enforce a fixed camera, one curtain, right-to-left free-edge motion, top-rail attachment, and empty warm-white interior.
-- [ ] Inspect beginning, intermediate moments, and ending for stable MARVIN lettering, photographs, chrome edges, and lighting. Reject split curtains, moving surroundings during opening, added objects, or geometry changes.
+- [x] Inspect beginning, intermediate moments, and ending for stable MARVIN lettering, photographs, chrome edges, and lighting. Reject split curtains, moving surroundings during opening, added objects, or geometry changes.
 - [ ] Verify that the same video continues from the open doorway into level human-eye perspective, gentle rightward alignment and forward doorway passage, left-gathered curtain, and warm-white final surface. No return to a closed curtain or visible transition jump is allowed.
 - [ ] Review motion for digital zoom, clipping through geometry, roll/tilt/bounce, wrong doorway, or left turn. Correct noncompliant footage before integration; do not synthesize missing entry through CSS scaling or extracted frames.
 - [ ] Prepare one optimized MP4 with a broadly compatible codec, no audio, sensible resolution, browser-friendly metadata placement, and seek-friendly keyframe intervals. Tune encoding on the actual desktop/mobile test devices; target a shared asset of at most 4 MB while retaining acceptable image quality.
 - [ ] Preserve the source file; publish only the selected combined delivery asset as `public/media/entrance.mp4`. Do not require two source clips, perform runtime clip switching, or create playback image assets.
 - [ ] Record duration, frame rate, codec, dimensions, byte size, first/last usable timestamps, curtain-open/entry landmarks, and content hash in `docs/media-manifest.md`.
 - [ ] Use the same file on desktop/mobile and verify responsive fitting preserves the booth and doorway trajectory. Keep poster and first-frame framing matched.
-- [ ] Build a minimal single-video seek spike before polishing the controller. Measure ordinary, rapid, stop-and-hold, and reverse seeking on desktop/mobile; optimize video encoding and scheduling rather than comparing against a canvas renderer.
+- [x] Build a minimal single-video seek spike before polishing the controller. Measure ordinary, rapid, stop-and-hold, and reverse seeking on desktop/mobile; optimize video encoding and scheduling rather than comparing against a canvas renderer.
 
 ### Verify and exit
 
-- [ ] AI actually views the video and browser evidence and records a verdict for every choreography requirement; filenames or generation prompts are not evidence of compliance. QA screenshots do not become runtime frame assets.
+- [x] AI actually views the video and browser evidence and records a verdict for every choreography requirement; filenames or generation prompts are not evidence of compliance. QA screenshots do not become runtime frame assets.
 - [ ] The opening-to-entry transition within the single video is visually continuous; inspect moments on either side for geometry, lighting, and perspective consistency.
 - [ ] Browser seeking has no recurrent black frames or unacceptable stalls on supported reference devices; size budgets are met or the encoding is revised.
-- [ ] If usable final media cannot be obtained, stop claiming Milestone B readiness and continue only the foundation/fallback milestone.
+- [x] If usable final media cannot be obtained, stop claiming Milestone B readiness and continue only the foundation/fallback milestone.
 
 ## 9. Phase 6 — Media integration and reverse behavior
 
 ### Execute
 
 - [ ] Connect one combined MP4 through the media manifest and base-aware asset helper, using a single video element on every viewport. Keep the element and source stable across the opening and entry segments.
-- [ ] Keep the static poster visible until the required decoded frame is ready. Set appropriate muted/inline media attributes and avoid dependence on autoplay permission.
-- [ ] Keep the video paused and map scroll progress to valid `currentTime` targets after metadata arrives. Account for duration boundaries, avoid seeking beyond the last usable frame, and wait for a renderable target instead of assuming the time assignment displays a frame immediately.
-- [ ] Coalesce seeks: retain only the newest target while a seek is in flight; do not accumulate a seek promise/task for every scroll event. Confirm presented frames before swapping visible layers where supported.
-- [ ] Preserve the last presented video frame while the next seek resolves; prevent black flashes. Use seek/render readiness events where available and a bounded stall deadline. Do not introduce a second video or canvas frame cache.
-- [ ] Use the same mapper for reverse travel; do not rely on negative playback speed. On unsupported seeking paths, use the documented fallback and disclose that limitation in QA.
+- [x] Keep the static poster visible until the required decoded frame is ready. Set appropriate muted/inline media attributes and avoid dependence on autoplay permission.
+- [x] Keep the video paused and map scroll progress to valid `currentTime` targets after metadata arrives. Account for duration boundaries, avoid seeking beyond the last usable frame, and wait for a renderable target instead of assuming the time assignment displays a frame immediately.
+- [x] Coalesce seeks: retain only the newest target while a seek is in flight; do not accumulate a seek promise/task for every scroll event. Confirm presented frames before swapping visible layers where supported.
+- [x] Preserve the last presented video frame while the next seek resolves; prevent black flashes. Use seek/render readiness events where available and a bounded stall deadline. Do not introduce a second video or canvas frame cache.
+- [x] Use the same mapper for reverse travel; do not rely on negative playback speed. On unsupported seeking paths, use the documented fallback and disclose that limitation in QA.
 - [ ] Recompute layout on resize/orientation without changing the video source, restarting the download, or resetting the visitor unexpectedly.
-- [ ] Pause unnecessary work offscreen and clean up media/event resources on unmount. Handle tab background/resume coherently.
+- [x] Pause unnecessary work offscreen and clean up media/event resources on unmount. Handle tab background/resume coherently.
 - [ ] Integrate the final warm-white frame with CSS white fade, white hold, and live monitor reveal. Tune scroll distance against real wheel, trackpad, and touch use.
 
 ### Verify and exit
 
 - [ ] Run cold-load and cached-load forward/reverse passes; inspect all timeline boundaries and intermediate states.
-- [ ] Confirm there is one entrance video element and one media URL in the browser; HTTP range requests to that URL are expected, but there must be no second segment source or image-sequence downloads.
+- [x] Confirm there is one entrance video element and one media URL in the browser; HTTP range requests to that URL are expected, but there must be no second segment source or image-sequence downloads.
 - [ ] Scroll rapidly to end and back, stop mid-curtain and mid-doorway, rotate/resize mid-sequence, background/resume the tab, and repeat after direct navigation.
 - [ ] Confirm accurate doorway parallax and stable booth geometry in the rendered browser, not only in the source video player.
-- [ ] Confirm no navbar occlusion, input-blocking overlay, unexpected focus loss, giant blank scroll region, or inaccessible portfolio.
+- [x] Confirm no navbar occlusion, input-blocking overlay, unexpected focus loss, giant blank scroll region, or inaccessible portfolio.
 
 ## 10. Phase 7 — Automated and manual quality checks
 
@@ -284,9 +286,9 @@ Record exact browser versions and devices. Device emulation checks layout and to
 
 ### Performance procedure
 
-- [ ] Use a documented mobile lab profile, proposed 4× CPU slowdown, 1.6 Mbps downstream, 750 Kbps upstream, 150 ms RTT, cold cache; record tool version and actual settings.
-- [ ] Run three cold-load measurements and report median plus worst result for LCP/CLS and transfer size. Separate initial page cost from entrance video requested later.
-- [ ] Measure interactions locally and report them as lab evidence; reserve field INP claims for real-user measurements.
+- [x] Use a documented mobile lab profile, proposed 4× CPU slowdown, 1.6 Mbps downstream, 750 Kbps upstream, 150 ms RTT, cold cache; record tool version and actual settings.
+- [x] Run three cold-load measurements and report median plus worst result for LCP/CLS and transfer size. Separate initial page cost from entrance video requested later.
+- [x] Measure interactions locally and report them as lab evidence; reserve field INP claims for real-user measurements.
 - [ ] Profile at least three repeated forward/reverse journeys on a named reference device; look for recurrent >200 ms seek stalls, long tasks, increasing memory, and duplicate downloads.
 - [ ] If budgets fail, reduce unnecessary effects, optimize the single video's resolution/bitrate, adjust keyframes or seek scheduling, or route affected configurations to fallback; repeat affected measurements. Keep extracted-frame rendering deferred.
 
@@ -352,17 +354,17 @@ Requirements: platform constraints, VIS-03; all applicable preceding gates.
 
 ### Execute
 
-- [ ] Resolve actual repository owner/name, hosting type, default branch, and Pages availability. Do not assume a private repository implies a private Pages site; verify deployment visibility before publishing business/demo content.
-- [ ] Configure Vite `base`: `/REPOSITORY/` for project Pages; `/` for account-root or applicable custom-domain hosting. Use imported asset URLs or `import.meta.env.BASE_URL` for public assets and avoid hard-coded root-relative media paths. [Vite deployment guide](https://vite.dev/guide/static-deploy.html#github-pages)
-- [ ] Use fragment navigation so `#work` remains reloadable without server rewrites. Test the final base path locally.
+- [x] Resolve actual repository owner/name, hosting type, default branch, and Pages availability. Do not assume a private repository implies a private Pages site; verify deployment visibility before publishing business/demo content.
+- [x] Configure Vite `base`: `/REPOSITORY/` for project Pages; `/` for account-root or applicable custom-domain hosting. Use imported asset URLs or `import.meta.env.BASE_URL` for public assets and avoid hard-coded root-relative media paths. [Vite deployment guide](https://vite.dev/guide/static-deploy.html#github-pages)
+- [x] Use fragment navigation so `#work` remains reloadable without server rewrites. Test the final base path locally.
 - [ ] Add title, description, favicon, and approved social-preview assets; set canonical/preview URLs only after the actual deployment URL is known.
-- [ ] Audit `marvin-web/dist/`: only runtime assets, no private notes, credentials, unused clips, legacy source, or QA recordings.
-- [ ] Create CI for pull requests: dependency installation, lint, typecheck, unit tests, build, and relevant browser tests against production preview. Keep publishing separate from PR validation.
-- [ ] Configure Pages source as GitHub Actions. Use build/upload/deploy stages with an explicit dependency so deployment cannot race the artifact build. Use `contents: read`, and grant the deployment job `pages: write` and `id-token: write`; attach the `github-pages` environment and deployment URL. [GitHub custom workflow documentation](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages)
-- [ ] Read current official action examples when implementing and pin reviewed action revisions. Set the Node version and lockfile cache path for `marvin-web/`.
-- [ ] Build from `marvin-web/`, but upload the repository-relative artifact path `marvin-web/dist`; a shell working-directory setting does not automatically change action input paths.
-- [ ] Trigger deployment on the verified default branch and manual dispatch. Use a Pages concurrency group to avoid overlapping deployments. Never deploy PR previews over production automatically.
-- [ ] Retain test reports and visual evidence associated with the exact candidate commit. Document manual visual acceptance in the release record; automated CI success cannot provide that judgment.
+- [x] Audit `marvin-web/dist/`: only runtime assets, no private notes, credentials, unused clips, legacy source, or QA recordings.
+- [x] Create CI for pull requests: dependency installation, lint, typecheck, unit tests, build, and relevant browser tests against production preview. Keep publishing separate from PR validation.
+- [x] Configure Pages source as GitHub Actions. Use build/upload/deploy stages with an explicit dependency so deployment cannot race the artifact build. Use `contents: read`, and grant the deployment job `pages: write` and `id-token: write`; attach the `github-pages` environment and deployment URL. [GitHub custom workflow documentation](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages)
+- [x] Read current official action examples when implementing and pin reviewed action revisions. Set the Node version and lockfile cache path for `marvin-web/`.
+- [x] Build from `marvin-web/`, but upload the repository-relative artifact path `marvin-web/dist`; a shell working-directory setting does not automatically change action input paths.
+- [x] Trigger deployment on the verified default branch and manual dispatch. Use a Pages concurrency group to avoid overlapping deployments. Never deploy PR previews over production automatically.
+- [x] Retain test reports and visual evidence associated with the exact candidate commit. Document manual visual acceptance in the release record; automated CI success cannot provide that judgment.
 
 ### Planned command contract
 
@@ -383,9 +385,9 @@ Configure E2E to start a production-preview server and visit the configured base
 ### Verify and exit
 
 - [ ] A clean checkout reproduces the build with the committed lockfile and pinned runtime.
-- [ ] Production preview passes the applicable automated tests and AI visual gate at desktop/mobile sizes.
-- [ ] All image/video/script/font paths work under the real repository subpath; direct `#work` refresh works.
-- [ ] Release record clearly states foundation preview or version 1 single-video release, known gaps, and verified/unverified environments.
+- [x] Production preview passes the applicable automated tests and AI visual gate at desktop/mobile sizes.
+- [x] All image/video/script/font paths work under the real repository subpath; direct `#work` refresh works.
+- [x] Release record clearly states foundation preview or version 1 single-video release, known gaps, and verified/unverified environments.
 
 ## 13. Phase 9 — Deploy and inspect the live website
 
@@ -429,10 +431,10 @@ Configure E2E to start a production-preview server and visit the configured base
 | 1 | React/Vite/TS foundation | Clean install, lint, types, build | Complete; Node 24.18.0, lockfile, strict TS, clean lint |
 | 2 | Clean hero/navbar | AI-viewed desktop/mobile opening | Complete for foundation; HERO-03 pending compliant footage |
 | 3 | HTML monitor | Functional and keyboard portfolio | Complete with labeled reference fixtures; contact unavailable |
-| 4 | Timeline, white, skip, fallback | Milestone A local acceptance | Implemented; local browser and accessibility checks pass; see QA limitations |
+| 4 | Timeline, white, skip, fallback | Milestone A local acceptance | Complete foundation: repaired mobile page overflow, resize reading position, reduced-motion focus and Firefox deep links; bounded white failure route |
 | 5 | Qualified combined MP4 | Both actions and single-video seek spike | Candidate reviewed: both actions present, stationary opening and first-frame fail; delivery blocked. Controller spike passes |
 | 6 | Integrated single-video entrance | Scroll/stop/reverse browser review | Controller implemented and tested with development fixture; compliant production integration blocked |
-| 7 | Full QA evidence | Applicable PRD requirements pass | Foundation evidence recorded; full physical-device/zoom audit and final performance acceptance outstanding |
+| 7 | Full QA evidence | Applicable PRD requirements pass | Chromium desktop/mobile, Firefox and WebKit foundation checks; eight viewport visual review. Physical devices, native zoom/screen reader and final-footage qualification remain open |
 | 8 | Production build/workflow | Artifact and base-path acceptance | Production artifact and pinned workflows implemented; project-path checks run |
 | 9 | Live deployment and handoff | Production visual/functional acceptance | Foundation deployed to arkanantaa.github.io/marvin-poc; live desktop/mobile browser flows and AI-viewed screenshots pass. Exact commit/run and remaining final-release gaps in docs/deployment.md |
 | Future | Extracted-frame/canvas animation | Separate follow-up after version 1 succeeds | Deferred; outside current scope |

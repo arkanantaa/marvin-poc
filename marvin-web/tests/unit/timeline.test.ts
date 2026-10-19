@@ -1,6 +1,16 @@
 import { describe, expect, it } from "vitest";
-import { timeline, wrap } from "../../src/lib/timeline";
+import { timeline, wrap, fallbackProgress } from "../../src/lib/timeline";
 describe("entrance timeline", () => {
+  it("bounds failed-media recovery with white hold and no early interactive controls", () => {
+    for (const elapsed of [-1, NaN, Infinity])
+      expect(timeline(fallbackProgress(elapsed))).toMatchObject({white:0,interactive:false});
+    for (const elapsed of [120, 160, 199])
+      expect(timeline(fallbackProgress(elapsed))).toMatchObject({white:1,monitor:0,interactive:false});
+    expect(timeline(fallbackProgress(290)).monitor).toBeCloseTo(0.5);
+    expect(timeline(fallbackProgress(379)).interactive).toBe(false);
+    for (const elapsed of [380, 10000])
+      expect(timeline(fallbackProgress(elapsed))).toMatchObject({monitor:1,interactive:true});
+  });
   it("clamps invalid input and unusable durations", () => {
     for (const p of [-5, NaN, -Infinity]) expect(timeline(p).progress).toBe(0);
     expect(timeline(5).progress).toBe(1);

@@ -2,6 +2,12 @@ export const clamp = (value: number) =>
   Number.isFinite(value) ? Math.min(1, Math.max(0, value)) : 0;
 const segment = (p: number, start: number, end: number) =>
   clamp((p - start) / (end - start));
+export function fallbackProgress(elapsed: number) {
+  const time = Number.isFinite(elapsed) ? Math.max(0, elapsed) : 0;
+  if (time < 120) return 0.78 + 0.08 * time / 120;
+  if (time < 200) return 0.88;
+  return 0.9 + 0.1 * clamp((time - 200) / 180);
+}
 export function timeline(progress: number, duration = 0) {
   const p = clamp(progress);
   const lastUsableTime = Number.isFinite(duration)

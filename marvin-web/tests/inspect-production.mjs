@@ -1,4 +1,4 @@
-import { chromium } from "@playwright/test";
+import { chromium, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import fs from "node:fs/promises";
 import { fileURLToPath } from "node:url";
@@ -6,10 +6,13 @@ const url = process.argv[2];
 if (!url || !url.startsWith("https://"))
   throw new Error("Supply the exact deployed HTTPS URL");
 const browser = await chromium.launch({ channel: "chromium" });
+const output = new URL(`../../docs/qa/${process.env.QA_REVIEW_DIR || ''}`, import.meta.url);
+await fs.mkdir(output, {recursive:true});
 const evidence = {
   url,
   browser: browser.version(),
   checkedAt: new Date().toISOString(),
+  build: process.env.BUILD_COMMIT || null,
   profiles: [],
 };
 for (const viewport of [
@@ -29,8 +32,8 @@ for (const viewport of [
     page.screenshot({
       path: fileURLToPath(
         new URL(
-          `../../docs/qa/production-${viewport.width}-${name}.png`,
-          import.meta.url,
+          `production-${viewport.width}-${name}.png`,
+          output,
         ),
       ),
     });
@@ -50,6 +53,13 @@ for (const viewport of [
   await capture("white");
   await page.getByRole("link", { name: "Our work" }).click();
   await capture("work");
+  if (viewport.width === 390) {
+    await page.mouse.move(200,500);
+    await page.mouse.wheel(0,600);
+    await expect.poll(() => page.locator('.console').evaluate(el=>el.getBoundingClientRect().bottom)).toBeLessThanOrEqual(viewport.height+1);
+    await capture('work-bottom');
+    await page.getByRole('link',{name:'Our work'}).click();
+  }
   const first = page.getByRole("tab", { name: "The portraits" });
   if (!(await first.evaluate((el) => el === document.activeElement)))
     throw new Error("Shortcut focus missing");
@@ -93,7 +103,7 @@ for (const viewport of [
   await context.close();
 }
 await fs.writeFile(
-  new URL("../../docs/qa/production.json", import.meta.url),
+  new URL("production.json", output),
   JSON.stringify(evidence, null, 2),
 );
 await browser.close();

@@ -1,0 +1,703 @@
+{
+  "browser": "156.0.8078.4",
+  "checkedAt": "2026-10-19T15:40:53.034Z",
+  "profile": "Windows Chromium, 390x844 DPR1 touch emulation; 4x CPU; 1.6Mbps down, 750Kbps up, 150ms latency, cache disabled; HTTP local preview; local transport uncompressed",
+  "results": [
+    {
+      "run": 1,
+      "lcp": 1604,
+      "cls": 0,
+      "longestEvent": 0,
+      "events": [
+        {
+          "name": "pointerover",
+          "duration": 472,
+          "inputDelay": 2.799999952316284,
+          "processing": 7.299999952316284
+        },
+        {
+          "name": "pointerenter",
+          "duration": 472,
+          "inputDelay": 10.199999809265137,
+          "processing": 0
+        },
+        {
+          "name": "pointerenter",
+          "duration": 472,
+          "inputDelay": 10.199999809265137,
+          "processing": 0
+        },
+        {
+          "name": "pointerenter",
+          "duration": 472,
+          "inputDelay": 10.199999809265137,
+          "processing": 0
+        },
+        {
+          "name": "pointerenter",
+          "duration": 472,
+          "inputDelay": 10.199999809265137,
+          "processing": 0
+        },
+        {
+          "name": "pointerenter",
+          "duration": 472,
+          "inputDelay": 10.199999809265137,
+          "processing": 0
+        },
+        {
+          "name": "pointerenter",
+          "duration": 472,
+          "inputDelay": 10.199999809265137,
+          "processing": 0.10000014305114746
+        },
+        {
+          "name": "pointerenter",
+          "duration": 472,
+          "inputDelay": 10.299999952316284,
+          "processing": 0
+        },
+        {
+          "name": "mouseover",
+          "duration": 472,
+          "inputDelay": 10.299999952316284,
+          "processing": 1.7000000476837158
+        },
+        {
+          "name": "pointerdown",
+          "duration": 472,
+          "inputDelay": 19.899999856948853,
+          "processing": 4.6000001430511475
+        },
+        {
+          "name": "mousedown",
+          "duration": 472,
+          "inputDelay": 24.59999990463257,
+          "processing": 1.2999999523162842
+        },
+        {
+          "name": "pointerup",
+          "duration": 472,
+          "inputDelay": 32.299999952316284,
+          "processing": 2.200000047683716
+        },
+        {
+          "name": "mouseup",
+          "duration": 472,
+          "inputDelay": 34.69999980926514,
+          "processing": 2
+        },
+        {
+          "name": "click",
+          "duration": 472,
+          "inputDelay": 36.89999985694885,
+          "processing": 26
+        },
+        {
+          "name": "pointerout",
+          "duration": 128,
+          "inputDelay": 7.400000095367432,
+          "processing": 2.799999952316284
+        },
+        {
+          "name": "pointerleave",
+          "duration": 128,
+          "inputDelay": 10.200000047683716,
+          "processing": 0
+        },
+        {
+          "name": "pointerleave",
+          "duration": 128,
+          "inputDelay": 10.200000047683716,
+          "processing": 0
+        },
+        {
+          "name": "pointerleave",
+          "duration": 128,
+          "inputDelay": 10.200000047683716,
+          "processing": 0
+        },
+        {
+          "name": "pointerover",
+          "duration": 128,
+          "inputDelay": 10.200000047683716,
+          "processing": 0.5999999046325684
+        },
+        {
+          "name": "pointerenter",
+          "duration": 128,
+          "inputDelay": 10.799999952316284,
+          "processing": 0
+        },
+        {
+          "name": "pointerenter",
+          "duration": 128,
+          "inputDelay": 10.799999952316284,
+          "processing": 0
+        },
+        {
+          "name": "pointerenter",
+          "duration": 128,
+          "inputDelay": 10.799999952316284,
+          "processing": 0
+        },
+        {
+          "name": "pointerenter",
+          "duration": 128,
+          "inputDelay": 10.799999952316284,
+          "processing": 0
+        },
+        {
+          "name": "pointerenter",
+          "duration": 128,
+          "inputDelay": 10.799999952316284,
+          "processing": 0
+        },
+        {
+          "name": "pointerenter",
+          "duration": 128,
+          "inputDelay": 10.799999952316284,
+          "processing": 0
+        },
+        {
+          "name": "pointerenter",
+          "duration": 128,
+          "inputDelay": 10.799999952316284,
+          "processing": 0
+        },
+        {
+          "name": "pointerenter",
+          "duration": 128,
+          "inputDelay": 10.799999952316284,
+          "processing": 0
+        },
+        {
+          "name": "pointerenter",
+          "duration": 128,
+          "inputDelay": 10.799999952316284,
+          "processing": 0
+        },
+        {
+          "name": "pointerenter",
+          "duration": 128,
+          "inputDelay": 10.799999952316284,
+          "processing": 0
+        },
+        {
+          "name": "pointerenter",
+          "duration": 128,
+          "inputDelay": 10.799999952316284,
+          "processing": 0
+        },
+        {
+          "name": "mouseout",
+          "duration": 128,
+          "inputDelay": 11.099999904632568,
+          "processing": 1
+        },
+        {
+          "name": "mouseover",
+          "duration": 128,
+          "inputDelay": 12.200000047683716,
+          "processing": 0.39999985694885254
+        },
+        {
+          "name": "pointerdown",
+          "duration": 128,
+          "inputDelay": 15.899999856948853,
+          "processing": 5.300000190734863
+        },
+        {
+          "name": "mousedown",
+          "duration": 128,
+          "inputDelay": 21.200000047683716,
+          "processing": 0.39999985694885254
+        },
+        {
+          "name": "pointerup",
+          "duration": 128,
+          "inputDelay": 25.90000009536743,
+          "processing": 0.7000000476837158
+        },
+        {
+          "name": "mouseup",
+          "duration": 128,
+          "inputDelay": 26.600000143051147,
+          "processing": 0.39999985694885254
+        },
+        {
+          "name": "click",
+          "duration": 128,
+          "inputDelay": 27.200000047683716,
+          "processing": 40.09999990463257
+        }
+      ],
+      "transferBytes": 153692,
+      "longestObservedEvent": 472
+    },
+    {
+      "run": 2,
+      "lcp": 1624,
+      "cls": 0,
+      "longestEvent": 0,
+      "events": [
+        {
+          "name": "pointerover",
+          "duration": 112,
+          "inputDelay": 3.200000047683716,
+          "processing": 8.099999904632568
+        },
+        {
+          "name": "pointerenter",
+          "duration": 112,
+          "inputDelay": 11.299999952316284,
+          "processing": 0
+        },
+        {
+          "name": "pointerenter",
+          "duration": 112,
+          "inputDelay": 11.299999952316284,
+          "processing": 0
+        },
+        {
+          "name": "pointerenter",
+          "duration": 112,
+          "inputDelay": 11.299999952316284,
+          "processing": 0
+        },
+        {
+          "name": "pointerenter",
+          "duration": 112,
+          "inputDelay": 11.299999952316284,
+          "processing": 0
+        },
+        {
+          "name": "pointerenter",
+          "duration": 112,
+          "inputDelay": 11.299999952316284,
+          "processing": 0
+        },
+        {
+          "name": "pointerenter",
+          "duration": 112,
+          "inputDelay": 11.299999952316284,
+          "processing": 0
+        },
+        {
+          "name": "pointerenter",
+          "duration": 112,
+          "inputDelay": 11.299999952316284,
+          "processing": 0
+        },
+        {
+          "name": "mouseover",
+          "duration": 112,
+          "inputDelay": 11.5,
+          "processing": 1.7000000476837158
+        },
+        {
+          "name": "pointerdown",
+          "duration": 112,
+          "inputDelay": 20.09999990463257,
+          "processing": 4.300000190734863
+        },
+        {
+          "name": "mousedown",
+          "duration": 112,
+          "inputDelay": 24.90000009536743,
+          "processing": 0.5999999046325684
+        },
+        {
+          "name": "pointerup",
+          "duration": 112,
+          "inputDelay": 29.90000009536743,
+          "processing": 1.9000000953674316
+        },
+        {
+          "name": "mouseup",
+          "duration": 112,
+          "inputDelay": 31.800000190734863,
+          "processing": 1.6999998092651367
+        },
+        {
+          "name": "click",
+          "duration": 112,
+          "inputDelay": 33.80000019073486,
+          "processing": 19.5
+        },
+        {
+          "name": "pointerout",
+          "duration": 136,
+          "inputDelay": 6,
+          "processing": 3.3999998569488525
+        },
+        {
+          "name": "pointerleave",
+          "duration": 136,
+          "inputDelay": 9.399999856948853,
+          "processing": 0
+        },
+        {
+          "name": "pointerleave",
+          "duration": 136,
+          "inputDelay": 9.399999856948853,
+          "processing": 0
+        },
+        {
+          "name": "pointerleave",
+          "duration": 136,
+          "inputDelay": 9.399999856948853,
+          "processing": 0
+        },
+        {
+          "name": "pointerover",
+          "duration": 136,
+          "inputDelay": 9.399999856948853,
+          "processing": 0.5
+        },
+        {
+          "name": "pointerenter",
+          "duration": 136,
+          "inputDelay": 9.899999856948853,
+          "processing": 0
+        },
+        {
+          "name": "pointerenter",
+          "duration": 136,
+          "inputDelay": 9.899999856948853,
+          "processing": 0
+        },
+        {
+          "name": "pointerenter",
+          "duration": 136,
+          "inputDelay": 9.899999856948853,
+          "processing": 0
+        },
+        {
+          "name": "pointerenter",
+          "duration": 136,
+          "inputDelay": 9.899999856948853,
+          "processing": 0
+        },
+        {
+          "name": "pointerenter",
+          "duration": 136,
+          "inputDelay": 9.899999856948853,
+          "processing": 0
+        },
+        {
+          "name": "pointerenter",
+          "duration": 136,
+          "inputDelay": 9.899999856948853,
+          "processing": 0
+        },
+        {
+          "name": "pointerenter",
+          "duration": 136,
+          "inputDelay": 9.899999856948853,
+          "processing": 0
+        },
+        {
+          "name": "pointerenter",
+          "duration": 136,
+          "inputDelay": 9.899999856948853,
+          "processing": 0
+        },
+        {
+          "name": "pointerenter",
+          "duration": 136,
+          "inputDelay": 9.899999856948853,
+          "processing": 0
+        },
+        {
+          "name": "pointerenter",
+          "duration": 136,
+          "inputDelay": 9.899999856948853,
+          "processing": 0
+        },
+        {
+          "name": "pointerenter",
+          "duration": 136,
+          "inputDelay": 9.899999856948853,
+          "processing": 0
+        },
+        {
+          "name": "mouseout",
+          "duration": 136,
+          "inputDelay": 10.099999904632568,
+          "processing": 0.6000001430511475
+        },
+        {
+          "name": "mouseover",
+          "duration": 136,
+          "inputDelay": 10.899999856948853,
+          "processing": 0.20000004768371582
+        },
+        {
+          "name": "pointerdown",
+          "duration": 136,
+          "inputDelay": 14.200000047683716,
+          "processing": 4.400000095367432
+        },
+        {
+          "name": "mousedown",
+          "duration": 136,
+          "inputDelay": 18.600000143051147,
+          "processing": 0.5
+        },
+        {
+          "name": "pointerup",
+          "duration": 136,
+          "inputDelay": 23.700000047683716,
+          "processing": 0.7000000476837158
+        },
+        {
+          "name": "mouseup",
+          "duration": 136,
+          "inputDelay": 24.40000009536743,
+          "processing": 0.39999985694885254
+        },
+        {
+          "name": "click",
+          "duration": 136,
+          "inputDelay": 25.200000047683716,
+          "processing": 36.299999952316284
+        }
+      ],
+      "transferBytes": 153692,
+      "longestObservedEvent": 136
+    },
+    {
+      "run": 3,
+      "lcp": 1608,
+      "cls": 0,
+      "longestEvent": 0,
+      "events": [
+        {
+          "name": "pointerover",
+          "duration": 128,
+          "inputDelay": 2.9000000953674316,
+          "processing": 8.299999952316284
+        },
+        {
+          "name": "pointerenter",
+          "duration": 128,
+          "inputDelay": 11.200000047683716,
+          "processing": 0
+        },
+        {
+          "name": "pointerenter",
+          "duration": 128,
+          "inputDelay": 11.200000047683716,
+          "processing": 0
+        },
+        {
+          "name": "pointerenter",
+          "duration": 128,
+          "inputDelay": 11.200000047683716,
+          "processing": 0
+        },
+        {
+          "name": "pointerenter",
+          "duration": 128,
+          "inputDelay": 11.200000047683716,
+          "processing": 0
+        },
+        {
+          "name": "pointerenter",
+          "duration": 128,
+          "inputDelay": 11.200000047683716,
+          "processing": 0
+        },
+        {
+          "name": "pointerenter",
+          "duration": 128,
+          "inputDelay": 11.200000047683716,
+          "processing": 0
+        },
+        {
+          "name": "pointerenter",
+          "duration": 128,
+          "inputDelay": 11.200000047683716,
+          "processing": 0
+        },
+        {
+          "name": "mouseover",
+          "duration": 128,
+          "inputDelay": 11.200000047683716,
+          "processing": 3.0999999046325684
+        },
+        {
+          "name": "pointerdown",
+          "duration": 128,
+          "inputDelay": 20.90000009536743,
+          "processing": 3.5999999046325684
+        },
+        {
+          "name": "mousedown",
+          "duration": 128,
+          "inputDelay": 24.59999990463257,
+          "processing": 0.40000009536743164
+        },
+        {
+          "name": "pointerup",
+          "duration": 128,
+          "inputDelay": 30.700000047683716,
+          "processing": 2.700000047683716
+        },
+        {
+          "name": "mouseup",
+          "duration": 128,
+          "inputDelay": 33.40000009536743,
+          "processing": 1.4000000953674316
+        },
+        {
+          "name": "click",
+          "duration": 128,
+          "inputDelay": 35,
+          "processing": 25.5
+        },
+        {
+          "name": "pointerout",
+          "duration": 160,
+          "inputDelay": 7.8999998569488525,
+          "processing": 3.200000047683716
+        },
+        {
+          "name": "pointerleave",
+          "duration": 160,
+          "inputDelay": 11.200000047683716,
+          "processing": 0
+        },
+        {
+          "name": "pointerleave",
+          "duration": 160,
+          "inputDelay": 11.200000047683716,
+          "processing": 0
+        },
+        {
+          "name": "pointerleave",
+          "duration": 160,
+          "inputDelay": 11.200000047683716,
+          "processing": 0
+        },
+        {
+          "name": "pointerover",
+          "duration": 160,
+          "inputDelay": 11.200000047683716,
+          "processing": 0.6999998092651367
+        },
+        {
+          "name": "pointerenter",
+          "duration": 160,
+          "inputDelay": 11.899999856948853,
+          "processing": 0
+        },
+        {
+          "name": "pointerenter",
+          "duration": 160,
+          "inputDelay": 11.899999856948853,
+          "processing": 0
+        },
+        {
+          "name": "pointerenter",
+          "duration": 160,
+          "inputDelay": 11.899999856948853,
+          "processing": 0
+        },
+        {
+          "name": "pointerenter",
+          "duration": 160,
+          "inputDelay": 12,
+          "processing": 0
+        },
+        {
+          "name": "pointerenter",
+          "duration": 160,
+          "inputDelay": 12,
+          "processing": 0
+        },
+        {
+          "name": "pointerenter",
+          "duration": 160,
+          "inputDelay": 12,
+          "processing": 0
+        },
+        {
+          "name": "pointerenter",
+          "duration": 160,
+          "inputDelay": 12,
+          "processing": 0.09999990463256836
+        },
+        {
+          "name": "pointerenter",
+          "duration": 160,
+          "inputDelay": 12.099999904632568,
+          "processing": 0
+        },
+        {
+          "name": "pointerenter",
+          "duration": 160,
+          "inputDelay": 12.099999904632568,
+          "processing": 0
+        },
+        {
+          "name": "pointerenter",
+          "duration": 160,
+          "inputDelay": 12.099999904632568,
+          "processing": 0
+        },
+        {
+          "name": "pointerenter",
+          "duration": 160,
+          "inputDelay": 12.099999904632568,
+          "processing": 0
+        },
+        {
+          "name": "mouseout",
+          "duration": 160,
+          "inputDelay": 12.099999904632568,
+          "processing": 1.2000000476837158
+        },
+        {
+          "name": "mouseover",
+          "duration": 160,
+          "inputDelay": 13.599999904632568,
+          "processing": 0.40000009536743164
+        },
+        {
+          "name": "pointerdown",
+          "duration": 160,
+          "inputDelay": 17.799999952316284,
+          "processing": 6.099999904632568
+        },
+        {
+          "name": "mousedown",
+          "duration": 160,
+          "inputDelay": 23.899999856948853,
+          "processing": 0.40000009536743164
+        },
+        {
+          "name": "pointerup",
+          "duration": 160,
+          "inputDelay": 29,
+          "processing": 0.8000001907348633
+        },
+        {
+          "name": "mouseup",
+          "duration": 160,
+          "inputDelay": 30,
+          "processing": 0.40000009536743164
+        },
+        {
+          "name": "click",
+          "duration": 160,
+          "inputDelay": 30.700000047683716,
+          "processing": 38.90000009536743
+        }
+      ],
+      "transferBytes": 153692,
+      "longestObservedEvent": 160
+    }
+  ]
+}

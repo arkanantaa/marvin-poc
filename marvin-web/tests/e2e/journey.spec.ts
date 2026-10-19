@@ -1,5 +1,51 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
+// Small native wheel steps also exercise Firefox's per-event scroll limits.
+async function wheelBy(page: Page, delta: number) {
+  const start = await page.evaluate(() => scrollY);
+  const target = await page.evaluate((value) => Math.max(0, Math.min(value,
+    document.documentElement.scrollHeight - innerHeight)), start + delta);
+  let current = start;
+  while (Math.abs(target - current) > 1) {
+    const next = current + Math.max(-180, Math.min(180, target - current));
+    await page.mouse.wheel(0, next - current);
+    await expect.poll(() => page.evaluate(value => Math.abs(scrollY - value), next)).toBeLessThanOrEqual(1);
+    current = await page.evaluate(() => scrollY);
+  }
+}
+test("motion preference changes preserve focus and scroll position", async ({ page }) => {
+  await page.goto("./#work");
+  const hello = page.getByRole("tab", { name: "Say hello" });
+  await hello.click();
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await expect(hello).toBeFocused();
+  await expect(hello).toHaveAttribute("aria-selected", "true");
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await expect(hello).toBeFocused();
+  await hello.press("Tab");
+  await expect(page.getByRole("tabpanel")).toBeFocused();
+});
+
+test("resize preserves portfolio reading offset; reduced motion bypasses the long entrance", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 600 });
+  await page.goto("./#work");
+  const readingOffset = () => page.evaluate(() => scrollY -
+    (document.querySelector<HTMLElement>(".journey")!.offsetHeight -
+      document.querySelector<HTMLElement>(".stage")!.offsetHeight));
+  await expect(page.getByRole("tab", { name: "The portraits" })).toBeFocused();
+  await page.mouse.move(180, 400);
+  await page.mouse.wheel(0, 180);
+  await expect.poll(readingOffset).toBeGreaterThan(150);
+  const before = await readingOffset();
+  await page.setViewportSize({ width: 390, height: 620 });
+  await expect.poll(readingOffset).toBeGreaterThan(before - 5);
+  await page.getByRole("link", { name: "Marvin Studio home" }).click();
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.mouse.move(180, 400);
+  await page.mouse.wheel(0, 40);
+  await expect(page.locator("#work")).toHaveAttribute("aria-hidden", "false");
+  await expect.poll(readingOffset).toBeGreaterThanOrEqual(-2);
+});
 test("clean opening, shortcut, collections, keyboard tabs, home and history", async ({
   page,
 }) => {
@@ -9,7 +55,9 @@ test("clean opening, shortcut, collections, keyboard tabs, home and history", as
   await expect(page.locator("#work")).toHaveAttribute("inert", "");
   await expect(page.locator(".media-surface img")).toBeVisible();
   await expect(page.locator("video")).not.toHaveAttribute("src");
-  await page.getByRole("link", { name: "Our work" }).click();
+  const shortcut = page.getByRole("link", { name: "Our work" });
+  if (test.info().project.name === "mobile") await shortcut.tap();
+  else await shortcut.click();
   await expect(page.getByRole("tab", { name: "The portraits" })).toBeFocused();
   await page.getByRole("button", { name: "Previous collection" }).click();
   await expect(page.locator(".collection-control")).toContainText(
@@ -28,6 +76,13 @@ test("clean opening, shortcut, collections, keyboard tabs, home and history", as
   await expect(page.getByRole("tabpanel")).toContainText("not connected yet");
   await page.keyboard.press("Home");
   await expect(first).toBeFocused();
+  await first.press("ArrowLeft");
+  await expect(page.getByRole("tab", { name: "Say hello" })).toBeFocused();
+  await page.keyboard.press("Home");
+  await first.press("Tab");
+  await expect(page.getByRole("tabpanel")).toBeFocused();
+  await page.keyboard.press("Shift+Tab");
+  await expect(first).toBeFocused();
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
   await page.getByRole("link", { name: "Marvin Studio home" }).click();
   await expect(page.locator("#work")).toHaveAttribute("inert", "");
@@ -44,15 +99,17 @@ test("native scroll, white hold, reverse focus and same-fragment shortcut", asyn
   const range = await page
     .locator(".journey")
     .evaluate((el) => (el as HTMLElement).offsetHeight - innerHeight);
-  await page.mouse.wheel(0, range * 0.88);
+  await page.mouse.move(180, 400);
+  await wheelBy(page, range * 0.88);
   await page.waitForTimeout(200);
   await expect(page.locator(".white-transition")).toHaveCSS("opacity", "1");
   await expect(page.locator("#work")).toHaveAttribute("inert", "");
-  await page.mouse.wheel(0, range);
+  await wheelBy(page, range);
   await page.waitForTimeout(200);
   await expect(page.getByRole("tab", { name: "The portraits" })).toBeVisible();
   await page.getByRole("link", { name: "Our work" }).click();
-  await page.mouse.wheel(0, -range);
+  await page.mouse.move(180, 400);
+  await wheelBy(page, -range);
   await page.waitForTimeout(200);
   await expect(
     page.getByRole("link", { name: "Marvin Studio home" }),

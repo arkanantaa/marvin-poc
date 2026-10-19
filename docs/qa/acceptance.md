@@ -25,3 +25,11 @@ Three serial cold-load mobile lab runs: 390×844, DPR 1, touch emulation, 4× CP
 Release decision: foundation preview with explicit demo content and rejected-video limitation. Single-video version 1 is not complete. Final business assets, compliant footage, supported physical-device checks, full accessibility/zoom audit and final performance acceptance remain required before a business launch. Extracted-frame animation remains deferred, not an unfinished requirement.
 
 Production runtime commit: `f5ac43883fec2bb3b97d83dd1045afaa1b66a81b`. [Deployment and exact build record](../deployment.md). GitHub-hosted CI also passed clean install, lint/types, six unit tests and six browser tests at each root and project base path. Live inspection at 22:04 Asia/Jakarta confirmed the foundation flow and visible keyboard focus in the mobile tabs. Evidence-only follow-up changes do not alter runtime assets.
+
+## 2026-10-19 implementation follow-up
+
+See the [new milestone review](review-2026-10-19/acceptance.md) for repairs, browser conditions, screenshot verdicts and remaining gates. Eleven unit tests and twenty production browser tests cover Chromium desktop/mobile, Firefox and WebKit. The detailed implementation checklist now marks verified steps.
+
+Current three-run mobile lab LCP: 1604 / 1624 / 1608 ms, median 1608 ms, worst 1624 ms; CLS 0 throughout; initial resource transfer 153,692 bytes (localhost preview). JS + CSS gzip approximately 75.1 KB. Longest observed event durations: 472 / 136 / 160 ms, median 160 ms, worst 472 ms. Event-level diagnostics show the cold first-click handler takes 26 ms under 4? CPU throttle, with most latency before presentation. A first-run cold presentation delay remains open as PERF-F01 before final-release approval. No field INP result is claimed. Unneeded React rerenders during static-preview navigation were removed.
+
+Milestone B remains blocked by noncompliant footage and final content; physical-device/actual Safari, screen reader/native zoom, long replacement-copy review, final-video traces and final performance acceptance remain open. This supersedes the previous claim that all mobile monitor content was naturally scrollable: the new regression test exposed and repaired an unreachable lower monitor on short phones.
