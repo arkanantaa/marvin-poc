@@ -1,6 +1,9 @@
 import { chromium } from "@playwright/test";
 import fs from "node:fs/promises";
-const browser = await chromium.launch({ channel: "chromium" });
+const browser = await chromium.launch({ channel: process.env.PLAYWRIGHT_CHROMIUM_CHANNEL || "chromium" });
+const base = process.argv[2] || "http://127.0.0.1:4173/";
+const output = new URL(`../../docs/qa/${process.env.QA_REVIEW_DIR || "realism-2026-10-22"}/`, import.meta.url);
+await fs.mkdir(output, { recursive: true });
 const results = [];
 for (let i = 0; i < 3; i++) {
   const context = await browser.newContext({
@@ -39,11 +42,13 @@ for (let i = 0; i < 3; i++) {
       }
     }).observe({ type: "event", buffered: true, durationThreshold: 16 });
   });
-  await page.goto("http://127.0.0.1:4173/", { waitUntil: "networkidle" });
+  await page.goto(base, { waitUntil: "networkidle" });
   await page.locator(".media-surface img").evaluate((img) => img.decode());
   await page.waitForTimeout(300);
+  await page.waitForFunction(() => document.querySelector(".booth-renderer")?.getAttribute("data-renderer") === "ready", null, { timeout: 15000 });
   const initial = await page.evaluate(() => ({
     ...window.metrics,
+    sceneReadyMs: performance.getEntriesByName("marvin-scene-ready")[0]?.startTime,
     transferBytes: performance
       .getEntriesByType("resource")
       .reduce((n, e) => n + e.transferSize, 0),
@@ -62,10 +67,11 @@ for (let i = 0; i < 3; i++) {
   await context.close();
 }
 await fs.writeFile(
-  new URL("../../docs/qa/review-2026-10-19/performance.json", import.meta.url),
+  new URL("performance.json", output),
   JSON.stringify(
     {
       browser: browser.version(),
+      base,
       checkedAt: new Date().toISOString(),
       profile:
         "Windows Chromium, 390x844 DPR1 touch emulation; 4x CPU; 1.6Mbps down, 750Kbps up, 150ms latency, cache disabled; HTTP local preview; local transport uncompressed",
@@ -75,5 +81,6 @@ await fs.writeFile(
     2,
   ),
 );
-console.log(JSON.stringify(results));
+console.log(JSON.stringify(results.map(({ run, lcp, cls, sceneReadyMs, transferBytes, longestObservedEvent }) =>
+  ({ run, lcp, cls, sceneReadyMs, transferBytes, longestObservedEvent }))));
 await browser.close();

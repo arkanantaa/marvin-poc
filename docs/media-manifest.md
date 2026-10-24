@@ -1,4 +1,8 @@
-# Media qualification
+# Renderer change — 2026-10-22
+
+The active website uses procedural Three.js geometry. No entrance video is loaded or shipped. The video qualification below is historical and is not a current release gate. Model source: `marvin-web/src/scene/buildBooth.ts`. Reusable export: `docs/models/marvin-booth.glb`. Original reference assets are preserved.
+
+# Historical media qualification
 
 ## Opening poster
 

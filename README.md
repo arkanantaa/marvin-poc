@@ -1,7 +1,12 @@
-# Marvin Studio
+# Marvin Studio — Three.js photobooth
 
-React/Vite/TypeScript photobooth portfolio in [`marvin-web/`](marvin-web/README.md), implemented from [`prd.md`](prd.md) and [`implementation-plan.md`](implementation-plan.md).
+A real 3D reconstruction of `marvin_main.png`, refined with the supplied printer, Marvin logo and olive velvet photographs. Built in Three.js with React, Vite and TypeScript. Native scrolling gathers the softly draped curtain and moves through the doorway into an interactive portfolio with a charcoal, ivory and gold theme.
 
-This is a **foundation preview**. The supplied video contains entry but fails the stationary curtain-opening and poster-match requirements, so the public experience uses the static booth → white → interactive monitor fallback. Reference portraits are labeled demo content; contact and bookings are not connected. No final single-video release is claimed.
+The website uses geometry and lighting instead of video. Reduced motion and unavailable WebGL retain a static reference and direct portfolio access. Portraits are labeled demo content; bookings are not connected.
 
-See [QA evidence](docs/qa/acceptance.md), [media qualification](docs/media-manifest.md), and [deployment/rollback](docs/deployment.md).
+- [Run and edit the website](marvin-web/README.md)
+- [Reusable 3D model](docs/models/marvin-booth.glb)
+- [Current requirements](prd.md) and [implementation](implementation-plan.md)
+- [Current model QA](docs/qa/realism-2026-10-22/acceptance.md)
+- [Supplied asset mapping](docs/models/assets.md)
+- [Deployment history](docs/deployment.md) — this local revision is not yet published

@@ -1,0 +1,115 @@
+import { test, expect, type Page } from "@playwright/test";
+
+async function goToProgress(page: Page, progress: number) {
+  await page.evaluate(value => scrollTo(0, value *
+    (document.querySelector<HTMLElement>(".journey")!.offsetHeight - document.querySelector<HTMLElement>(".stage")!.offsetHeight)), progress);
+}
+
+test("3D curtain opens before camera travel, holds, reverses, and releases on shortcut", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "GPU rendering is reviewed in Chrome; other engines exercise the accessible routes.");
+  const errors: string[] = [];
+  const videoRequests: string[] = [];
+  page.on("pageerror", error => errors.push(error.message));
+  page.on("request", request => { if (/\.mp4/.test(request.url())) videoRequests.push(request.url()); });
+  await page.goto("./");
+  const scene = page.locator(".booth-renderer");
+  await expect(scene).toHaveAttribute("data-renderer", "ready", { timeout: 15000 });
+  await expect(page.locator("canvas")).toHaveCount(1);
+  await expect(page.locator("video")).toHaveCount(0);
+  const camera = await scene.getAttribute("data-camera");
+  await goToProgress(page, .22);
+  await expect.poll(async () => Number(await scene.getAttribute("data-curtain"))).toBeCloseTo(.5, 2);
+  await expect(scene).toHaveAttribute("data-camera", camera!);
+  await goToProgress(page, .39);
+  await expect(scene).toHaveAttribute("data-curtain", "1.0000");
+  await expect(scene).toHaveAttribute("data-camera", camera!);
+  await goToProgress(page, .65);
+  await expect(scene).not.toHaveAttribute("data-camera", camera!);
+  await expect(scene).toHaveAttribute("data-cloth-motion", "settled");
+  const heldCamera = await scene.getAttribute("data-camera");
+  const heldFrames = await scene.getAttribute("data-frames");
+  await page.waitForTimeout(350);
+  await expect(scene).toHaveAttribute("data-camera", heldCamera!);
+  await expect(scene).toHaveAttribute("data-frames", heldFrames!);
+  await goToProgress(page, .75);
+  await goToProgress(page, .22);
+  await expect.poll(async () => Number(await scene.getAttribute("data-curtain"))).toBeCloseTo(.5, 2);
+  await expect(scene).toHaveAttribute("data-camera", camera!);
+  await page.getByRole("link", { name: "Our work" }).click();
+  await expect(page.getByRole("tab", { name: "The portraits" })).toBeFocused();
+  await expect(page.locator("canvas")).toHaveCount(0);
+  await page.getByRole("link", { name: "Marvin Studio home" }).click();
+  await expect(scene).toHaveAttribute("data-renderer", "ready", { timeout: 15000 });
+  await expect(page.locator("canvas")).toHaveCount(1);
+  expect(videoRequests).toEqual([]);
+  expect(errors).toEqual([]);
+});
+
+test("supplied textures load and the free curtain settles while its rail and camera hold", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "Real cloth rendering is exercised in Chrome.");
+  const textures: string[] = [];
+  const failed: string[] = [];
+  page.on("response", response => {
+    if (response.url().includes("/textures/")) {
+      textures.push(response.url().split("/").pop()!);
+      if (!response.ok()) failed.push(response.url());
+    }
+  });
+  await page.goto("./");
+  const scene = page.locator(".booth-renderer");
+  await expect(scene).toHaveAttribute("data-textures", "loaded", { timeout: 15000 });
+  expect(textures).toEqual(expect.arrayContaining(["printer-reference.jpg", "marvin-logo.jpg", "olive-velvet.jpg"]));
+  expect(failed).toEqual([]);
+  const camera = await scene.getAttribute("data-camera");
+  await goToProgress(page, .23);
+  await expect(scene).toHaveAttribute("data-cloth-motion", "settling");
+  const displacement = await scene.getAttribute("data-cloth-displacement");
+  await expect(scene).not.toHaveAttribute("data-cloth-displacement", displacement!);
+  await expect(scene).toHaveAttribute("data-camera", camera!);
+  await expect(scene).toHaveAttribute("data-cloth-motion", "settled");
+  const frames = await scene.getAttribute("data-frames");
+  await page.waitForTimeout(200);
+  await expect(scene).toHaveAttribute("data-frames", frames!);
+});
+
+test("direct entry and reduced motion do not load the 3D renderer", async ({ page }) => {
+  const resources: string[] = [];
+  page.on("request", request => { if (/createBoothScene|\.mp4/.test(request.url())) resources.push(request.url()); });
+  await page.goto("./#work");
+  await expect(page.getByRole("tab", { name: "The portraits" })).toBeFocused();
+  await expect(page.locator("canvas")).toHaveCount(0);
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.getByRole("link", { name: "Marvin Studio home" }).click();
+  await expect(page.locator(".booth-poster")).toBeVisible();
+  await goToProgress(page, .2);
+  await expect(page.locator("#work")).toHaveAttribute("aria-hidden", "false");
+  expect(resources).toEqual([]);
+});
+
+test("unavailable WebGL retains the reference and a usable portfolio", async ({ page }) => {
+  await page.addInitScript(() => {
+    const original = HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.getContext = function (type: string, ...args: unknown[]) {
+      if (type.startsWith("webgl")) return null;
+      return Reflect.apply(original, this, [type, ...args]);
+    } as typeof original;
+  });
+  await page.goto("./");
+  await expect(page.locator(".booth-renderer")).toHaveAttribute("data-renderer", "fallback", { timeout: 15000 });
+  await expect(page.locator(".booth-poster")).toBeVisible();
+  await goToProgress(page, .88);
+  await expect(page.locator(".white-transition")).toHaveCSS("opacity", "1");
+  await page.getByRole("link", { name: "Our work" }).click();
+  await expect(page.getByRole("tab", { name: "The portraits" })).toBeFocused();
+});
+
+test("GPU context loss falls back without hiding portfolio access", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "Context-loss extension is exercised in Chrome.");
+  await page.goto("./");
+  await expect(page.locator(".booth-renderer")).toHaveAttribute("data-renderer", "ready", { timeout: 15000 });
+  await page.locator("canvas").evaluate(canvas => canvas.getContext("webgl2")!.getExtension("WEBGL_lose_context")!.loseContext());
+  await expect(page.locator(".booth-renderer")).toHaveAttribute("data-renderer", "fallback");
+  await expect(page.locator(".booth-poster")).toBeVisible();
+  await page.getByRole("link", { name: "Our work" }).click();
+  await expect(page.getByRole("tab", { name: "The portraits" })).toBeFocused();
+});

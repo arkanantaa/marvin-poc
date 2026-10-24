@@ -1,5 +1,51 @@
 import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
+test("long content and enlarged text remain reachable at 320 pixels", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 800 });
+  await page.goto("./#work");
+  await page.locator(".portfolio-copy h2").evaluate((el) => {
+    el.textContent = "A lifetime of memories with every one of the people you love.";
+  });
+  await page.locator(".portfolio-copy p:not(.eyebrow)").evaluate((el) => {
+    el.textContent = `${el.textContent} `.repeat(5);
+  });
+  await page.evaluate(() => { document.documentElement.style.fontSize = "200%"; });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  expect(await page.getByRole("tab").evaluateAll(buttons =>
+    buttons.every(button => button.scrollWidth <= button.clientWidth))).toBe(true);
+  expect(await page.locator(".site-header").evaluate(header => {
+    const brand = header.querySelector(".wordmark")!.getBoundingClientRect();
+    const navigation = header.querySelector("nav")!.getBoundingClientRect();
+    return brand.right + 8 <= navigation.left;
+  })).toBe(true);
+  await page.getByRole("button", { name: "Next collection" }).click();
+  await expect(page.locator(".collection-control")).toContainText("Warm memories");
+  await page.locator(".screen-footer").scrollIntoViewIfNeeded();
+  await expect(page.locator(".screen-footer")).toBeInViewport();
+  await page.getByRole("tab", { name: "The experience" }).click();
+  await page.locator(".experience-steps li").last().scrollIntoViewIfNeeded();
+  await expect(page.locator(".experience-steps li").last()).toBeInViewport();
+  await page.getByRole("tab", { name: "Say hello" }).click();
+  await page.locator(".contact-note").scrollIntoViewIfNeeded();
+  await expect(page.locator(".contact-note")).toBeInViewport();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});
+
+test("collection selection survives tabs and direct navigation respects the selected tab", async ({ page }) => {
+  await page.goto("./#work");
+  await page.getByRole("button", { name: "Next collection" }).click();
+  const hello = page.getByRole("tab", { name: "Say hello" });
+  await hello.click();
+  await page.getByRole("link", { name: "Our work" }).click();
+  await expect(hello).toBeFocused();
+  await page.getByRole("tab", { name: "The portraits" }).click();
+  await expect(page.locator(".collection-control")).toContainText("Warm memories");
+  await page.getByRole("link", { name: "Marvin Studio home" }).click();
+  await page.goBack();
+  await expect(page.locator("#work")).toHaveAttribute("aria-hidden", "false");
+  await page.goForward();
+  await expect(page.locator("#work")).toHaveAttribute("inert", "");
+});
 // Small native wheel steps also exercise Firefox's per-event scroll limits.
 async function wheelBy(page: Page, delta: number) {
   const start = await page.evaluate(() => scrollY);
@@ -53,8 +99,8 @@ test("clean opening, shortcut, collections, keyboard tabs, home and history", as
   page.on("pageerror", (error) => errors.push(error.message));
   await page.goto("./");
   await expect(page.locator("#work")).toHaveAttribute("inert", "");
-  await expect(page.locator(".media-surface img")).toBeVisible();
-  await expect(page.locator("video")).not.toHaveAttribute("src");
+  await expect(page.locator(".booth-renderer")).toBeVisible();
+  await expect(page.locator("video")).toHaveCount(0);
   const shortcut = page.getByRole("link", { name: "Our work" });
   if (test.info().project.name === "mobile") await shortcut.tap();
   else await shortcut.click();
@@ -123,7 +169,7 @@ test("reduced motion, resize, failed images and reflow", async ({ page }) => {
   await page.goto("./#work");
   await expect(page.getByRole("tab", { name: "The portraits" })).toBeFocused();
   await expect(page.locator(".image-fallback")).toHaveCount(3);
-  await expect(page.locator("video")).not.toHaveAttribute("src");
+  await expect(page.locator("video")).toHaveCount(0);
   await page.setViewportSize({ width: 320, height: 800 });
   await expect(
     page.getByRole("button", { name: "Next collection" }),

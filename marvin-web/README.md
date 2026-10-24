@@ -1,42 +1,33 @@
-# Marvin Studio — foundation preview
+# Marvin Studio — 3D edition
 
-React + Vite + strict TypeScript. Original PoC and supplied source assets remain intact in the parent folder. This implements Milestone A; the supplied video fails the stationary-opening/first-frame gates and is intentionally excluded from the public build. Final footage, business photographs/copy and contact destination are still needed for version 1.
+Three.js geometry replaces the previous MP4 entrance. The model uses the original booth composition plus the supplied Marvin logo, recessed LOVE CAPTURE printer image, and olive velvet fabric. It has metal trim, an upholstered interior seat, actual printer cavity and irregular soft folds. Depth is inferred from the references.
 
-Use Node **24.18.0** (`../.nvmrc`).
+Use the Node 24 release pinned in `../.nvmrc` (validated locally with 24.19.0).
 
-```powershell
-cd marvin-web
+```sh
 npm ci
 npm run dev
 ```
 
-Validation:
+Vite serves the website on port 5173. Native scroll controls the rail and camera; a damped response lets the lower fabric lag and sway before settling. “Our work” skips directly to the portfolio. No video is requested. The renderer is dynamically imported only when needed and draws until the cloth settles, with a capped pixel ratio and resource cleanup. Reduced motion, missing WebGL and context loss use a matching render of the revised model as the poster fallback.
 
-```powershell
+Edit geometry and supplied texture crops in `src/scene/buildBooth.ts`, cloth response in `src/scene/curtainMotion.ts`, lighting/framing in `src/scene/createBoothScene.ts`, and choreography in `src/lib/timeline.ts`. Portfolio content and confirmed contact configuration live in `src/data/portfolio.ts`. The charcoal/ivory/gold theme is in `src/styles/site.css`. Asset provenance and the Codex skill adaptation are recorded in `../docs/models/assets.md`.
+
+```sh
 npm run lint
 npm run typecheck
 npm run test:unit
 npm run build
 npx playwright install chromium firefox webkit
 npm run test:e2e
-npm run preview -- --host 127.0.0.1
 ```
 
-The development server defaults to port 5173; the production preview uses 4173. Browser tests start the production preview automatically. `tests/capture-evidence.mjs` captures visual evidence with preview on 4173 and the repository served on 4174 (`python -m http.server 4174` from repository root). Screenshots require AI/manual viewing; capture alone does not imply acceptance.
+On Windows machines where installed Chrome works but downloaded Chromium does not, set `$env:PLAYWRIGHT_CHROMIUM_CHANNEL='chrome'`. To run the locally reviewed engines: `npx playwright test --project=desktop --project=mobile --project=webkit`. Actual Firefox, Safari, physical devices and screen readers require their own checks.
 
-Edit collections, captions and alternatives in `src/data/portfolio.ts`. The demo photos are tiny crops from the supplied reference, upscaled for layout; replace these with approved high-resolution photographs before launch. Contact has no active link because no destination was supplied. Portfolio effects are restrained local CSS; no React Bits dependency is needed.
+For visual evidence, start `npm run preview -- --host 127.0.0.1 --port 4176`, then run `node tests/capture-threejs.mjs`. View the images in `../docs/qa/realism-2026-10-22/`; capturing them alone does not establish acceptance. `node tests/measure-performance.mjs http://127.0.0.1:4176/` records lab loading and 3D-ready timings separately. With the dev server on 5173, `node tests/capture-model-details.mjs` also renders close-ups and regenerates the matching fallback poster.
 
-Timeline is independent of loading state. One native paused video element uses coalesced latest-target seeks; no canvas, extracted frames, timed autoplay or alternate sources. See `src/lib/timeline.ts`, `src/hooks/useEntranceMedia.ts` and [media qualification](../docs/media-manifest.md) before enabling footage. An unapproved file is not downloaded. `Our work` immediately bypasses entrance; `#work` refresh, history, home and same-fragment shortcuts work. Native scrolling reverses across the journey boundary. Mobile monitor content grows naturally and remains scrollable.
+With the dev server running, `npm run export:model` writes `../docs/models/marvin-booth.glb`. This GLB contains the same closed-booth geometry and embedded textures for reuse in 3D tools. The website uses the procedural source so the curtain can deform and camera travel can follow scroll directly; the exported static GLB is not downloaded by visitors.
 
-GitHub Pages workflows are in `../.github/workflows/`. Public asset paths use Vite's base. For a local project-path test:
+GitHub Pages remains the hosting target. Set `PAGES_BASE_PATH=/marvin-poc/` when testing its project path. Existing Actions validate/build/deploy on a pushed default-branch commit. This working-tree revision has not been published. See [QA](../docs/qa/realism-2026-10-22/acceptance.md) and [deployment history](../docs/deployment.md).
 
-```powershell
-$env:PAGES_BASE_PATH='/marvin-validation/'
-npm run build
-npm run test:e2e
-Remove-Item Env:PAGES_BASE_PATH
-```
-
-Live foundation preview: [arkanantaa.github.io/marvin-poc](https://arkanantaa.github.io/marvin-poc/). See [deployment and rollback](../docs/deployment.md), [baseline](../docs/qa/baseline.md), and [acceptance evidence](../docs/qa/acceptance.md). Re-run live checks with `node tests/inspect-production.mjs https://arkanantaa.github.io/marvin-poc/`, then view the resulting screenshots.
-
-Latest review: [2026-10-19 foundation acceptance](../docs/qa/review-2026-10-19/acceptance.md). Browser tests cover Chromium desktop/mobile, Firefox and WebKit. The monitor supports natural page scrolling below the entrance, preserves reading offset on resize, and retains focus on motion-preference changes. Run the local media spike with `VITE_REVIEW_MEDIA=true` on port 4175 and `node tests/review-media.mjs`; it creates/removes a temporary rejected fixture and must finish before building a release.
+The six portraits are small reference crops, not approved launch photography. Contact remains disabled until a real destination is supplied. The old video-specific PRD/plan are archived and no longer govern the renderer.

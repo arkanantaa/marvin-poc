@@ -1,5 +1,7 @@
 # Acceptance — foundation preview, 2026-10-15
 
+Historical report. The current Three.js implementation is covered by [the 2026-10-22 model refinement report](realism-2026-10-22/acceptance.md); the video requirements below have been superseded.
+
 Local production preview reviewed at `http://127.0.0.1:4173/`. Source build is identified by the commit containing this report; compiled JS/CSS sizes below. Chromium 156.0.8078.4, Windows host, AMD Ryzen 7 6800HS; DPR 1 for screenshots; no-preference motion; local unthrottled network unless noted. Pixel 7 mobile emulation is browser coverage, not a physical Android-device result. No Safari/iOS/physical-device result is claimed.
 
 The AI actually viewed the supplied source, candidate contact sheet, legacy desktop/mobile screenshots, new desktop/mobile/short-landscape opening, desktop and 320/390 px monitor, white hold, mid-reveal, experience and contact. Native scroll and keyboard interactions were exercised with real Chromium browser automation. Capture paths are relative to this directory; machine-readable conditions are in `browser-metadata.json`.

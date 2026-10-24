@@ -1,0 +1,71 @@
+{
+  "date": "2026-10-20T15:12:32.506Z",
+  "base": "http://127.0.0.1:4176/",
+  "browser": "155.0.8059.85",
+  "profiles": [
+    {
+      "width": 1440,
+      "height": 900,
+      "dpr": 1,
+      "motion": "no-preference",
+      "network": "local unthrottled",
+      "errors": [],
+      "violations": []
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "dpr": 1,
+      "motion": "no-preference",
+      "network": "local unthrottled",
+      "errors": [],
+      "violations": []
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "dpr": 1,
+      "motion": "no-preference",
+      "network": "local unthrottled",
+      "errors": [],
+      "violations": []
+    },
+    {
+      "width": 360,
+      "height": 800,
+      "dpr": 1,
+      "motion": "no-preference",
+      "network": "local unthrottled",
+      "errors": [],
+      "violations": []
+    },
+    {
+      "width": 320,
+      "height": 800,
+      "dpr": 1,
+      "motion": "no-preference",
+      "network": "local unthrottled",
+      "errors": [],
+      "violations": []
+    },
+    {
+      "width": 844,
+      "height": 390,
+      "dpr": 1,
+      "motion": "no-preference",
+      "network": "local unthrottled",
+      "errors": [],
+      "violations": []
+    }
+  ],
+  "assets": [
+    {
+      "name": "index-6gN6Udb-.js",
+      "sha256": "8fb45f3fa5e6d50b4a150eb4222653dfb3b85fac8148d69b0a7a904b1f538cae"
+    },
+    {
+      "name": "index-C37xKuSb.css",
+      "sha256": "b5cd4a1dba6b407e711fac2a378caa6070f2b49aae981b41a8b579fa7481400c"
+    }
+  ]
+}

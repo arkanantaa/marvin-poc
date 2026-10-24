@@ -1,5 +1,7 @@
 /marvin-web/node_modules/
 /marvin-web/dist/
 /marvin-web/test-results/
+/marvin-web/test-results-layout/
 /marvin-web/playwright-report/
+/marvin-web/.npm-cache/
 /docs/qa/*.webm

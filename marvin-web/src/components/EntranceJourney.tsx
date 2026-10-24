@@ -1,227 +1,25 @@
-import { useEffect, useRef, useState, type RefObject } from "react";
-import { useReducedMotion } from "../hooks/useReducedMotion";
-import { useEntranceMedia } from "../hooks/useEntranceMedia";
-import { asset, mediaManifest } from "../lib/mediaManifest";
-import { timeline, fallbackProgress } from "../lib/timeline";
+import type { RefObject } from "react";
+import { useJourneyProgress } from "../hooks/useJourneyProgress";
+import { BoothScene } from "./BoothScene";
 import { PortfolioMonitor } from "./PortfolioMonitor";
-export function EntranceJourney({
-  homeRef,
-}: {
+import { WhiteTransition } from "./WhiteTransition";
+
+export function EntranceJourney({ homeRef }: {
   homeRef: RefObject<HTMLAnchorElement | null>;
 }) {
-  const journey = useRef<HTMLElement>(null),
-    stage = useRef<HTMLDivElement>(null),
-    surface = useRef<HTMLDivElement>(null),
-    white = useRef<HTMLDivElement>(null),
-    work = useRef<HTMLElement>(null),
-    overflowSpace = useRef<HTMLDivElement>(null);
-  const reduced = useReducedMotion();
-  const [initialDirect] = useState(() => location.hash === "#work");
-  const [mediaAllowed, setMediaAllowed] = useState(!initialDirect);
-  const initialized = useRef(false);
-  const fallbackAt = useRef<number | null>(null);
-  const direct = useRef(initialDirect);
-  const media = useEntranceMedia(
-    mediaManifest.approved && !reduced && mediaAllowed,
-  );
-  const { video } = media;
-  useEffect(() => {
-    const allowMedia = (allowed: boolean) => {
-      // A static fallback has no decoder to mount or release.
-      if (mediaManifest.approved) setMediaAllowed(allowed);
-    };
-    let raf = 0,
-      timer = 0,
-      active = false;
-    const range = () =>
-      Math.max(1, (journey.current?.offsetHeight ?? 0) - (stage.current?.offsetHeight ?? innerHeight));
-    let previousRange = range();
-    const updateOverflow = () => {
-      if (overflowSpace.current)
-        overflowSpace.current.style.height = `${active ? Math.max(0,
-          (work.current?.offsetHeight ?? 0) - (stage.current?.offsetHeight ?? innerHeight)) : 0}px`;
-    };
-    const render = () => {
-      raf = 0;
-      const p = Math.min(1, Math.max(0, scrollY / range()));
-      if (mediaManifest.approved && mediaAllowed && media.hasFailed() &&
-          p > 0.08 && !direct.current && !reduced && fallbackAt.current === null)
-        fallbackAt.current = performance.now();
-      const elapsed = fallbackAt.current === null ? null : performance.now() - fallbackAt.current;
-      if (elapsed !== null && elapsed >= 380) {
-        fallbackAt.current = null;
-        direct.current = true;
-        allowMedia(false);
-        window.scrollTo({ top: range(), behavior: "instant" });
-        schedule();
-        return;
-      }
-      const state = timeline(
-        direct.current || (reduced && p > 0) ? 1 : elapsed === null ? p : fallbackProgress(elapsed),
-        media.video.current?.duration,
-      );
-      media.seek(
-        state.time,
-        p > 0.08 && p < 0.86 && !direct.current && !reduced,
-      );
-      if (surface.current)
-        surface.current.style.opacity = String(1 - state.white);
-      if (white.current)
-        white.current.style.opacity = String(state.white * (1 - state.monitor));
-      if (work.current) {
-        work.current.style.opacity = String(state.monitor);
-        if (!state.interactive && work.current.contains(document.activeElement))
-          homeRef.current?.focus({ preventScroll: true });
-        work.current.inert = !state.interactive;
-        work.current.setAttribute("aria-hidden", String(!state.interactive));
-        active = state.interactive;
-      }
-      if (stage.current) stage.current.dataset.active = String(active);
-      updateOverflow();
-      if (fallbackAt.current !== null || (mediaManifest.approved && mediaAllowed &&
-          media.hasFailed() && p > 0.08 && !direct.current && !reduced)) schedule();
-      if (
-        mediaManifest.approved &&
-        p > 0.08 &&
-        p < 0.86 &&
-        !media.hasFailed() &&
-        !direct.current
-      )
-        timer = window.setTimeout(schedule, 100);
-    };
-    function schedule() {
-      clearTimeout(timer);
-      if (!raf) raf = requestAnimationFrame(render);
-    }
-    const navigate = () => {
-      fallbackAt.current = null;
-      direct.current = location.hash === "#work";
-      allowMedia(!direct.current);
-      window.scrollTo({
-        top: direct.current ? range() : 0,
-        behavior: "instant",
-      });
-      render();
-      if (direct.current)
-        work.current
-          ?.querySelector<HTMLButtonElement>("[role=tab]")
-          ?.focus({ preventScroll: true });
-      else homeRef.current?.focus({ preventScroll: true });
-    };
-    const onScroll = () => {
-      if (direct.current && scrollY < range() - 2) {
-        direct.current = false;
-        allowMedia(true);
-      }
-      if (reduced && !direct.current && scrollY > 0) {
-        fallbackAt.current = null;
-        direct.current = true;
-        allowMedia(false);
-        window.scrollTo({ top: range(), behavior: "instant" });
-      }
-      schedule();
-    };
-    const onResize = () => {
-      updateOverflow();
-      const nextRange = range();
-      const top = direct.current || scrollY >= previousRange
-        ? nextRange + Math.max(0, scrollY - previousRange)
-        : scrollY / previousRange * nextRange;
-      previousRange = nextRange;
-      window.scrollTo({ top, behavior: "instant" });
-      schedule();
-    };
-    const onClick = (event: MouseEvent) => {
-      const link = (event.target as Element).closest<HTMLAnchorElement>(
-        ".site-header a",
-      );
-      if (
-        !link ||
-        event.ctrlKey ||
-        event.metaKey ||
-        event.shiftKey ||
-        event.altKey ||
-        event.button !== 0
-      )
-        return;
-      event.preventDefault();
-      if (location.hash !== link.hash) history.pushState(null, "", link.hash);
-      navigate();
-    };
-    const onPageShow = () => {
-      // Firefox applies native fragment focus after the mount effect.
-      // Finish explicit deep-link navigation after that browser operation.
-      if (initialDirect && location.hash === "#work") {
-        cancelAnimationFrame(raf);
-        raf = requestAnimationFrame(navigate);
-      } else schedule();
-    };
-    addEventListener("scroll", onScroll, { passive: true });
-    addEventListener("resize", onResize);
-    addEventListener("hashchange", navigate);
-    addEventListener("pageshow", onPageShow);
-    addEventListener("click", onClick);
-    const observer = new ResizeObserver(updateOverflow);
-    if (work.current) observer.observe(work.current);
-    if (!initialized.current && direct.current) navigate();
-    else if (reduced && scrollY > 0 && !direct.current) {
-      fallbackAt.current = null;
-      direct.current = true;
-      allowMedia(false);
-      window.scrollTo({ top: range(), behavior: "instant" });
-      render();
-    } else render();
-    initialized.current = true;
-    return () => {
-      cancelAnimationFrame(raf);
-      clearTimeout(timer);
-      observer.disconnect();
-      removeEventListener("scroll", onScroll);
-      removeEventListener("resize", onResize);
-      removeEventListener("hashchange", navigate);
-      removeEventListener("pageshow", onPageShow);
-      removeEventListener("click", onClick);
-    };
-  }, [reduced, homeRef, media, mediaAllowed, initialDirect]);
+  const { journey, stage, surface, white, work, initialDirect, sceneProgress, sceneEnabled } = useJourneyProgress(homeRef);
   return (
     <>
-    <section
-      className="journey"
-      ref={journey}
-      aria-label="Marvin photobooth entrance"
-    >
-      <div className="stage" ref={stage} data-active={initialDirect}>
-        <div className="media-surface" ref={surface}>
-          <img
-            src={asset(mediaManifest.poster)}
-            width={1920}
-            height={1080}
-            alt="Marvin cream and chrome photobooth with portrait prints and one golden-yellow curtain"
-            fetchPriority="high"
-          />
-          <video
-            ref={video}
-            muted
-            playsInline
-            preload="none"
-            aria-hidden="true"
-            tabIndex={-1}
-          />
+      <section id="home" className="journey" ref={journey} aria-label="Marvin photobooth entrance">
+        <div className="stage" ref={stage} data-active={initialDirect}>
+          <BoothScene surfaceRef={surface} progress={sceneProgress} enabled={sceneEnabled} />
+          <WhiteTransition layerRef={white} />
         </div>
-        <div className="white-transition" ref={white} aria-hidden="true" />
-        <section
-          id="work"
-          className="work-scene"
-          ref={work}
-          inert={!initialDirect}
-          aria-hidden={!initialDirect}
-          aria-label="Portfolio monitor"
-        >
-          <PortfolioMonitor />
-        </section>
-      </div>
-    </section>
-    <div ref={overflowSpace} aria-hidden="true" />
+      </section>
+      <section id="work" className="work-scene" ref={work} data-active={initialDirect}
+        inert={!initialDirect} aria-hidden={!initialDirect} aria-label="Portfolio monitor">
+        <PortfolioMonitor />
+      </section>
     </>
   );
 }

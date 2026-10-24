@@ -1,5 +1,9 @@
 # Deployment and rollback
 
+## 2026-10-22 local 3D revision
+
+The current working tree uses a procedural Three.js model, the supplied logo/printer/olive velvet assets, soft curtain motion and a charcoal/ivory/gold theme. It has not been pushed or deployed in this task. The historical release records below describe earlier video/fallback versions and do not validate this revision. See [current model QA](qa/realism-2026-10-22/acceptance.md); rerun the existing Pages workflow and inspect the resulting URL after publication.
+
 Status: **deployed and visually inspected**. Public foundation preview: [arkanantaa.github.io/marvin-poc](https://arkanantaa.github.io/marvin-poc/). User supplied the blank public repository `arkanantaa/marvin-poc`; origin is configured to `https://github.com/arkanantaa/marvin-poc.git`, default branch `main`. Pages is configured for GitHub Actions. This is not the approved single-video release.
 
 ## Verified deployment
