@@ -1,6 +1,6 @@
 # Marvin Studio — interactive 3D portfolio
 
-Updated 2026-10-22. The user's request to replace video with Three.js and overwrite the theme supersedes the previous video-first specification. The previous PRD is retained in [the archive](docs/archive/prd-video-2026-10-19.md). A compliant MP4 is no longer a release dependency.
+Updated 2026-10-22. The user's request to replace video with Three.js and overwrite the theme supersedes the previous video-first specification. Superseded video specifications and assets were removed from the workspace on 2026-10-26. A compliant MP4 is no longer a release dependency.
 
 ## Product direction
 

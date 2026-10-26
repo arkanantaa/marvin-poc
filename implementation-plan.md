@@ -1,6 +1,6 @@
 # Marvin Studio — Three.js implementation
 
-Updated 2026-10-22 following the user's renderer/theme change. Product source: [prd.md](prd.md). The superseded video plan is [archived](docs/archive/implementation-plan-video-2026-10-19.md).
+Updated 2026-10-22 following the user's renderer/theme change. Product source: [prd.md](prd.md). The superseded video plan and assets were removed from the workspace on 2026-10-26.
 
 ## Implemented structure
 
@@ -26,7 +26,7 @@ marvin-web/src/
 
 ## Execution and checks
 
-1. Preserve `marvin_main.png` and the old MP4 as source references. Remove the video element, decoder/seeking hook, approval manifest, and obsolete media tests from the active implementation.
+1. Preserve `marvin_main.png` as the booth source reference. The old MP4, video posters, CSS zoom prototype, video specifications and obsolete media tests were removed from the workspace. The active implementation uses no video element, decoder/seeking hook or approval manifest.
 2. Build a genuinely volumetric booth from the image: front panel around an actual doorway, side/back/ceiling/floor surfaces, bevelled chrome, sign, portrait cards, print slot, rail/rings, and folded fabric.
 3. Map scroll to deterministic rail and camera targets. Finish gathering before aligning and entering. Let the lower fabric lag and settle with a bounded damped response; stop rendering when settled. Texture updates, resize and restored visibility also invalidate the scene.
 4. Keep the monitor in normal page flow. Translate only its inactive reveal phase; explicit navigation focuses the selected tab, while passive scroll preserves focus or safely moves it before hiding.

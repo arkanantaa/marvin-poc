@@ -1,5 +1,7 @@
 # Deployment and rollback
 
+Workspace cleanup on 2026-10-26 removed the obsolete video/CSS zoom implementation and its QA artifacts. Historical references below describe earlier deployments; their former screenshots and video qualification files are no longer kept in this checkout. Current Three.js source, assets, tests and dated 3D evidence are retained. The production inspection script has since been updated for the current 3D entrance.
+
 ## 2026-10-22 local 3D revision
 
 The current working tree uses a procedural Three.js model, the supplied logo/printer/olive velvet assets, soft curtain motion and a charcoal/ivory/gold theme. It has not been pushed or deployed in this task. The historical release records below describe earlier video/fallback versions and do not validate this revision. See [current model QA](qa/realism-2026-10-22/acceptance.md); rerun the existing Pages workflow and inspect the resulting URL after publication.
