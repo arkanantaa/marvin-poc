@@ -13,19 +13,17 @@ export type Collection = {
   images: readonly Portrait[];
 };
 
-const portraits: Portrait[] = [
-  "Two friends posing together",
-  "Friends smiling for a booth portrait",
-  "A black and white portrait of two friends",
-  "A group celebrating together",
-  "Friends leaning in for a group portrait",
-  "A group making memories in the booth",
-].map((alt, index) => ({
-  id: `portrait-${index + 1}`,
-  src: `portfolio/portrait-${index + 1}.webp`,
-  alt,
-  width: 300,
-  height: 360,
+export const portraits: readonly Portrait[] = [
+  { alt: "Three friends blowing kisses in the photobooth", width: 584, height: 440 },
+  { alt: "Three friends holding a long strip of photobooth pictures", width: 330, height: 585 },
+  { alt: "Two children smiling together in the photobooth", width: 465, height: 499 },
+  { alt: "A group of friends making playful poses in the photobooth", width: 479, height: 364 },
+  { alt: "Two friends laughing and hugging in the photobooth", width: 401, height: 413 },
+  { alt: "A black and white photobooth portrait of two friends", width: 800, height: 601 },
+].map((portrait, index) => ({
+  id: `ape-portrait-${index + 1}`,
+  src: `portfolio/ape-portrait-${index + 1}.webp`,
+  ...portrait,
 }));
 
 export const collections: readonly Collection[] = [

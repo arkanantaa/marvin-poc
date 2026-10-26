@@ -26,19 +26,24 @@ try {
     const { GLTFLoader } = await import("/node_modules/three/examples/jsm/loaders/GLTFLoader.js");
     const { Box3 } = await import("/node_modules/three/build/three.module.js");
     const model = await new GLTFLoader().parseAsync(new Uint8Array(bytes).buffer, "");
-    let meshes = 0, triangles = 0;
+    let meshes = 0, triangles = 0, pdfPortraits = 0, hasSeat = false;
     const namedParts = [];
     model.scene.traverse(object => {
       if (object.isMesh) {
+        if (/seat|chair/i.test(object.name)) hasSeat = true;
+        if (/Supplied_PDF_portrait|Supplied PDF portrait/i.test(object.parent?.name || "")) {
+          if (object.material.map) pdfPortraits++;
+        }
         meshes++;
         triangles += (object.geometry.index?.count || object.geometry.attributes.position.count) / 3;
         if (/Supplied|printer/i.test(object.name)) namedParts.push(object.name);
       }
     });
     const bounds = new Box3().setFromObject(model.scene);
-    return { meshes, triangles, min: bounds.min.toArray(), max: bounds.max.toArray(), namedParts };
+    return { meshes, triangles, pdfPortraits, hasSeat, min: bounds.min.toArray(), max: bounds.max.toArray(), namedParts };
   }, bytes);
   if (!validation.namedParts.some(name => /olive_velvet|olive velvet/i.test(name))) throw new Error("Export lost the supplied curtain.");
+  if (validation.hasSeat || validation.pdfPortraits !== 6) throw new Error("Export must contain six PDF photos and no chair.");
   await fs.writeFile(new URL("../../docs/models/validation.json", import.meta.url), JSON.stringify({ bytes: buffer.length, ...validation }, null, 2));
   console.log(`Exported reference booth GLB: ${buffer.length.toLocaleString()} bytes.`);
 } finally { await browser.close(); }

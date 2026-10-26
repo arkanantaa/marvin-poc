@@ -38,4 +38,18 @@ describe("soft curtain", () => {
     const motion = createCurtainMotion(0);
     expect(Math.abs(motion.step(1, 60).displacement)).toBeLessThanOrEqual(.13);
   });
+  it("adds a slow breeze at rest while pinning the rail and keeping the doorway clear", () => {
+    const hemStart = curtainVertex(.8, 1, 0, 0, 0);
+    expect(curtainVertex(.8, 1, 0, 0, 3).z).not.toBeCloseTo(hemStart.z, 3);
+    for (let time = 0; time < 24; time += .5) {
+      for (const u of [0, .25, .5, .75, 1]) {
+        expect(curtainVertex(u, 0, 0, 0, time)).toEqual(curtainVertex(u, 0, 0, 0, 0));
+        expect(curtainVertex(u, 1, 1, .13, time).x).toBeLessThan(.74);
+      }
+      const current = curtainVertex(.8, 1, 0, 0, time);
+      const next = curtainVertex(.8, 1, 0, 0, time + 1 / 30);
+      expect(Math.abs(next.x - current.x)).toBeLessThan(.001);
+      expect(Math.abs(next.z - current.z)).toBeLessThan(.001);
+    }
+  });
 });

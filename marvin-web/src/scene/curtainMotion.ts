@@ -27,7 +27,7 @@ export function createCurtainMotion(initialOpening: number) {
   };
 }
 
-export function curtainVertex(u: number, v: number, opening: number, sway = 0) {
+export function curtainVertex(u: number, v: number, opening: number, sway = 0, windTime = 0) {
   const width = 1 - opening * .81;
   // Nonuniform gathering and a slightly flared hem preserve a fabric silhouette.
   const rail = u + .013 * Math.sin(u * Math.PI * 4) * opening;
@@ -40,12 +40,20 @@ export function curtainVertex(u: number, v: number, opening: number, sway = 0) {
     + .055 * Math.sin(opening * Math.PI) * weight * Math.sin(u * Math.PI / 2);
   // Fade secondary movement once gathered, keeping the clear doorway clear.
   const movement = sway * (1 - opening * .65) * weight;
+  // Two slow, overlapping waves avoid a mechanical back-and-forth swing.
+  // The rail stays pinned; wind is strongest at the hem and softens when gathered.
+  const breeze = weight * (1 - opening * .8);
+  const gust = Math.sin(windTime * .72 + u * 2.4 - v * 1.1)
+    + .3 * Math.sin(windTime * .43 - u * 3 + v * 2);
+  const windX = .016 * breeze * gust * Math.sin(u * Math.PI / 2);
+  const windZ = breeze * (.022 * Math.sin(windTime * .72 + u * 3.1 - v * 1.7)
+    + .006 * Math.sin(windTime * 1.03 - u * 4 + v * 2.2));
   return {
-    x: .44 + rail * width + flare + drape + movement * Math.sin(u * Math.PI / 2),
+    x: .44 + rail * width + flare + drape + movement * Math.sin(u * Math.PI / 2) + windX,
     y: 2.99 - v * 2.77 - .018 * Math.sin(u * Math.PI * 12) ** 2 * (1 - v)
       + (.009 * Math.cos(foldPhase + .5) + .016 * Math.sin(u * 19) + .018 * Math.sin(u * 7 + 1)) * v ** 8
-      + Math.abs(movement) * .18,
+      + Math.abs(movement) * .18 + breeze * .004 * Math.sin(windTime * .72 + u * 2),
     z: .87 + fold * amplitude * (.65 + .35 * v)
-      + .012 * Math.sin(v * 8 + u * 11) * v + movement * Math.sin(v * 4 + u * 7),
+      + .012 * Math.sin(v * 8 + u * 11) * v + movement * Math.sin(v * 4 + u * 7) + windZ,
   };
 }

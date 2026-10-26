@@ -45,15 +45,10 @@ for (const viewport of [
   const range = await page
     .locator(".journey")
     .evaluate((el) => el.offsetHeight - innerHeight);
-  await page.mouse.wheel(0, range * 0.88);
-  await page.waitForTimeout(200);
-  if (
-    (await page
-      .locator(".white-transition")
-      .evaluate((el) => el.style.opacity)) !== "1"
-  )
-    throw new Error("White hold is not opaque");
-  await capture("white");
+  await page.mouse.wheel(0, 120);
+  await expect(page.locator("#work")).toHaveAttribute("aria-hidden", "false", { timeout: 8000 });
+  await expect(page.locator(".white-transition")).toHaveCount(0);
+  await capture("dissolve-complete");
   await page.getByRole("link", { name: "Our work" }).click();
   await capture("work");
   if (viewport.width === 390) {
@@ -82,14 +77,14 @@ for (const viewport of [
   await page.reload();
   await first.waitFor({ state: "visible" });
   await page.mouse.wheel(0, -range);
-  await page.waitForTimeout(250);
+  await expect(page.getByRole("link", { name: "Marvin Studio home" })).toBeFocused({ timeout: 8000 });
   if (!(await page.locator("#work").evaluate((el) => el.inert)))
     throw new Error("Reverse did not return to opening");
   await page.getByRole("link", { name: "Our work" }).click();
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.reload();
   await capture("reduced");
-  if (await page.locator("video").getAttribute("src"))
+  if (await page.locator("video").count())
     throw new Error("Unexpected video download in foundation preview");
   if (errors.length || failed.length)
     throw new Error(JSON.stringify({ errors, failed }));
@@ -102,7 +97,7 @@ for (const viewport of [
     failed,
     axeViolations: violations.length,
     flows:
-      "scroll/white/shortcut/tabs/collections/home/history/deep-link-refresh/reverse/reduced-motion passed",
+      "single-scroll/dissolve/shortcut/tabs/collections/home/history/deep-link-refresh/reverse/reduced-motion passed",
   });
   await context.close();
 }

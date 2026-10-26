@@ -1,15 +1,17 @@
 {
-  "bytes": 5471884,
-  "meshes": 76,
-  "triangles": 19756,
+  "bytes": 5593572,
+  "meshes": 60,
+  "triangles": 14172,
+  "pdfPortraits": 6,
+  "hasSeat": false,
   "min": [
     -1.600000023841858,
-    -0.002500000894069654,
+    -0.0025000572204589844,
     -0.7850000017881393
   ],
   "max": [
     1.600000023841858,
-    4.079000003039837,
+    3.9890000030398367,
     0.9799999952316284
   ],
   "namedParts": [
@@ -17,21 +19,16 @@
     "Front_panel_below_printer",
     "Printer_panel_left",
     "Printer_panel_right",
-    "Supplied_Marvin_studio_logo_—_illuminated_sign",
-    "Printer_metal_label_plate",
-    "Supplied_LOVE_CAPTURE_printer_label",
+    "Supplied_black_Marvin_wordmark_—_illuminated_sign",
     "Printer_recessed_housing",
     "Printer_inner_left",
     "Printer_inner_right",
     "Printer_lower_tray",
     "Printer_upper_inner_wall",
-    "Supplied_printer_interior_photograph",
+    "Printer_narrow_black_output_slot",
     "Beveled_stainless_printer_surround",
-    "Printer_inner_polished_edge_left",
-    "Printer_inner_polished_edge_right",
-    "Printer_inner_polished_edge_top",
-    "Printer_inner_polished_edge_bottom",
-    "Supplied_Marvin_studio_logo_—_lower_plaque",
+    "Printer_inner_polished_edge",
+    "Supplied_black_Marvin_wordmark_—_lower_branding",
     "Supplied_olive_velvet_—_soft_gathered_curtain"
   ]
 }

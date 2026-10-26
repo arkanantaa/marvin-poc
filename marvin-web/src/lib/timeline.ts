@@ -8,24 +8,39 @@ export function timeline(progress: number) {
   const p = clamp(progress);
   return {
     progress: p,
-    phase: p < .08 ? "booth" : p < .36 ? "opening" : p < .43 ? "open"
-      : p < .78 ? "entering" : p < .86 ? "fade" : p < .9 ? "white" : "monitor",
-    curtain: ease(segment(p, .08, .36)),
-    alignment: ease(segment(p, .43, .58)),
-    travel: ease(segment(p, .48, .78)),
-    white: segment(p, .78, .86),
-    monitor: segment(p, .9, 1),
+    phase: p < .02 ? "booth" : p < .56 ? "entering" : p < 1 ? "dissolve" : "monitor",
+    curtain: ease(segment(p, .02, .60)),
+    alignment: ease(segment(p, .02, .50)),
+    travel: ease(segment(p, .02, .78)),
+    monitor: ease(segment(p, .56, 1)),
     interactive: p >= 1,
   };
 }
 export const wrap = (index: number, length: number) => ((index % length) + length) % length;
 
 export function cameraPose(progress: number, distance: number) {
-  const pose = timeline(progress);
+  const p = clamp(progress);
+  const pose = timeline(p);
+  // Approach at a steady change in apparent scale, then walk through the
+  // opening. A matched tangent joins both segments without a pause or lurch.
+  const facadeZ = .82, clearance = .9, endZ = -.35;
+  const startClearance = Math.max(clearance, distance - facadeZ);
+  const approach = segment(p, .02, .64);
+  const pace = approach * approach * (2 - approach);
+  const logRatio = Math.log(startClearance / clearance);
+  const entryZ = facadeZ + clearance;
+  let z = facadeZ + startClearance * Math.exp(-logRatio * pace);
+  if (p > .64) {
+    const t = segment(p, .64, .78);
+    const tangent = -clearance * logRatio / .62 * .14;
+    z = (2 * t ** 3 - 3 * t ** 2 + 1) * entryZ
+      + (t ** 3 - 2 * t ** 2 + t) * tangent
+      + (-2 * t ** 3 + 3 * t ** 2) * endZ;
+  }
   return {
-    x: .94 + .36 * (1 - pose.alignment),
+    x: .94 * pose.alignment,
     y: 1.7 + .3 * (1 - pose.alignment),
-    z: distance + (-.35 - distance) * pose.travel,
+    z,
     lookX: .94 * pose.alignment,
     lookY: 1.7 + .3 * (1 - pose.alignment),
     lookZ: -.74,

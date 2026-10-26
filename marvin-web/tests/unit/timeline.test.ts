@@ -2,15 +2,20 @@ import { describe, expect, it } from "vitest";
 import { cameraPose, createSceneProgress, timeline, wrap } from "../../src/lib/timeline";
 
 describe("3D entrance choreography", () => {
-  it("keeps the camera fixed during curtain opening and the open-door hold", () => {
+  it("opens the curtain and advances the camera together without an open-door pause", () => {
     const first = cameraPose(0, 9);
-    for (const progress of [.08, .22, .36, .42]) expect(cameraPose(progress, 9)).toEqual(first);
-    expect(timeline(.22).curtain).toBeCloseTo(.5);
-    expect(timeline(.36).curtain).toBe(1);
-    expect(timeline(.42).travel).toBe(0);
+    expect(first.x).toBe(first.lookX);
+    expect(first.x).toBe(0);
+    for (const progress of [.08, .22, .36, .42]) {
+      expect(cameraPose(progress, 9).z).toBeLessThan(first.z);
+      expect(timeline(progress).curtain).toBeGreaterThan(0);
+      expect(timeline(progress).travel).toBeGreaterThan(0);
+    }
+    expect(timeline(.31).curtain).toBeCloseTo(.5);
+    expect(timeline(.60).curtain).toBe(1);
   });
   it("aligns with the clear doorway before crossing its front plane", () => {
-    for (let progress = .43; progress <= .78; progress += .005) {
+    for (let progress = .02; progress <= .78; progress += .005) {
       const view = cameraPose(progress, 9);
       expect(view.y).toBe(view.lookY);
       if (view.z < .9) {
@@ -29,11 +34,37 @@ describe("3D entrance choreography", () => {
     }
     expect(cameraPose(.6, 9).z).toBeGreaterThan(cameraPose(.7, 9).z);
   });
-  it("bounds invalid input and retains opaque white before interaction", () => {
+  it("limits sudden enlargement during the doorway approach on wide and narrow screens", () => {
+    for (const distance of [8.5, 15]) {
+      let previousScale = 1 / (cameraPose(.02, distance).z + .74);
+      for (let step = 1; step <= 62; step++) {
+        const view = cameraPose(.02 + step * .01, distance);
+        const scale = 1 / (view.z + .74);
+        expect(scale / previousScale).toBeLessThan(1.2);
+        expect(scale).toBeGreaterThanOrEqual(previousScale);
+        if (view.z < .9) expect(view.x).toBeCloseTo(.94, 2);
+        previousScale = scale;
+      }
+    }
+  });
+  it("joins the approach to the doorway crossing without a sudden velocity change", () => {
+    const step = .00001;
+    const before = (cameraPose(.64, 9).z - cameraPose(.64 - step, 9).z) / step;
+    const after = (cameraPose(.64 + step, 9).z - cameraPose(.64, 9).z) / step;
+    expect(after).toBeCloseTo(before, 1);
+    expect(cameraPose(.64, 9).z).toBeGreaterThan(.82);
+    expect(timeline(.70).monitor).toBeGreaterThan(0);
+  });
+  it("bounds invalid input and dissolves directly into the portfolio before interaction", () => {
     for (const value of [-1, NaN, Infinity]) expect(timeline(value).progress).toBe(0);
     expect(timeline(2).progress).toBe(1);
-    for (const value of [.86, .88, .9]) expect(timeline(value)).toMatchObject({ white: 1, monitor: 0, interactive: false });
-    expect(timeline(.95).monitor).toBeCloseTo(.5);
+    expect(timeline(.56).monitor).toBe(0);
+    expect(timeline(.78).monitor).toBeCloseTo(.5);
+    for (const value of [.70, .82, .9]) {
+      expect(timeline(value).monitor).toBeGreaterThan(0);
+      expect(timeline(value).monitor).toBeLessThan(1);
+      expect(timeline(value).interactive).toBe(false);
+    }
     expect(timeline(.999).interactive).toBe(false);
     expect(timeline(1).interactive).toBe(true);
   });

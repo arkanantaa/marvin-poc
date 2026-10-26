@@ -6,6 +6,7 @@ import {
 import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
 import { asset } from "../lib/assets";
 import { curtainVertex } from "./curtainMotion";
+import { portraits } from "../data/portfolio";
 
 export const boothDimensions = { width: 3.2, height: 4.04, doorLeft: .43, doorRight: 1.43, eyeHeight: 1.7 };
 
@@ -32,12 +33,12 @@ function surfaceGrain() {
 // interior surfaces are inferred from the single frontal reference image.
 export function buildBooth(invalidate: () => void) {
   const root = new Group();
-  root.name = "Marvin Studio — reference reconstruction";
+  root.name = "Marvin — gold-trim reference reconstruction";
   let disposed = false;
   const textures = new Set<Texture>();
   const textureLoads: Promise<void>[] = [];
   const loader = new TextureLoader();
-  // UV crops reference the untouched user JPEGs, including their exact logo.
+  // UV crops reference the untouched supplied images.
   function photo(path: string, crop?: [number, number, number, number, number, number]) {
     let complete!: () => void;
     textureLoads.push(new Promise<void>(resolve => { complete = resolve; }));
@@ -57,12 +58,34 @@ export function buildBooth(invalidate: () => void) {
   }
   const grain = surfaceGrain();
   textures.add(grain);
+  // Low-amplitude polishing ripples break up the reflection of the studio
+  // softboxes, matching the slightly uneven folded metal in the reference.
+  const metalCanvas = document.createElement("canvas");
+  metalCanvas.width = metalCanvas.height = 256;
+  const metalContext = metalCanvas.getContext("2d")!;
+  const normals = metalContext.createImageData(256, 256);
+  for (let y = 0; y < 256; y++) for (let x = 0; x < 256; x++) {
+    const u = x / 256, v = y / 256, tau = Math.PI * 2;
+    const nx = .16 * Math.sin(tau * (u * 7 + v * 3)) + .07 * Math.sin(tau * (u * 13 - v * 8));
+    const ny = .14 * Math.cos(tau * (v * 9 + u * 2)) + .06 * Math.sin(tau * (u * 5 - v * 17));
+    const index = (y * 256 + x) * 4;
+    normals.data[index] = (nx + 1) * 127.5;
+    normals.data[index + 1] = (ny + 1) * 127.5;
+    normals.data[index + 2] = (Math.sqrt(1 - nx * nx - ny * ny) + 1) * 127.5;
+    normals.data[index + 3] = 255;
+  }
+  metalContext.putImageData(normals, 0, 0);
+  const polishedNormals = new CanvasTexture(metalCanvas);
+  textures.add(polishedNormals);
   const cream = new MeshPhysicalMaterial({ color: "#d8d3c4", roughness: .48, metalness: .22,
     clearcoat: .16, clearcoatRoughness: .4, bumpMap: grain, bumpScale: .0008 });
   const interior = new MeshStandardMaterial({ color: "#d1c9b9", roughness: .9 });
   const chrome = new MeshPhysicalMaterial({ color: "#d2d4d0", metalness: 1, roughness: .29,
     anisotropy: .45, bumpMap: grain, bumpScale: .0004 });
-  const dark = new MeshStandardMaterial({ color: "#20241f", roughness: .65 });
+  const gold = new MeshPhysicalMaterial({ color: "#d4bf96", metalness: 1, roughness: .14,
+    clearcoat: .25, clearcoatRoughness: .2, envMapIntensity: 1.15,
+    normalMap: polishedNormals });
+  gold.normalScale.set(.65, .65);
   const paper = new MeshStandardMaterial({ color: "#fffdf6", roughness: .92 });
 
   function box(name: string, width: number, height: number, depth: number,
@@ -78,11 +101,37 @@ export function buildBooth(invalidate: () => void) {
     root.add(mesh);
     return mesh;
   }
-  function frame(name: string, width: number, height: number, x: number, y: number, z: number, thickness = .035) {
-    box(`${name} left`, thickness, height, .07, x - width / 2, y, z, chrome, true);
-    box(`${name} right`, thickness, height, .07, x + width / 2, y, z, chrome, true);
-    box(`${name} top`, width, thickness, .07, x, y + height / 2, z, chrome, true);
-    box(`${name} bottom`, width, thickness, .07, x, y - height / 2, z, chrome, true);
+  function frame(name: string, width: number, height: number, x: number, y: number, z: number,
+    thickness = .035, material: Material = gold) {
+    // A mitered metal profile catches distinct reflections on the outer bevel,
+    // narrow flat face and inward bevel, as in the photographed surrounds.
+    const points: number[] = [];
+    const contours = [[thickness / 2, -.015], [thickness * .27, .025],
+      [-thickness * .12, .025], [-thickness / 2, -.018]];
+    for (let level = 0; level < contours.length - 1; level++) {
+      const ring = (index: number, band: number) => {
+        const [offset, depth] = contours[band];
+        return [[-1, -1], [1, -1], [1, 1], [-1, 1]][index]
+          .map((side, axis) => side * ((axis === 0 ? width : height) / 2 + offset))
+          .concat(depth);
+      };
+      for (let side = 0; side < 4; side++) {
+        const next = (side + 1) % 4;
+        const a = ring(side, level), b = ring(next, level);
+        const c = ring(next, level + 1), d = ring(side, level + 1);
+        points.push(...a, ...b, ...c, ...a, ...c, ...d);
+      }
+    }
+    const geometry = new BufferGeometry();
+    geometry.setAttribute("position", new Float32BufferAttribute(points, 3));
+    geometry.setAttribute("uv", new Float32BufferAttribute(points.flatMap((_, i) =>
+      i % 3 === 0 ? [points[i] / width + .5, points[i + 1] / height + .5] : []), 2));
+    geometry.computeVertexNormals();
+    const mesh = new Mesh(geometry, material);
+    mesh.name = name;
+    mesh.position.set(x, y, z);
+    mesh.castShadow = mesh.receiveShadow = true;
+    root.add(mesh);
   }
   function plane(name: string, width: number, height: number, x: number, y: number, z: number, material: Material) {
     const mesh = new Mesh(new PlaneGeometry(width, height), material);
@@ -97,8 +146,8 @@ export function buildBooth(invalidate: () => void) {
     const outer = [[-width / 2, -height / 2], [width / 2, -height / 2], [width / 2, height / 2], [-width / 2, height / 2]];
     for (let i = 0; i < 4; i++) {
       const a = outer[i], b = outer[(i + 1) % 4];
-      const innerA = [a[0] - Math.sign(a[0]) * inset, a[1] - Math.sign(a[1]) * inset, -.075];
-      const innerB = [b[0] - Math.sign(b[0]) * inset, b[1] - Math.sign(b[1]) * inset, -.075];
+      const innerA = [a[0] - Math.sign(a[0]) * inset, a[1] - Math.sign(a[1]) * inset, -.035];
+      const innerB = [b[0] - Math.sign(b[0]) * inset, b[1] - Math.sign(b[1]) * inset, -.035];
       points.push(...a, 0, ...b, 0, ...innerB, ...a, 0, ...innerB, ...innerA);
     }
     const geometry = new BufferGeometry();
@@ -124,71 +173,95 @@ export function buildBooth(invalidate: () => void) {
   box("Right side", .09, 3.5, 1.5, 1.555, 1.75, 0, cream);
   box("Ceiling", 3.2, .08, 1.5, 0, 3.47, 0, cream);
   box("Floor", 3.2, .09, 1.5, 0, .045, 0, interior);
+  const leftTrimInnerEdge = -3.15 / 2 + .045 / 2;
+  const curtainTrimOuterEdge = .94 - 1.08 / 2 - .045 / 2;
+  const displayX = (leftTrimInnerEdge + curtainTrimOuterEdge) / 2;
+  const printerLeft = displayX - .26, printerRight = displayX + .26;
   // Four panels leave a real opening for the inset printer tray.
-  box("Front panel above printer", 1.96, 1.98, .12, -.55, 2.47, .72, cream);
-  box("Front panel below printer", 1.96, .74, .12, -.55, .41, .72, cream);
-  box("Printer panel left", .25, .70, .12, -1.405, 1.13, .72, cream);
-  box("Printer panel right", .61, .70, .12, .125, 1.13, .72, cream);
+  box("Front panel above printer", 1.96, 1.91, .12, -.55, 2.505, .72, cream);
+  box("Front panel below printer", 1.96, 1.20, .12, -.55, .64, .72, cream);
+  box("Printer panel left", printerLeft + 1.53, .31, .12, (printerLeft - 1.53) / 2, 1.395, .72, cream);
+  box("Printer panel right", .43 - printerRight, .31, .12, (.43 + printerRight) / 2, 1.395, .72, cream);
   box("Door right jamb", .13, 3.42, .13, 1.485, 1.75, .72, cream);
   box("Door lintel", 1.11, .45, .12, .955, 3.245, .72, cream);
-  frame("Outer chrome surround", 3.15, 3.46, 0, 1.75, .8, .045);
-  frame("Doorway chrome surround", 1.08, 2.91, .94, 1.565, .82, .045);
-  box("Canopy", 2.78, .045, .26, 0, 3.2, .85, chrome, true);
+  frame("Outer gold surround", 3.15, 3.46, 0, 1.75, .8, .045);
+  frame("Doorway gold surround", 1.08, 2.91, .94, 1.565, .82, .045);
+  box("Canopy", 2.78, .045, .26, 0, 3.2, .85, gold, true);
   box("Canopy warm underside", 2.56, .015, .15, 0, 3.17, .84,
-    new MeshStandardMaterial({ color: "#fff1c1", emissive: "#ffe7ac", emissiveIntensity: .4 }));
+    new MeshStandardMaterial({ color: "#fff8e9", emissive: "#ffe6b1", emissiveIntensity: .35 }));
 
-  box("Illuminated sign case", 1.43, .55, .20, 0, 3.775, .57, chrome, true);
-  box("Opal sign diffuser", 1.36, .49, .018, 0, 3.775, .677,
-    new MeshStandardMaterial({ color: "#faf8ef", roughness: .6, emissive: "#fff8e8", emissiveIntensity: .2 }), true);
-  const logo = photo("textures/marvin-logo.jpg", [70, 145, 1140, 420, 1280, 712]);
-  plane("Supplied Marvin studio logo — illuminated sign", 1.27, 1.27 * 420 / 1140, 0, 3.775, .689,
-    new MeshBasicMaterial({ map: logo, toneMapped: false }));
+  box("Illuminated sign case", 1.43, .43, .20, 0, 3.715, .57, gold, true);
+  const signCanvas = document.createElement("canvas");
+  signCanvas.width = 512; signCanvas.height = 160;
+  const signContext = signCanvas.getContext("2d")!;
+  signContext.scale(512, 160);
+  const signLight = signContext.createRadialGradient(.5, .5, .1, .5, .5, .68);
+  signLight.addColorStop(0, "#fff7c8");
+  signLight.addColorStop(.65, "#fff0ae");
+  signLight.addColorStop(1, "#e8ca7c");
+  signContext.fillStyle = signLight;
+  signContext.fillRect(0, 0, 1, 1);
+  const signMap = new CanvasTexture(signCanvas);
+  signMap.colorSpace = SRGBColorSpace;
+  textures.add(signMap);
+  box("Warm yellow opal sign diffuser", 1.38, .38, .018, 0, 3.715, .677,
+    new MeshBasicMaterial({ map: signMap, toneMapped: false }), true);
+  frame("Mitered sign surround", 1.41, .41, 0, 3.715, .686, .036);
+  // Keep the supplied black wordmark, its star cutout and transparency intact.
+  const logo = photo("textures/marvin-wordmark.png");
+  const logoMaterial = new MeshBasicMaterial({ map: logo, transparent: true, alphaTest: .02, toneMapped: false });
+  plane("Supplied black Marvin wordmark — illuminated sign", 1.08, 1.08 * 227 / 1098, 0, 3.715, .696, logoMaterial);
   for (const x of [-.48, .48]) {
     const handle = new Mesh(new TorusGeometry(.055, .009, 6, 18, Math.PI), chrome);
-    handle.position.set(x, 4.015, .57);
+    handle.position.set(x, 3.925, .57);
     root.add(handle);
   }
 
-  box("Portrait display inset", .85, 1.04, .035, -.73, 2.32, .81, interior);
-  frame("Portrait display frame", .87, 1.06, -.73, 2.32, .84, .025);
+  const displayScale = 1.3;
+  const displayY = 2.37;
+  box("Portrait display inset", .85 * displayScale, 1.04 * displayScale, .035, displayX, displayY, .81,
+    new MeshStandardMaterial({ color: "#fff3c8", roughness: .8, emissive: "#ffe4a3", emissiveIntensity: .18 }));
+  frame("Portrait display frame", .87 * displayScale, 1.06 * displayScale, displayX, displayY, .84, .025);
   const rotations = [-.12, .09, .08, -.1, -.1, .13];
   for (let index = 0; index < 6; index++) {
     const card = new Group();
-    card.name = `Reference portrait ${index + 1}`;
-    card.position.set(-.73 + (index % 2 === 0 ? -.185 : .185), 2.65 - Math.floor(index / 2) * .33, .87);
+    card.name = `Supplied PDF portrait ${index + 1}`;
+    card.position.set(displayX + (index % 2 === 0 ? -.185 : .185) * displayScale,
+      displayY + (.33 - Math.floor(index / 2) * .33) * displayScale, .87);
+    card.scale.set(displayScale, displayScale, 1);
     card.rotation.z = rotations[index];
-    const backing = new Mesh(new BoxGeometry(.29, .315, .008), paper);
+    const portrait = portraits[index];
+    const aspect = portrait.width / portrait.height;
+    const imageWidth = Math.min(.25, .245 * aspect);
+    const imageHeight = imageWidth / aspect;
+    const backing = new Mesh(new BoxGeometry(imageWidth + .04, imageHeight + .06, .008), paper);
     card.add(backing);
-    const map = photo(`portfolio/portrait-${index + 1}.webp`);
-    const image = new Mesh(new PlaneGeometry(.25, .245), new MeshBasicMaterial({ map, toneMapped: false }));
-    image.position.set(0, .018, .006);
+    const map = photo(portrait.src);
+    const image = new Mesh(new PlaneGeometry(imageWidth, imageHeight), new MeshBasicMaterial({ map, toneMapped: false }));
+    image.position.set(0, .01, .006);
     card.add(image);
     root.add(card);
   }
 
   const printerPhoto = "textures/printer-reference.jpg";
-  box("Printer metal label plate", 1.03, .31, .018, -.73, 1.64, .80, chrome, true);
-  plane("Supplied LOVE CAPTURE printer label", .99, .99 * 178 / 598, -.73, 1.64, .811,
-    new MeshStandardMaterial({ map: photo(printerPhoto, [353, 106, 598, 178, 1280, 854]), roughness: .53, metalness: .25 }));
-  box("Printer recessed housing", 1.08, .69, .055, -.73, 1.13, .44, dark);
-  box("Printer inner left", .025, .58, .29, -1.225, 1.13, .59, chrome);
-  box("Printer inner right", .025, .58, .29, -.235, 1.13, .59, chrome);
-  box("Printer lower tray", 1.0, .022, .31, -.73, .835, .59, chrome, true);
-  box("Printer upper inner wall", 1.0, .022, .29, -.73, 1.425, .59, chrome);
-  // The photographic insert preserves the user's actual print/product detail.
-  plane("Supplied printer interior photograph", .98, .58, -.73, 1.13, .472,
-    new MeshBasicMaterial({ map: photo(printerPhoto, [402, 384, 507, 306, 1280, 854]), toneMapped: false }));
-  metalRim("Beveled stainless printer surround", 1.10, .72, .055, -.73, 1.13, .835,
+  // Match the main reference: compact empty metal recess and a narrow upper
+  // print slot, about 17% of the facade width (previously 34%).
+  const brushedSteel = chrome.clone();
+  brushedSteel.map = photo(printerPhoto, [380, 10, 500, 80, 1280, 854]);
+  brushedSteel.roughness = .42;
+  brushedSteel.metalness = .65;
+  box("Printer recessed housing", .54, .34, .035, displayX, 1.395, .61, brushedSteel);
+  box("Printer inner left", .014, .28, .15, displayX - .243, 1.395, .705, chrome);
+  box("Printer inner right", .014, .28, .15, displayX + .243, 1.395, .705, chrome);
+  box("Printer lower tray", .49, .014, .15, displayX, 1.254, .705, brushedSteel, true);
+  box("Printer upper inner wall", .49, .014, .15, displayX, 1.536, .705, chrome);
+  box("Printer narrow black output slot", .415, .038, .008, displayX, 1.503, .634,
+    new MeshBasicMaterial({ color: "#090b08" }), true);
+  metalRim("Beveled stainless printer surround", .56, .36, .033, displayX, 1.395, .835,
     photo(printerPhoto, [343, 330, 628, 410, 1280, 854]));
-  frame("Printer inner polished edge", .99, .61, -.73, 1.13, .76, .012);
-  box("Lower brand plaque", .77, .295, .012, -.73, .53, .789, paper, true);
-  plane("Supplied Marvin studio logo — lower plaque", .72, .72 * 420 / 1140, -.73, .53, .797,
-    new MeshBasicMaterial({ map: logo, toneMapped: false }));
+  frame("Printer inner polished edge", .49, .29, displayX, 1.395, .788, .008, chrome);
+  plane("Supplied black Marvin wordmark — lower branding", .58, .58 * 227 / 1098, displayX, 1.095, .789, logoMaterial);
 
-  // A small upholstered seat gives the entry an actual interior and scale.
-  const seatFabric = new MeshStandardMaterial({ color: "#39422b", roughness: .97 });
-  box("Interior upholstered seat", .77, .14, .49, .94, .64, -.38, seatFabric, true);
-  box("Interior seat pedestal", .43, .52, .30, .94, .31, -.38, dark, true);
   box("Interior rear skirting", 3.07, .09, .04, 0, .14, -.665, chrome, true);
 
   const rod = new Mesh(new CylinderGeometry(.017, .017, 1.09, 12), chrome);
@@ -216,15 +289,17 @@ export function buildBooth(invalidate: () => void) {
   });
   let lastOpening = -1;
   let lastSway = NaN;
-  function setCurtain(opening: number, sway = 0) {
-    if (opening === lastOpening && sway === lastSway) return;
+  let lastWindTime = NaN;
+  function setCurtain(opening: number, sway = 0, windTime = 0) {
+    if (opening === lastOpening && sway === lastSway && windTime === lastWindTime) return;
     lastOpening = opening;
     lastSway = sway;
+    lastWindTime = windTime;
     const positions = curtainGeometry.attributes.position;
     const uv = curtainGeometry.attributes.uv;
     for (let i = 0; i < positions.count; i++) {
       const u = uv.getX(i), v = 1 - uv.getY(i);
-      const point = curtainVertex(u, v, opening, sway);
+      const point = curtainVertex(u, v, opening, sway, windTime);
       positions.setXYZ(i, point.x, point.y, point.z);
     }
     positions.needsUpdate = true;

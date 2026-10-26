@@ -1,4 +1,4 @@
-import { test, expect, type Page } from "@playwright/test";
+import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 test("long content and enlarged text remain reachable at 320 pixels", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 800 });
@@ -46,19 +46,6 @@ test("collection selection survives tabs and direct navigation respects the sele
   await page.goForward();
   await expect(page.locator("#work")).toHaveAttribute("inert", "");
 });
-// Small native wheel steps also exercise Firefox's per-event scroll limits.
-async function wheelBy(page: Page, delta: number) {
-  const start = await page.evaluate(() => scrollY);
-  const target = await page.evaluate((value) => Math.max(0, Math.min(value,
-    document.documentElement.scrollHeight - innerHeight)), start + delta);
-  let current = start;
-  while (Math.abs(target - current) > 1) {
-    const next = current + Math.max(-180, Math.min(180, target - current));
-    await page.mouse.wheel(0, next - current);
-    await expect.poll(() => page.evaluate(value => Math.abs(scrollY - value), next)).toBeLessThanOrEqual(1);
-    current = await page.evaluate(() => scrollY);
-  }
-}
 test("motion preference changes preserve focus and scroll position", async ({ page }) => {
   await page.goto("./#work");
   const hello = page.getByRole("tab", { name: "Say hello" });
@@ -138,30 +125,53 @@ test("clean opening, shortcut, collections, keyboard tabs, home and history", as
   await expect(first).toBeFocused();
   expect(errors).toEqual([]);
 });
-test("native scroll, white hold, reverse focus and same-fragment shortcut", async ({
+test("one wheel gesture opens and zooms into the portfolio, and one reverses home", async ({
   page,
 }) => {
   await page.goto("./");
-  const range = await page
-    .locator(".journey")
-    .evaluate((el) => (el as HTMLElement).offsetHeight - innerHeight);
+  const scene = page.locator(".booth-renderer");
+  await expect(scene).toHaveAttribute("data-renderer", "ready", { timeout: 15000 });
+  const initialCamera = await scene.getAttribute("data-camera");
   await page.mouse.move(180, 400);
-  await wheelBy(page, range * 0.88);
-  await page.waitForTimeout(200);
-  await expect(page.locator(".white-transition")).toHaveCSS("opacity", "1");
-  await expect(page.locator("#work")).toHaveAttribute("inert", "");
-  await wheelBy(page, range);
-  await page.waitForTimeout(200);
-  await expect(page.getByRole("tab", { name: "The portraits" })).toBeVisible();
+  const started = Date.now();
+  await page.mouse.wheel(0, 120);
+  await expect.poll(async () => {
+    const opening = Number(await scene.getAttribute("data-curtain"));
+    return opening > .02 && opening < 1 && await scene.getAttribute("data-camera") !== initialCamera;
+  }).toBe(true);
+  await expect(page.locator("#work")).toHaveAttribute("aria-hidden", "false");
+  expect(Date.now() - started).toBeGreaterThanOrEqual(3300);
+  await expect(page.getByRole("tab", { name: "The portraits" })).toBeFocused();
   await page.getByRole("link", { name: "Our work" }).click();
   await page.mouse.move(180, 400);
-  await wheelBy(page, -range);
-  await page.waitForTimeout(200);
+  await page.mouse.wheel(0, -120);
   await expect(
     page.getByRole("link", { name: "Marvin Studio home" }),
   ).toBeFocused();
+  await expect.poll(() => page.evaluate(() => scrollY)).toBe(0);
   await page.getByRole("link", { name: "Our work" }).click();
   await expect(page.getByRole("tab", { name: "The portraits" })).toBeFocused();
+});
+
+test("PageDown runs the same single entrance transition", async ({ page }) => {
+  await page.goto("./");
+  await page.getByRole("link", { name: "Marvin Studio home" }).focus();
+  await page.keyboard.press("PageDown");
+  await expect(page.locator("#work")).toHaveAttribute("aria-hidden", "false");
+  await expect(page.getByRole("tab", { name: "The portraits" })).toBeFocused();
+});
+
+test("one touch swipe reaches the portfolio", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium" || test.info().project.name !== "mobile", "Touch input is exercised in mobile Chromium.");
+  await page.goto("./");
+  const session = await page.context().newCDPSession(page);
+  try {
+    await session.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x: 180, y: 540 }] });
+    await session.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [{ x: 180, y: 400 }] });
+    await session.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+    await expect(page.locator("#work")).toHaveAttribute("aria-hidden", "false");
+    await expect(page.getByRole("tab", { name: "The portraits" })).toBeFocused();
+  } finally { await session.detach(); }
 });
 test("reduced motion, resize, failed images and reflow", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });

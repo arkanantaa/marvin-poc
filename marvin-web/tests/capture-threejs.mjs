@@ -27,7 +27,7 @@ try {
     await capture("hero");
     const range = await page.locator(".journey").evaluate(el => el.offsetHeight - document.querySelector(".stage").offsetHeight);
     if ([1440, 390].includes(width)) {
-      for (const [p, name] of [[.22, "half-open"], [.39, "open"], [.58, "align"], [.69, "entry"], [.78, "interior"], [.88, "white"], [.95, "reveal"], [.39, "reverse-open"], [0, "reverse-home"]]) {
+      for (const [p, name] of [[.31, "half-open-zoom"], [.62, "open-zoom"], [.69, "entry-dissolve"], [.78, "mid-dissolve"], [.9, "portfolio-dissolve"], [.95, "reveal"], [.31, "reverse-opening"], [0, "reverse-home"]]) {
         await page.evaluate(top => scrollTo(0, top), range * p);
         await page.waitForTimeout(180);
         await capture(name);

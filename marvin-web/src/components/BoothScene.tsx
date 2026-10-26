@@ -34,7 +34,7 @@ export function BoothScene({ surfaceRef, progress, enabled }: {
   return (
     <div className="media-surface booth-surface" ref={surfaceRef}>
       <div className="booth-renderer" ref={host} data-renderer="fallback" role="img"
-        aria-label="Three-dimensional Marvin photobooth with the supplied studio logo, recessed stainless printer, portrait display, and soft olive velvet curtain on the right">
+        aria-label="Front-facing three-dimensional Marvin photobooth with reflective champagne metal trim, a black Marvin wordmark on a warm yellow illuminated sign, compact recessed stainless printer, portrait display, and soft olive velvet curtain on the right">
         <img className="booth-poster" src={asset(boothPoster.src)}
           width={boothPoster.width} height={boothPoster.height} alt="" fetchPriority="high" />
       </div>

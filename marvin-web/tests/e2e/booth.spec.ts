@@ -5,7 +5,7 @@ async function goToProgress(page: Page, progress: number) {
     (document.querySelector<HTMLElement>(".journey")!.offsetHeight - document.querySelector<HTMLElement>(".stage")!.offsetHeight)), progress);
 }
 
-test("3D curtain opens before camera travel, holds, reverses, and releases on shortcut", async ({ page, browserName }) => {
+test("3D curtain and camera move together, hold, reverse, and release on shortcut", async ({ page, browserName }) => {
   test.skip(browserName !== "chromium", "GPU rendering is reviewed in Chrome; other engines exercise the accessible routes.");
   const errors: string[] = [];
   const videoRequests: string[] = [];
@@ -17,24 +17,27 @@ test("3D curtain opens before camera travel, holds, reverses, and releases on sh
   await expect(page.locator("canvas")).toHaveCount(1);
   await expect(page.locator("video")).toHaveCount(0);
   const camera = await scene.getAttribute("data-camera");
-  await goToProgress(page, .22);
+  await goToProgress(page, .31);
   await expect.poll(async () => Number(await scene.getAttribute("data-curtain"))).toBeCloseTo(.5, 2);
-  await expect(scene).toHaveAttribute("data-camera", camera!);
-  await goToProgress(page, .39);
-  await expect(scene).toHaveAttribute("data-curtain", "1.0000");
-  await expect(scene).toHaveAttribute("data-camera", camera!);
+  await expect(scene).not.toHaveAttribute("data-camera", camera!);
+  await expect(scene).toHaveAttribute("data-scene-motion", "settled");
+  const openingCamera = await scene.getAttribute("data-camera");
   await goToProgress(page, .65);
   await expect(scene).not.toHaveAttribute("data-camera", camera!);
+  await expect(scene).toHaveAttribute("data-scene-motion", "settled");
   await expect(scene).toHaveAttribute("data-cloth-motion", "settled");
+  await expect(scene).toHaveAttribute("data-curtain", "1.0000");
   const heldCamera = await scene.getAttribute("data-camera");
   const heldFrames = await scene.getAttribute("data-frames");
   await page.waitForTimeout(350);
   await expect(scene).toHaveAttribute("data-camera", heldCamera!);
-  await expect(scene).toHaveAttribute("data-frames", heldFrames!);
+  await expect.poll(async () => Number(await scene.getAttribute("data-frames"))).toBeGreaterThan(Number(heldFrames));
+  await expect(scene).toHaveAttribute("data-wind", "breeze");
   await goToProgress(page, .75);
-  await goToProgress(page, .22);
+  await goToProgress(page, .31);
   await expect.poll(async () => Number(await scene.getAttribute("data-curtain"))).toBeCloseTo(.5, 2);
-  await expect(scene).toHaveAttribute("data-camera", camera!);
+  await expect(scene).toHaveAttribute("data-scene-motion", "settled");
+  await expect(scene).toHaveAttribute("data-camera", openingCamera!);
   await page.getByRole("link", { name: "Our work" }).click();
   await expect(page.getByRole("tab", { name: "The portraits" })).toBeFocused();
   await expect(page.locator("canvas")).toHaveCount(0);
@@ -45,7 +48,7 @@ test("3D curtain opens before camera travel, holds, reverses, and releases on sh
   expect(errors).toEqual([]);
 });
 
-test("supplied textures load and the free curtain settles while its rail and camera hold", async ({ page, browserName }) => {
+test("supplied textures load and gentle wind continues while the rail and camera hold", async ({ page, browserName }) => {
   test.skip(browserName !== "chromium", "Real cloth rendering is exercised in Chrome.");
   const textures: string[] = [];
   const failed: string[] = [];
@@ -58,18 +61,40 @@ test("supplied textures load and the free curtain settles while its rail and cam
   await page.goto("./");
   const scene = page.locator(".booth-renderer");
   await expect(scene).toHaveAttribute("data-textures", "loaded", { timeout: 15000 });
-  expect(textures).toEqual(expect.arrayContaining(["printer-reference.jpg", "marvin-logo.jpg", "olive-velvet.jpg"]));
+  expect(textures).toEqual(expect.arrayContaining(["printer-reference.jpg", "marvin-wordmark.png", "olive-velvet.jpg"]));
   expect(failed).toEqual([]);
   const camera = await scene.getAttribute("data-camera");
   await goToProgress(page, .23);
   await expect(scene).toHaveAttribute("data-cloth-motion", "settling");
   const displacement = await scene.getAttribute("data-cloth-displacement");
   await expect(scene).not.toHaveAttribute("data-cloth-displacement", displacement!);
-  await expect(scene).toHaveAttribute("data-camera", camera!);
+  await expect(scene).not.toHaveAttribute("data-camera", camera!);
+  await expect(scene).toHaveAttribute("data-scene-motion", "settled");
   await expect(scene).toHaveAttribute("data-cloth-motion", "settled");
   const frames = await scene.getAttribute("data-frames");
+  const windTime = await scene.getAttribute("data-wind-time");
+  const heldCamera = await scene.getAttribute("data-camera");
   await page.waitForTimeout(200);
-  await expect(scene).toHaveAttribute("data-frames", frames!);
+  await expect.poll(async () => Number(await scene.getAttribute("data-frames"))).toBeGreaterThan(Number(frames));
+  await expect(scene).not.toHaveAttribute("data-wind-time", windTime!);
+  await expect(scene).toHaveAttribute("data-camera", heldCamera!);
+});
+
+test("portfolio displays the six PDF photos at their native dimensions", async ({ page }) => {
+  await page.goto("./#work");
+  const photos = page.locator(".prints img");
+  await expect(photos).toHaveCount(3);
+  const dimensions = [[584, 440], [330, 585], [465, 499], [479, 364], [401, 413], [800, 601]];
+  for (let collection = 0; collection < 2; collection++) {
+    for (let index = 0; index < 3; index++) {
+      const photo = photos.nth(index);
+      await expect(photo).toHaveAttribute("src", new RegExp(`ape-portrait-${collection * 3 + index + 1}\\.webp$`));
+      await expect.poll(() => photo.evaluate(image => [(image as HTMLImageElement).naturalWidth,
+        (image as HTMLImageElement).naturalHeight])).toEqual(dimensions[collection * 3 + index]);
+      await expect(photo).toHaveCSS("object-fit", "contain");
+    }
+    if (collection === 0) await page.getByRole("button", { name: "Next collection" }).click();
+  }
 });
 
 test("direct entry and reduced motion do not load the 3D renderer", async ({ page }) => {
@@ -97,8 +122,11 @@ test("unavailable WebGL retains the reference and a usable portfolio", async ({ 
   await page.goto("./");
   await expect(page.locator(".booth-renderer")).toHaveAttribute("data-renderer", "fallback", { timeout: 15000 });
   await expect(page.locator(".booth-poster")).toBeVisible();
-  await goToProgress(page, .88);
-  await expect(page.locator(".white-transition")).toHaveCSS("opacity", "1");
+  await goToProgress(page, .82);
+  await expect(page.locator(".white-transition")).toHaveCount(0);
+  await expect.poll(async () => Number(await page.locator("#work").evaluate(el => getComputedStyle(el).opacity))).toBeGreaterThan(0);
+  expect(Number(await page.locator("#work").evaluate(el => getComputedStyle(el).opacity))).toBeLessThan(1);
+  await expect(page.locator(".media-surface")).toHaveCSS("opacity", "1");
   await page.getByRole("link", { name: "Our work" }).click();
   await expect(page.getByRole("tab", { name: "The portraits" })).toBeFocused();
 });

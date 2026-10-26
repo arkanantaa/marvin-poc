@@ -3,10 +3,11 @@ import {
   PCFSoftShadowMap, PerspectiveCamera, PlaneGeometry, PMREMGenerator,
   PointLight, Scene, ShadowMaterial, SRGBColorSpace, Vector3, WebGLRenderer,
 } from "three";
-import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
+import { studioEnvironment } from "./studioEnvironment";
 import { buildBooth, boothDimensions } from "./buildBooth";
 import { cameraPose, timeline } from "../lib/timeline";
 import { createCurtainMotion } from "./curtainMotion";
+import { createScrollMotion } from "./scrollMotion";
 
 export function createBoothScene(host: HTMLDivElement, initialProgress: number) {
   const renderer = new WebGLRenderer({ antialias: true, alpha: true, powerPreference: "low-power" });
@@ -23,9 +24,9 @@ export function createBoothScene(host: HTMLDivElement, initialProgress: number) 
   scene.background = new Color("#ffffff");
   const camera = new PerspectiveCamera(34, 1, .025, 80);
   const target = new Vector3();
-  const environmentScene = new RoomEnvironment();
+  const environmentScene = studioEnvironment();
   const pmrem = new PMREMGenerator(renderer);
-  const environment = pmrem.fromScene(environmentScene, .05, .1, 50, { size: 128 });
+  const environment = pmrem.fromScene(environmentScene, .025, .1, 50, { size: 256 });
   scene.environment = environment.texture;
   scene.environmentIntensity = .7;
   environmentScene.dispose();
@@ -79,7 +80,10 @@ export function createBoothScene(host: HTMLDivElement, initialProgress: number) 
   let frames = 0;
   let distance = 8;
   let previousTime = performance.now();
+  let windTime = 0;
+  let motionActive = true;
   const clothMotion = createCurtainMotion(timeline(initialProgress).curtain);
+  const scrollMotion = createScrollMotion(initialProgress);
   const booth = buildBooth(schedule);
   scene.add(booth.root);
   void booth.ready.then(() => { if (!disposed) { host.dataset.textures = "loaded"; schedule(); } });
@@ -88,12 +92,17 @@ export function createBoothScene(host: HTMLDivElement, initialProgress: number) 
   }
   function render(time: number) {
     scheduled = 0;
-    if (disposed || lost || document.hidden || progress >= .86) return;
-    const pose = timeline(progress);
-    const cloth = clothMotion.step(pose.curtain, (time - previousTime) / 1000);
+    if (disposed || lost || document.hidden || progress >= 1) return;
+    const elapsed = (time - previousTime) / 1000;
+    // Idle breeze renders at 30 fps; wheel/touch movement remains responsive.
+    if (!motionActive && elapsed < 1 / 30) { schedule(); return; }
+    const motion = scrollMotion.step(progress, elapsed);
+    const pose = timeline(motion.progress);
+    const cloth = clothMotion.step(pose.curtain, elapsed);
     previousTime = time;
-    booth.setCurtain(pose.curtain, cloth.displacement);
-    const view = cameraPose(progress, distance);
+    windTime += Math.max(0, Math.min(elapsed, .05));
+    booth.setCurtain(pose.curtain, cloth.displacement, windTime);
+    const view = cameraPose(motion.progress, distance);
     // Keep eye level fixed during travel; change position, not field of view.
     camera.position.set(view.x, view.y, view.z);
     target.set(view.lookX, view.lookY, view.lookZ);
@@ -103,10 +112,14 @@ export function createBoothScene(host: HTMLDivElement, initialProgress: number) 
     host.dataset.renderer = "ready";
     host.dataset.curtain = pose.curtain.toFixed(4);
     host.dataset.camera = camera.position.toArray().map(value => value.toFixed(4)).join(",");
+    host.dataset.sceneMotion = motion.active ? "settling" : "settled";
     host.dataset.frames = String(++frames);
     host.dataset.clothMotion = cloth.active ? "settling" : "settled";
     host.dataset.clothDisplacement = cloth.displacement.toFixed(6);
-    if (cloth.active) schedule();
+    host.dataset.wind = "breeze";
+    host.dataset.windTime = windTime.toFixed(4);
+    motionActive = cloth.active || motion.active;
+    schedule();
   }
   function resize() {
     const width = Math.max(1, host.clientWidth), height = Math.max(1, host.clientHeight);

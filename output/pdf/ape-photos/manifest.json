@@ -1,0 +1,42 @@
+{
+  "source": "ape.pdf",
+  "sha256": "54a8348f2664d11027c915ea8e8174f1f3f2f8d5d5b0d1c134dbe50fc3561df8",
+  "photos": [
+    {
+      "page": 1,
+      "src": "portfolio/ape-portrait-1.webp",
+      "width": 584,
+      "height": 440
+    },
+    {
+      "page": 2,
+      "src": "portfolio/ape-portrait-2.webp",
+      "width": 330,
+      "height": 585
+    },
+    {
+      "page": 3,
+      "src": "portfolio/ape-portrait-3.webp",
+      "width": 465,
+      "height": 499
+    },
+    {
+      "page": 4,
+      "src": "portfolio/ape-portrait-4.webp",
+      "width": 479,
+      "height": 364
+    },
+    {
+      "page": 5,
+      "src": "portfolio/ape-portrait-5.webp",
+      "width": 401,
+      "height": 413
+    },
+    {
+      "page": 6,
+      "src": "portfolio/ape-portrait-6.webp",
+      "width": 800,
+      "height": 601
+    }
+  ]
+}
