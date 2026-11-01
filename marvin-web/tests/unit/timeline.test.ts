@@ -3,10 +3,10 @@ import { cameraPose, createSceneProgress, portal, portalView, timeline, wrap } f
 
 describe("3D entrance choreography", () => {
   it("opens the curtain and advances the camera together without an open-door pause", () => {
-    // A three-quarter view from the right and above, looking at the booth's middle.
+    // Straight on, slightly above the booth's middle.
     const first = cameraPose(0, 9);
     expect(first.lookX).toBe(0);
-    expect(first.x).toBeGreaterThan(1.5);
+    expect(first.x).toBe(0);
     expect(first.y).toBeGreaterThan(first.lookY);
     for (const progress of [.08, .22, .36, .42]) {
       expect(cameraPose(progress, 9).z).toBeLessThan(first.z);

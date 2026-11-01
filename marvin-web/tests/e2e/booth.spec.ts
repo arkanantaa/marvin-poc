@@ -1,5 +1,10 @@
 import { test, expect, type Page } from "@playwright/test";
 
+// The header no longer has links; open a part of the page the way a link would.
+async function openSection(page: Page, hash: string) {
+  await page.evaluate(target => { history.pushState(null, "", target); dispatchEvent(new HashChangeEvent("hashchange")); }, hash);
+}
+
 async function goToProgress(page: Page, progress: number) {
   await page.evaluate(value => scrollTo(0, value *
     (document.querySelector<HTMLElement>(".journey")!.offsetHeight - document.querySelector<HTMLElement>(".stage")!.offsetHeight)), progress);
@@ -40,7 +45,7 @@ test("3D curtain and camera move together, hold, reverse, and release on shortcu
   await expect.poll(async () => Number(await scene.getAttribute("data-curtain"))).toBeCloseTo(.5, 2);
   await expect(scene).toHaveAttribute("data-scene-motion", "settled");
   await expect(scene).toHaveAttribute("data-camera", openingCamera!);
-  await page.getByRole("link", { name: "Our work" }).click();
+  await openSection(page, "#work");
   await expect(page.getByRole("button", { name: "Photos" })).toBeFocused();
   await expect(page.locator("canvas")).toHaveCount(0);
   await page.getByRole("link", { name: "Marvin Studio home" }).click();
@@ -84,7 +89,7 @@ test("supplied textures load and gentle wind continues while the rail and camera
 
 test("each event shows its own demo photos at their native dimensions", async ({ page }) => {
   await page.goto("./#work");
-  const photos = page.locator(".prints img");
+  const photos = page.locator(".print-front img");
   await expect(photos).toHaveCount(3);
   const dimensions = [[584, 440], [330, 585], [465, 499], [479, 364], [401, 413], [800, 601]];
   const events = [[1, 2, 3], [4, 5, 6], [3, 5, 6]];
@@ -144,7 +149,7 @@ test("unavailable WebGL retains the reference and a usable portfolio", async ({ 
   await expect.poll(async () => Number(await page.locator("#work").evaluate(el => getComputedStyle(el).opacity))).toBeGreaterThan(0);
   expect(Number(await page.locator("#work").evaluate(el => getComputedStyle(el).opacity))).toBeLessThan(1);
   await expect(page.locator(".media-surface")).toHaveCSS("opacity", "1");
-  await page.getByRole("link", { name: "Our work" }).click();
+  await openSection(page, "#work");
   await expect(page.getByRole("button", { name: "Photos" })).toBeFocused();
 });
 
@@ -155,6 +160,6 @@ test("GPU context loss falls back without hiding portfolio access", async ({ pag
   await page.locator("canvas").evaluate(canvas => canvas.getContext("webgl2")!.getExtension("WEBGL_lose_context")!.loseContext());
   await expect(page.locator(".booth-renderer")).toHaveAttribute("data-renderer", "fallback");
   await expect(page.locator(".booth-poster")).toBeVisible();
-  await page.getByRole("link", { name: "Our work" }).click();
+  await openSection(page, "#work");
   await expect(page.getByRole("button", { name: "Photos" })).toBeFocused();
 });

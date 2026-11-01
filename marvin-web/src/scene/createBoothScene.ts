@@ -156,8 +156,9 @@ export function createBoothScene(
     look.y += (look.targetY - look.y) * follow;
     driftTime += step;
     const outside = 1 - pose.alignment;
-    const offsetX = (look.x * .9 + Math.sin(driftTime * .32) * .22) * outside;
-    const offsetY = (-look.y * .35 + Math.sin(driftTime * .21 + 1) * .06) * outside;
+    // Small enough that the booth still reads as front-on, large enough to show depth.
+    const offsetX = (look.x * .45 + Math.sin(driftTime * .32) * .1) * outside;
+    const offsetY = (-look.y * .2 + Math.sin(driftTime * .21 + 1) * .04) * outside;
     // Keep eye level fixed during travel; change position, not field of view.
     camera.position.set(view.x + offsetX, view.y + offsetY, view.z);
     target.set(view.lookX, view.lookY, view.lookZ);

@@ -1,5 +1,10 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
+
+// The header no longer has links; open a part of the page the way a link would.
+async function openSection(page: Page, hash: string) {
+  await page.evaluate(target => { history.pushState(null, "", target); dispatchEvent(new HashChangeEvent("hashchange")); }, hash);
+}
 test("long content and enlarged text remain reachable at 320 pixels", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 800 });
   await page.goto("./#work");
@@ -7,8 +12,8 @@ test("long content and enlarged text remain reachable at 320 pixels", async ({ p
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   expect(await page.locator(".site-header").evaluate(header => {
     const brand = header.querySelector(".wordmark")!.getBoundingClientRect();
-    const navigation = header.querySelector("nav")!.getBoundingClientRect();
-    return brand.right + 8 <= navigation.left;
+    const tagline = header.querySelector(".header-note")!.getBoundingClientRect();
+    return brand.right + 8 <= tagline.left;
   })).toBe(true);
   await page.getByRole("button", { name: "Next event" }).click();
   await expect(page.locator(".event-title")).toHaveText("Padel Night");
@@ -22,10 +27,10 @@ test("event selection survives navigation and the header links focus the matchin
   await page.getByRole("button", { name: "Next event" }).click();
   await expect(page.locator(".event-title")).toHaveText("Padel Night");
   if (!isMobile) {
-    await page.getByRole("link", { name: "Say hello" }).click();
-    await expect(page.getByRole("heading", { name: /Some moments deserve/ })).toBeFocused();
+    await openSection(page, "#hello");
+    await expect(page.getByRole("heading", { name: /Book for an event/ })).toBeFocused();
   }
-  await page.getByRole("link", { name: "Our work" }).click();
+  await openSection(page, "#work");
   await expect(page.getByRole("button", { name: "Photos" })).toBeFocused();
   await expect(page.locator(".event-title")).toHaveText("Padel Night");
   await page.getByRole("link", { name: "Marvin Studio home" }).click();
@@ -79,9 +84,7 @@ test("clean opening, shortcut, events, views, home and history", async ({
   await expect(page.locator("#work")).toHaveAttribute("inert", "");
   await expect(page.locator(".booth-renderer")).toBeVisible();
   await expect(page.locator("video")).toHaveCount(0);
-  const shortcut = page.getByRole("link", { name: "Our work" });
-  if (test.info().project.name === "mobile") await shortcut.tap();
-  else await shortcut.click();
+  await openSection(page, "#work");
   const first = page.getByRole("button", { name: "Photos" });
   await expect(first).toBeFocused();
   // Let the turn towards the monitor finish before using it.
@@ -96,7 +99,7 @@ test("clean opening, shortcut, events, views, home and history", async ({
   await page.getByRole("button", { name: "Video" }).click();
   await expect(page.locator("video.showcase-video")).toBeVisible();
   await first.click();
-  await expect(page.locator(".prints img")).toHaveCount(3);
+  await expect(page.locator(".print-front img")).toHaveCount(3);
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
   await page.getByRole("link", { name: "Marvin Studio home" }).click();
   await expect(page.locator("#work")).toHaveAttribute("inert", "");
@@ -125,7 +128,7 @@ test("one wheel gesture opens and zooms into the portfolio, and one reverses hom
   await expect(page.locator("#work")).toHaveAttribute("aria-hidden", "false");
   expect(Date.now() - started).toBeGreaterThanOrEqual(3300);
   await expect(page.getByRole("button", { name: "Photos" })).toBeFocused();
-  await page.getByRole("link", { name: "Our work" }).click();
+  await openSection(page, "#work");
   await page.mouse.move(180, 400);
   // Scrolling up inside is a wall; the Step outside button walks you back out.
   await page.mouse.wheel(0, -400);
@@ -136,7 +139,7 @@ test("one wheel gesture opens and zooms into the portfolio, and one reverses hom
     page.getByRole("link", { name: "Marvin Studio home" }),
   ).toBeFocused();
   await expect.poll(() => page.evaluate(() => scrollY)).toBe(0);
-  await page.getByRole("link", { name: "Our work" }).click();
+  await openSection(page, "#work");
   await expect(page.getByRole("button", { name: "Photos" })).toBeFocused();
 });
 

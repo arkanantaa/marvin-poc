@@ -63,29 +63,22 @@ export const showcaseViews = [
   { id: "video", label: "Video" },
 ] as const;
 export type ShowcaseView = (typeof showcaseViews)[number]["id"];
-export type ContactAction = {
-  label: string;
-  href: `mailto:${string}` | `https://${string}`;
+// Contact links for the closing section. Fill these in and the links work:
+// - whatsapp: the number in international format, digits only (e.g. "6281234567890")
+// - instagram / tiktok: the full profile URLs
+export const social = {
+  whatsapp: "",
+  whatsappMessage: "Halo Marvin, saya mau booking photobooth untuk event.",
+  instagram: "",
+  tiktok: "",
 };
-export const contact: {
-  heading: string;
-  description: string;
-  note: string;
-  action: ContactAction | null;
-} = {
-  heading: "Your people.\nOur little booth.",
-  description: "A wedding, a celebration, or just because. Imagine Marvin in your next memory.",
-  note: "This is a concept preview. Contact and bookings are not connected yet.",
-  // Add only a confirmed business destination.
-  action: null,
-};
+export const whatsappLink = social.whatsapp
+  ? `https://wa.me/${social.whatsapp}?text=${encodeURIComponent(social.whatsappMessage)}` : null;
 export const closing = {
-  eyebrow: "THE MARVIN PHOTO CONCEPT",
-  heading: "Some moments deserve\nmore than a camera roll.",
-  again: "Take another look",
-  hello: "Say hello",
-  notice: "Concept preview with demo content. Contact and bookings are not connected yet.",
+  book: "Book for an event",
+  bookNote: "Chat with us on WhatsApp",
 };
+export const consoleHint = "Click the yellow button for a surprise";
 export const portfolioLabels = {
   printSignature: "marvin studio",
 };

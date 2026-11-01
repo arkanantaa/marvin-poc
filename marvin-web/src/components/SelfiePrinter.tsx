@@ -4,9 +4,8 @@ import { asset } from "../lib/assets";
 // The yellow button in the middle of the console takes the selfie.
 export function SelfieButton({ onSnap }: { onSnap: () => void }) {
   return (
-    <button type="button" className="selfie-button" onClick={onSnap}>
+    <button type="button" className="selfie-button" aria-label="Take a selfie" onClick={onSnap}>
       <i aria-hidden="true" />
-      <span>Selfie</span>
     </button>
   );
 }

@@ -1,24 +1,36 @@
-import { useRef, useState, type PointerEvent } from "react";
+import { useRef, useState, type CSSProperties, type PointerEvent } from "react";
 import { collections, portfolioLabels, showcaseViews, type Portrait as PortraitData, type ShowcaseView } from "../data/portfolio";
 import { asset } from "../lib/assets";
 import { wrap } from "../lib/timeline";
 import { BoothModelViewer } from "./BoothModelViewer";
 
-function Portrait({ portrait }: { portrait: PortraitData }) {
+// A print with the new photo on the front and, while it turns, the previous
+// event's photo on the back: changing event spins each print round to the next.
+function Portrait({ portrait, previous, order }: { portrait: PortraitData; previous?: PortraitData; order: number }) {
   const [broken, setBroken] = useState(false);
   return (
-    <figure className="print">
-      {broken ? (
-        <div className="image-fallback" role="img" aria-label={`${portrait.alt}. Image unavailable.`}>
-          <span aria-hidden="true">✳</span>
-          Portrait unavailable
+    <figure className="print" style={{ "--i": order } as CSSProperties}>
+      <div className="print-card">
+        <div className="print-face print-front">
+          {broken ? (
+            <div className="image-fallback" role="img" aria-label={`${portrait.alt}. Image unavailable.`}>
+              <span aria-hidden="true">✳</span>
+              Portrait unavailable
+            </div>
+          ) : (
+            <img src={asset(portrait.src)} alt={portrait.alt}
+              width={portrait.width} height={portrait.height}
+              decoding="async" onError={() => setBroken(true)} />
+          )}
+          <figcaption>{portfolioLabels.printSignature}</figcaption>
         </div>
-      ) : (
-        <img src={asset(portrait.src)} alt={portrait.alt}
-          width={portrait.width} height={portrait.height}
-          decoding="async" onError={() => setBroken(true)} />
-      )}
-      <figcaption>{portfolioLabels.printSignature}</figcaption>
+        {previous && (
+          <div className="print-face print-back" aria-hidden="true">
+            <img src={asset(previous.src)} alt="" width={previous.width} height={previous.height} decoding="async" />
+            <span>{portfolioLabels.printSignature}</span>
+          </div>
+        )}
+      </div>
     </figure>
   );
 }
@@ -27,6 +39,7 @@ function Portrait({ portrait }: { portrait: PortraitData }) {
 // next event; every event has its own photos, 3D booth and video.
 export function PortfolioGallery() {
   const [index, setIndex] = useState(0);
+  const [previousIndex, setPreviousIndex] = useState<number | null>(null);
   const [direction, setDirection] = useState<"none" | "next" | "prev">("none");
   const [chosen, setChosen] = useState<ShowcaseView>("photos");
   const swipe = useRef<{ x: number; y: number } | null>(null);
@@ -35,9 +48,13 @@ export function PortfolioGallery() {
   const view = views.some(option => option.id === chosen) ? chosen : "photos";
 
   function go(target: number, forward = target > index) {
+    const next = wrap(target, collections.length);
+    if (next === index) return;
     setDirection(forward ? "next" : "prev");
-    setIndex(wrap(target, collections.length));
+    setPreviousIndex(index);
+    setIndex(next);
   }
+  const previous = previousIndex === null ? null : collections[previousIndex];
   const step = (delta: 1 | -1) => go(index + delta, delta > 0);
   function onPointerDown(event: PointerEvent) {
     swipe.current = event.pointerType === "mouse" && event.button !== 0 ? null : { x: event.clientX, y: event.clientY };
@@ -51,6 +68,7 @@ export function PortfolioGallery() {
   }
   return (
     <div className="showcase">
+      <h2 className="event-title" aria-live="polite" aria-atomic="true">{current.name}</h2>
       <div className="showcase-views" role="group" aria-label="How to view this event">
         {views.map(option => (
           <button type="button" key={option.id} aria-pressed={view === option.id}
@@ -65,8 +83,11 @@ export function PortfolioGallery() {
         <div className="showcase-media">
           {view === "photos" && (
             <div className="gallery">
-              <div className="prints" key={current.id}>
-                {current.images.map((portrait) => <Portrait key={portrait.src} portrait={portrait} />)}
+              <div className="prints" key={current.id} data-flip={previous && direction !== "none" ? direction : "none"}>
+                {current.images.map((portrait, order) => (
+                  <Portrait key={portrait.src} portrait={portrait} order={order}
+                    previous={direction !== "none" ? previous?.images[order] : undefined} />
+                ))}
               </div>
             </div>
           )}
@@ -82,14 +103,11 @@ export function PortfolioGallery() {
         </div>
         <button type="button" className="slide-arrow" data-side="next" aria-label="Next event" onClick={() => step(1)}>›</button>
       </div>
-      <div className="showcase-foot">
-        <h2 className="event-title" aria-live="polite" aria-atomic="true">{current.name}</h2>
-        <div className="showcase-dots" role="group" aria-label="Jump to an event">
-          {collections.map((collection, position) => (
-            <button type="button" key={collection.id} aria-label={`Show ${collection.name}`}
-              aria-current={position === index} onClick={() => go(position)} />
-          ))}
-        </div>
+      <div className="showcase-dots" role="group" aria-label="Jump to an event">
+        {collections.map((collection, position) => (
+          <button type="button" key={collection.id} aria-label={`Show ${collection.name}`}
+            aria-current={position === index} onClick={() => go(position)} />
+        ))}
       </div>
     </div>
   );

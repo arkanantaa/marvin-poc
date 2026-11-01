@@ -1,12 +1,16 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
 
-test("header links open the matching part of the portfolio", async ({ page, isMobile }) => {
-  test.skip(isMobile, "The text links are hidden on phones; Our work remains.");
+// The header no longer has links; open a part of the page the way a link would.
+async function openSection(page: Page, hash: string) {
+  await page.evaluate(target => { history.pushState(null, "", target); dispatchEvent(new HashChangeEvent("hashchange")); }, hash);
+}
+
+test("the header shows the logo and the tagline only, and #hello opens the booking section", async ({ page }) => {
   await page.goto("./");
-  await page.getByRole("link", { name: "Our work" }).click();
-  await expect(page.getByRole("button", { name: "Photos" })).toBeFocused();
-  await page.getByRole("link", { name: "Say hello" }).click();
-  await expect(page.getByRole("heading", { name: /Some moments deserve/ })).toBeFocused();
+  await expect(page.locator(".site-header")).toContainText("Romanticizing moments through our lens");
+  await expect(page.locator(".site-header nav")).toHaveCount(0);
+  await openSection(page, "#hello");
+  await expect(page.getByRole("heading", { name: /Book for an event/ })).toBeFocused();
 });
 
 test("each event has photos, video and a 3D booth, and slides left and right", async ({ page }) => {
@@ -42,7 +46,7 @@ test("the selfie flashes, prints a polaroid out of the console's slot, and it ca
   await page.goto("./#work");
   const papers = page.locator(".console .paper-feed .paper");
   await expect(papers).toHaveCount(0);
-  await page.getByRole("button", { name: "Selfie" }).click();
+  await page.getByRole("button", { name: "Take a selfie" }).click();
   await expect(page.locator(".camera-flash")).toHaveCount(1);
   await expect(papers).toHaveCount(1);
   expect(await papers.first().evaluate(paper => getComputedStyle(paper).animationName)).toContain("polaroid-eject");
@@ -52,7 +56,7 @@ test("the selfie flashes, prints a polaroid out of the console's slot, and it ca
   await expect.poll(async () => { const box = await papers.first().boundingBox(); return box!.y + box!.height; })
     .toBeGreaterThan(slot!.y + slot!.height + 20);
   // A new selfie puts the previous print away first.
-  await page.getByRole("button", { name: "Selfie" }).click();
+  await page.getByRole("button", { name: "Take a selfie" }).click();
   await expect(papers.first()).toHaveAttribute("data-closing", "true");
   await expect(page.locator('.paper[data-closing="false"]')).toHaveCount(1);
   await expect(papers).toHaveCount(1, { timeout: 10000 });
@@ -67,9 +71,13 @@ test("only the closing section follows the booth wall", async ({ page }) => {
   await expect(page.locator("#experience")).toHaveCount(0);
 });
 
-test("scrolling down the booth wall reaches the closing section", async ({ page }) => {
+test("scrolling down the booth wall reaches the booking section with social links", async ({ page }) => {
   await page.goto("./#work");
   await page.locator("#hello").scrollIntoViewIfNeeded();
-  await expect(page.getByRole("heading", { name: /Some moments deserve/ })).toBeInViewport();
-  await expect(page.getByRole("link", { name: /Take another look/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Book for an event/ })).toBeInViewport();
+  await expect(page.locator(".console-text")).toHaveText(/Click the yellow button for a surprise/i);
+  await expect(page.getByRole("link", { name: "Marvin on Instagram" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Marvin on TikTok" })).toBeVisible();
+  await expect(page.getByRole("link", { name: /Take another look/ })).toHaveCount(0);
+  await expect(page.getByText("THE MARVIN PHOTO CONCEPT")).toHaveCount(0);
 });

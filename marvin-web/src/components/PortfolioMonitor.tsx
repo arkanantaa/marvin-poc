@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { closing, contact } from "../data/portfolio";
+import { closing, consoleHint, social, whatsappLink } from "../data/portfolio";
 import { useSelfie } from "../hooks/useSelfie";
 import { asset } from "../lib/assets";
 import { leaveEvent } from "../lib/sections";
@@ -37,21 +37,24 @@ export function PortfolioMonitor() {
             <div className="room-face room-back" aria-hidden="true" />
             <div className="room-face room-left">
               <div className="monitor-mount">
-                <div className="camera" aria-hidden="true" data-snap={flash}>
-                  <span className="camera-dot" />
-                  <div className="lens"><i /></div>
-                  <span className="camera-grille">{Array.from({ length: 6 }, (_, index) => <i key={index} />)}</span>
-                </div>
+                {/* A slim, modern display: thin aluminium edge, black glass bezel with the
+                    camera set into it, and the portfolio on the screen. */}
                 <div className="monitor-shell">
-                  <div className="monitor-screen">
-                    <div className="screen-header">
-                      <img className="screen-logo" src={asset("textures/marvin-wordmark.png")} alt="Marvin" width={1098} height={227} />
+                  <div className="monitor-bezel">
+                    <div className="camera" aria-hidden="true" data-snap={flash}>
+                      <span className="camera-dot" />
+                      <span className="lens" />
                     </div>
-                    <PortfolioGallery />
+                    <div className="monitor-screen">
+                      <div className="screen-header">
+                        <img className="screen-logo" src={asset("textures/marvin-wordmark.png")} alt="Marvin" width={1098} height={227} />
+                      </div>
+                      <PortfolioGallery />
+                    </div>
                   </div>
                 </div>
                 <div className="console">
-                  <span className="console-text" aria-hidden="true">GOOD TIMES, ON REPEAT.</span>
+                  <span className="console-text">{consoleHint}</span>
                   <SelfieButton onSnap={snap} />
                   <PrintSlot prints={prints} onClose={close} />
                 </div>
@@ -67,13 +70,29 @@ export function PortfolioMonitor() {
       </div>
       <div className="after">
         <section id="hello" className="closing" aria-labelledby="closing-title">
-          <p className="eyebrow">{closing.eyebrow}</p>
-          <h2 id="closing-title" tabIndex={-1}>{closing.heading}</h2>
-          <div className="closing-actions">
-            <a className="closing-primary" href="#home" onClick={event => { event.preventDefault(); window.dispatchEvent(new Event(leaveEvent)); }}>{closing.again} <span aria-hidden="true">↺</span></a>
-            {contact.action && <a className="closing-link" href={contact.action.href}>{closing.hello}</a>}
-          </div>
-          <p className="closing-note">{closing.notice}</p>
+          <h2 id="closing-title" tabIndex={-1}>
+            <a className="closing-book" href={whatsappLink ?? undefined} aria-disabled={whatsappLink ? undefined : true} role={whatsappLink ? undefined : "link"}
+              target="_blank" rel="noopener noreferrer">
+              {closing.book} <span aria-hidden="true">↗</span>
+            </a>
+          </h2>
+          <p className="closing-note">{closing.bookNote}</p>
+          <ul className="closing-social">
+            <li>
+              <a href={social.instagram || undefined} aria-disabled={social.instagram ? undefined : true} role={social.instagram ? undefined : "link"}
+                target="_blank" rel="noopener noreferrer" aria-label="Marvin on Instagram">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" /><circle cx="12" cy="12" r="4.2" /><circle cx="17.4" cy="6.6" r="1" className="fill" /></svg>
+                <span>Instagram</span>
+              </a>
+            </li>
+            <li>
+              <a href={social.tiktok || undefined} aria-disabled={social.tiktok ? undefined : true} role={social.tiktok ? undefined : "link"}
+                target="_blank" rel="noopener noreferrer" aria-label="Marvin on TikTok">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3v11.2a3.8 3.8 0 1 1-3.8-3.8" /><path d="M14 3c.6 2.8 2.6 4.6 5.5 4.8" /></svg>
+                <span>TikTok</span>
+              </a>
+            </li>
+          </ul>
         </section>
       </div>
     </>
