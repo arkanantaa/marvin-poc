@@ -66,7 +66,7 @@ a:focus-visible, button:focus-visible, h2:focus-visible { outline: 3px solid var
 :root[data-portal="on"] .stage { z-index: 2; background: transparent; }
 :root[data-portal="on"] .work-scene { z-index: 1; background: transparent; will-change: transform; }
 :root[data-portal="on"] .interior { background: transparent; }
-:root[data-portal="on"] .after { visibility: hidden; }
+:root[data-portal="on"] .after, :root[data-portal="on"] .exit-sign { visibility: hidden; }
 
 
 /* ---- Inside the booth -------------------------------------------------------
@@ -85,38 +85,26 @@ a:focus-visible, button:focus-visible, h2:focus-visible { outline: 3px solid var
 .room-view {
   position: relative; height: 100%; overflow: hidden; perspective: 50vw; perspective-origin: 50% 50%;
 }
-/* The EXIT sign: a small lit box hanging inside the booth, built like the MARVIN
-   sign outside (warm opal face, brass frame, two hanging hooks). It sways a
-   little, glows brighter under the pointer, and walks you back out when pressed. */
+/* The EXIT sign: a slim backlit plate on the wall, in the monitor's materials
+   (black glass, thin aluminium edge) with the brand yellow as its light. It only
+   appears once you are inside and have turned to the monitor. */
 .exit-sign {
-  position: absolute; z-index: 6; left: max(18px, 3vw); top: calc(var(--header) + 4px);
-  padding: 0; border: 0; background: none;
+  position: absolute; z-index: 6; left: max(18px, 3vw); top: calc(var(--header) + 18px);
+  display: flex; align-items: center; gap: .6rem; min-height: 44px; padding: 0 1.15rem 0 .8rem;
+  border: 3px solid transparent; border-radius: 12px;
+  background: linear-gradient(#17181a, #0b0c0d) padding-box, linear-gradient(160deg, #f6f7f8, #dcdfe1 38%, #c4c8cb 72%, #e8eaeb) border-box;
+  box-shadow: 0 .9rem 1.8rem -.8rem #4a3b2473;
+  color: var(--yellow);
+  opacity: 0; transform: translateY(-6px); pointer-events: none; visibility: hidden;
+  transition: opacity .5s ease, transform .5s ease, visibility 0s linear .5s, box-shadow .2s ease;
 }
-.exit-swing { display: flex; flex-direction: column; align-items: center; transform-origin: 50% 0; animation: exit-sway 6s ease-in-out infinite; }
-.exit-hooks { position: relative; width: 5.6rem; height: 16px; }
-.exit-hooks::before, .exit-hooks::after {
-  content: ""; position: absolute; top: 0; width: 1px; height: 100%;
-  background: linear-gradient(#9b9c96, #c9c3b3);
-}
-.exit-hooks::before { left: 14%; }
-.exit-hooks::after { right: 14%; }
-.exit-face {
-  display: flex; align-items: center; gap: .55rem; padding: .5rem 1rem .5rem .85rem; border-radius: 6px;
-  border: 3px solid transparent;
-  background:
-    radial-gradient(ellipse at 50% 40%, #fffbe6, #fff0ae 62%, #e8ca7c) padding-box,
-    linear-gradient(135deg, #f0e2bf, #b89a5c 40%, #f5e8c6 60%, #9c7f45) border-box;
-  box-shadow: 0 0 0 1px #00000014, 0 .35rem .9rem #4a3b2433, 0 0 1.6rem .2rem #ffd96a59;
-  color: #161613; transition: box-shadow .25s ease, transform .2s ease;
-}
-.exit-arrow { font-size: 1rem; line-height: 1; }
-.exit-word { font: 900 1.05rem/1 Arial, Helvetica, sans-serif; letter-spacing: .14em; }
-.exit-sign:hover .exit-face, .exit-sign:focus-visible .exit-face { box-shadow: 0 0 0 1px #00000014, 0 .35rem .9rem #4a3b2433, 0 0 2.6rem .6rem #ffd96a99; }
-.exit-sign:hover .exit-arrow { transform: translateX(-2px); }
-.exit-sign:active .exit-face { transform: translateY(1px); }
-.exit-sign:focus-visible { outline: none; }
-.exit-sign:focus-visible .exit-face { outline: 3px solid var(--focus); outline-offset: 3px; }
-@keyframes exit-sway { 0%, 100% { transform: rotate(-1.2deg); } 50% { transform: rotate(1.2deg); } }
+/* Shown once the turn to the monitor has (nearly) finished. */
+.work-scene[data-turned="true"] .exit-sign { opacity: 1; transform: none; pointer-events: auto; visibility: visible; transition: opacity .5s ease 1.7s, transform .5s ease 1.7s, visibility 0s linear 1.7s, box-shadow .2s ease; }
+.exit-door { display: grid; place-items: center; width: 22px; height: 22px; }
+.exit-door svg { width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 4px #f1cd3c99); transition: transform .2s ease; }
+.exit-word { font: 800 .8125rem/1 Arial, Helvetica, sans-serif; letter-spacing: .22em; text-transform: uppercase; text-shadow: 0 0 10px #f1cd3c80; }
+.exit-sign:hover { box-shadow: 0 .9rem 1.8rem -.8rem #4a3b2473, 0 0 1.4rem -.2rem #f1cd3c80; }
+.exit-sign:hover .exit-door svg { transform: translateX(-2px); }
 .room { position: absolute; inset: 0; transform-style: preserve-3d; transform: translateZ(50vw) rotateY(0deg); transition: transform .95s cubic-bezier(.5, 0, .3, 1); }
 .work-scene[data-turned="true"] .room { transform: translateZ(50vw) rotateY(-90deg); transition: transform 1.8s cubic-bezier(.6, 0, .22, 1) .25s; }
 /* While the page is seen through the doorway it always faces the back wall, so the
@@ -224,16 +212,19 @@ a:focus-visible, button:focus-visible, h2:focus-visible { outline: 3px solid var
   box-shadow: inset 0 1px 0 #ffffff14, 0 1.6em 2.6em -1.2em #4a3b2466;
 }
 .console-text { color: #c9c3b4; font-size: max(9px, .74em); letter-spacing: .12em; text-transform: uppercase; white-space: nowrap; }
+/* The shutter key: a flat yellow disc with a camera mark, set in an aluminium
+   ring like a modern camera's shutter button. */
 .selfie-button { display: grid; place-items: center; min-width: 44px; min-height: 44px; padding: 0; border: 0; background: none; }
 .selfie-button i {
-  width: calc(var(--u) * 2.5); height: calc(var(--u) * 2.5); min-width: 20px; min-height: 20px; border-radius: 50%;
-  background: radial-gradient(circle at 40% 35%, #fff2b0, var(--yellow) 52%, #c99f12);
-  box-shadow: 0 0 0 .22em #2a2b2d, 0 0 0 .32em #4a4c4f, 0 0 1.2em .1em #f1cd3c66;
-  animation: shutter-glow 2.6s ease-in-out infinite;
+  display: grid; place-items: center;
+  width: calc(var(--u) * 2.9); height: calc(var(--u) * 2.9); min-width: 26px; min-height: 26px; border-radius: 50%;
+  background: var(--yellow);
+  box-shadow: 0 0 0 .18em #0b0c0d, 0 0 0 .34em #c4c8cb, 0 0 1em .1em #f1cd3c40;
+  transition: transform .15s ease, box-shadow .2s ease, background .2s ease;
 }
-@keyframes shutter-glow { 0%, 100% { box-shadow: 0 0 0 .22em #2a2b2d, 0 0 0 .32em #4a4c4f, 0 0 .8em 0 #f1cd3c4d; } 50% { box-shadow: 0 0 0 .22em #2a2b2d, 0 0 0 .32em #4a4c4f, 0 0 1.6em .25em #f1cd3c8c; } }
-.selfie-button:hover i { filter: brightness(1.08); }
-.selfie-button:active i { transform: scale(.94); }
+.selfie-button svg { width: 52%; height: 52%; fill: none; stroke: #1d1f1a; stroke-width: 1.9; stroke-linejoin: round; }
+.selfie-button:hover i { background: #f6d84f; box-shadow: 0 0 0 .18em #0b0c0d, 0 0 0 .34em #e8eaeb, 0 0 1.4em .2em #f1cd3c80; }
+.selfie-button:active i { transform: scale(.9); }
 .print-slot { justify-self: end; position: relative; width: 13em; height: .55em; }
 .slot-line { position: absolute; inset: 0; z-index: 2; border-radius: .3em; background: #000; box-shadow: inset 0 .15em .25em #000, 0 0 0 1px #3a3c3f, 0 1px 0 1px #ffffff1f; }
 /* The polaroid comes out of the slot: clipped above the slot line, free below it. */

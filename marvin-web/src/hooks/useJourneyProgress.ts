@@ -31,6 +31,8 @@ export function useJourneyProgress(home: RefObject<HTMLAnchorElement | null>) {
     // Back/forward lets the browser restore an old scroll position on purpose; the
     // "stay inside the booth" snapping must not fight that.
     let navigatedAt = -Infinity;
+    // Set while deliberately leaving the booth (EXIT sign, logo), so the lock lets go.
+    let leaving = false;
     const justNavigated = () => performance.now() - navigatedAt < 800;
     const turnBackMs = 950;
     let wheelIntent = 0;
@@ -91,14 +93,15 @@ export function useJourneyProgress(home: RefObject<HTMLAnchorElement | null>) {
       if (frame) cancelAnimationFrame(frame);
       frame = 0;
       let progress = clamp(scrollY / range());
-      // Overshooting a little above the top of the booth (scroll momentum coming up
-      // from below) keeps you inside: no turn back, no doorway view. Only the exit
-      // transition, or dragging far up, leaves.
-      if (!transition && state.interactive && progress > .8 && progress < 1 && !justNavigated()) {
+      // Once inside, the booth is one-way: however the page gets scrolled up (wheel,
+      // trackpad momentum, scrollbar, keys) it is put back at the monitor. Only the
+      // EXIT sign, the logo or the browser's Back button lead out.
+      if (!transition && state.interactive && !leaving && progress < 1 && !justNavigated()) {
         progress = 1;
         window.scrollTo({ top: range(), behavior: "instant" });
       }
       state = timeline(direct.current || (reduced && progress > 0) ? 1 : progress);
+      if (!state.interactive) leaving = false;
       sceneProgress.set(state.progress);
       // Keep the booth beneath the incoming portfolio throughout the entrance;
       // fading both layers out would expose a bright, empty background.
@@ -253,6 +256,7 @@ export function useJourneyProgress(home: RefObject<HTMLAnchorElement | null>) {
       cancelTransition();
       ignoreWheelUntil = 0;
       const section = sectionFromHash(location.hash);
+      if (!section) leaving = true;
       direct.current = section !== null;
       setSceneAllowed(!direct.current);
       window.scrollTo({ top: direct.current ? range() : 0, behavior: "instant" });
@@ -262,10 +266,8 @@ export function useJourneyProgress(home: RefObject<HTMLAnchorElement | null>) {
       } else home.current?.focus({ preventScroll: true });
     };
     const onScroll = () => {
-      // A small programmatic nudge (focus or scroll-into-view inside the room) must
-      // not pull you back out of the booth: snap back to the portfolio. Leaving is
-      // done with the wheel, a swipe, the keyboard or a real scrollbar drag.
-      if (!transition && state.interactive && scrollY < range() - 2 && scrollY > range() * .8 && !justNavigated()) {
+      // Inside the booth any upward scroll is undone at once (see render).
+      if (!transition && state.interactive && !leaving && scrollY < range() - 2 && !justNavigated()) {
         window.scrollTo({ top: range(), behavior: "instant" });
         return;
       }
@@ -314,7 +316,7 @@ export function useJourneyProgress(home: RefObject<HTMLAnchorElement | null>) {
     addEventListener("popstate", onPopState);
     addEventListener("pageshow", onPageShow);
     addEventListener("click", onClick);
-    const onLeave = () => playTransition(false);
+    const onLeave = () => { leaving = true; playTransition(false); };
     addEventListener(leaveEvent, onLeave);
     if (!initialized.current && direct.current) navigate();
     else if (reduced && scrollY > 0 && !direct.current) {

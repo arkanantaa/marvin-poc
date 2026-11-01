@@ -62,17 +62,15 @@ export function PortfolioMonitor() {
             </div>
           </div>
         </div>
-        {/* A lit EXIT sign hanging inside the booth, in the same opal-and-brass style as
-            the MARVIN sign outside. It is the way back out. */}
+        {/* A backlit EXIT sign mounted on the wall, made like the monitor and the
+            console (black glass, thin aluminium edge, the yellow of the shutter key).
+            It appears once you have turned to the monitor, and leads back out. */}
         <button type="button" className="exit-sign" onClick={() => window.dispatchEvent(new Event(leaveEvent))}
           aria-label="Exit the booth">
-          <span className="exit-swing" aria-hidden="true">
-            <span className="exit-hooks" />
-            <span className="exit-face">
-              <span className="exit-arrow">←</span>
-              <span className="exit-word">EXIT</span>
-            </span>
+          <span className="exit-door" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M14 4h4v16h-4" /><path d="M10 12H3" /><path d="M6 8.5 2.5 12 6 15.5" /></svg>
           </span>
+          <span className="exit-word" aria-hidden="true">Exit</span>
         </button>
         {flash > 0 && <div className="camera-flash" key={flash} aria-hidden="true" />}
         <p className="sr-only" role="status">{prints.some(print => !print.closing) ? "Your photo is printing." : ""}</p>

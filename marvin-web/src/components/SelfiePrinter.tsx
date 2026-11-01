@@ -5,7 +5,9 @@ import { asset } from "../lib/assets";
 export function SelfieButton({ onSnap }: { onSnap: () => void }) {
   return (
     <button type="button" className="selfie-button" aria-label="Take a selfie" onClick={onSnap}>
-      <i aria-hidden="true" />
+      <i aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M4 8.5h3l1.6-2.5h6.8L17 8.5h3v10H4z" /><circle cx="12" cy="13.2" r="3.4" /></svg>
+      </i>
     </button>
   );
 }

@@ -224,6 +224,8 @@ test("inside the booth scrolling up never leaves; the EXIT sign is always there 
   await page.mouse.move(700, 500);
   for (let step = 0; step < 12; step++) { await page.mouse.wheel(0, -200); await page.waitForTimeout(30); }
   await page.keyboard.press("PageUp");
+  // Even scrolling the page straight to the top (scrollbar, momentum) is undone.
+  await page.evaluate(() => scrollTo({ top: 0, behavior: "instant" }));
   await page.waitForTimeout(800);
   await expect(page.locator("#work")).toHaveAttribute("aria-hidden", "false");
   await expect(exit).toBeVisible();
