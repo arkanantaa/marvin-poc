@@ -62,8 +62,17 @@ export function PortfolioMonitor() {
             </div>
           </div>
         </div>
-        <button type="button" className="leave-hint" onClick={() => window.dispatchEvent(new Event(leaveEvent))}>
-          <span aria-hidden="true">↑</span> Step outside
+        {/* A lit EXIT sign hanging inside the booth, in the same opal-and-brass style as
+            the MARVIN sign outside. It is the way back out. */}
+        <button type="button" className="exit-sign" onClick={() => window.dispatchEvent(new Event(leaveEvent))}
+          aria-label="Exit the booth">
+          <span className="exit-swing" aria-hidden="true">
+            <span className="exit-hooks" />
+            <span className="exit-face">
+              <span className="exit-arrow">←</span>
+              <span className="exit-word">EXIT</span>
+            </span>
+          </span>
         </button>
         {flash > 0 && <div className="camera-flash" key={flash} aria-hidden="true" />}
         <p className="sr-only" role="status">{prints.some(print => !print.closing) ? "Your photo is printing." : ""}</p>

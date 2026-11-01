@@ -84,20 +84,39 @@ a:focus-visible, button:focus-visible, h2:focus-visible { outline: 3px solid var
 }
 .room-view {
   position: relative; height: 100%; overflow: hidden; perspective: 50vw; perspective-origin: 50% 50%;
-  /* Resistance when scrolling up inside: the room eases down a little as you push. */
-  transform: translateY(calc(var(--pull, 0) * 2em)); transition: transform .35s cubic-bezier(.2, .8, .2, 1);
 }
-/* "Step outside": appears when you scroll up against the top of the booth
-   (or when it gets keyboard focus) and walks you back out when pressed. */
-.leave-hint {
-  position: absolute; z-index: 5; left: max(20px, 3vw); top: calc(var(--header) + 18px);
-  display: flex; align-items: center; gap: .55rem; min-height: 40px; padding: 0 1.1rem; border: 0; border-radius: 999px;
-  background: #1d1f1ae6; color: var(--paper); font-size: .8125rem; letter-spacing: .03em; white-space: nowrap;
-  opacity: 0; transform: translateY(-.4rem); pointer-events: none; transition: opacity .25s ease, transform .25s ease, background .16s ease;
+/* The EXIT sign: a small lit box hanging inside the booth, built like the MARVIN
+   sign outside (warm opal face, brass frame, two hanging hooks). It sways a
+   little, glows brighter under the pointer, and walks you back out when pressed. */
+.exit-sign {
+  position: absolute; z-index: 6; left: max(18px, 3vw); top: calc(var(--header) + 4px);
+  padding: 0; border: 0; background: none;
 }
-.work-scene[data-leave-hint="true"] .leave-hint, .leave-hint:focus-visible { opacity: 1; transform: none; pointer-events: auto; }
-.leave-hint:hover { background: var(--ink); }
-.leave-hint span { color: var(--yellow); }
+.exit-swing { display: flex; flex-direction: column; align-items: center; transform-origin: 50% 0; animation: exit-sway 6s ease-in-out infinite; }
+.exit-hooks { position: relative; width: 5.6rem; height: 16px; }
+.exit-hooks::before, .exit-hooks::after {
+  content: ""; position: absolute; top: 0; width: 1px; height: 100%;
+  background: linear-gradient(#9b9c96, #c9c3b3);
+}
+.exit-hooks::before { left: 14%; }
+.exit-hooks::after { right: 14%; }
+.exit-face {
+  display: flex; align-items: center; gap: .55rem; padding: .5rem 1rem .5rem .85rem; border-radius: 6px;
+  border: 3px solid transparent;
+  background:
+    radial-gradient(ellipse at 50% 40%, #fffbe6, #fff0ae 62%, #e8ca7c) padding-box,
+    linear-gradient(135deg, #f0e2bf, #b89a5c 40%, #f5e8c6 60%, #9c7f45) border-box;
+  box-shadow: 0 0 0 1px #00000014, 0 .35rem .9rem #4a3b2433, 0 0 1.6rem .2rem #ffd96a59;
+  color: #161613; transition: box-shadow .25s ease, transform .2s ease;
+}
+.exit-arrow { font-size: 1rem; line-height: 1; }
+.exit-word { font: 900 1.05rem/1 Arial, Helvetica, sans-serif; letter-spacing: .14em; }
+.exit-sign:hover .exit-face, .exit-sign:focus-visible .exit-face { box-shadow: 0 0 0 1px #00000014, 0 .35rem .9rem #4a3b2433, 0 0 2.6rem .6rem #ffd96a99; }
+.exit-sign:hover .exit-arrow { transform: translateX(-2px); }
+.exit-sign:active .exit-face { transform: translateY(1px); }
+.exit-sign:focus-visible { outline: none; }
+.exit-sign:focus-visible .exit-face { outline: 3px solid var(--focus); outline-offset: 3px; }
+@keyframes exit-sway { 0%, 100% { transform: rotate(-1.2deg); } 50% { transform: rotate(1.2deg); } }
 .room { position: absolute; inset: 0; transform-style: preserve-3d; transform: translateZ(50vw) rotateY(0deg); transition: transform .95s cubic-bezier(.5, 0, .3, 1); }
 .work-scene[data-turned="true"] .room { transform: translateZ(50vw) rotateY(-90deg); transition: transform 1.8s cubic-bezier(.6, 0, .22, 1) .25s; }
 /* While the page is seen through the doorway it always faces the back wall, so the
@@ -154,27 +173,24 @@ a:focus-visible, button:focus-visible, h2:focus-visible { outline: 3px solid var
 .slide-arrow[data-side="prev"] { justify-self: start; }
 .slide-arrow[data-side="next"] { justify-self: end; }
 .slide-arrow:hover { background: var(--yellow); border-color: var(--yellow); }
-.showcase-media { position: relative; align-self: stretch; min-width: 0; min-height: 0; }
+.showcase-media { position: relative; isolation: isolate; align-self: stretch; min-width: 0; min-height: 0; }
 .gallery, .showcase-slide, .model-viewer { position: absolute; inset: 0; }
-.gallery { display: grid; place-items: center; }
-.prints { display: flex; align-items: center; justify-content: center; width: 100%; padding: .5em 0 1.2em; }
-/* Each print turns round when the event changes: the old photo on its back, the
-   new one on its front. */
-.prints { perspective: 90em; }
-.print { flex: 0 1 30%; min-width: 0; margin: 0 -.9em; transform: rotate(-8deg); }
-.print:nth-child(2) { transform: translateY(1.5em) rotate(2deg); z-index: 1; }
-.print:nth-child(3) { transform: rotate(9deg); }
-.print-card { position: relative; transform-style: preserve-3d; }
-.print-face { padding: .8em .8em 0; background: #fff; color: #2a2c26; border: 1px solid #ebe5d5; box-shadow: 0 1.2em 2.4em #4a3b2426; backface-visibility: hidden; }
-.print-back { position: absolute; inset: 0; transform: rotateY(180deg); }
-.print img, .image-fallback { display: block; width: 100%; height: auto; aspect-ratio: 5 / 6; object-fit: cover; background: #fff; }
+/* The photo ring: prints ride round a circle seen from the front (positions are
+   worked out in PortfolioGallery), the nearest one large and on top. */
+.gallery { display: grid; place-items: center; cursor: grab; touch-action: pan-y; user-select: none; outline: none; }
+.gallery[data-dragging="true"] { cursor: grabbing; }
+.gallery:focus-visible .print[data-front="true"] { outline: 3px solid var(--focus); outline-offset: 4px; }
+.ring { --card: 15.5em; position: relative; width: var(--card); height: calc(var(--card) * 1.36); margin-top: -1em; }
+.print {
+  position: absolute; inset: 0; margin: 0; padding: .7em .7em 0; background: #fff; color: #2a2c26;
+  border: 1px solid #ebe5d5; box-shadow: 0 1.2em 2.4em #4a3b2426; will-change: transform;
+}
+.print:not([data-front="true"]) { cursor: pointer; }
+.print img, .image-fallback { display: block; width: 100%; height: auto; aspect-ratio: 5 / 6; object-fit: cover; background: #fff; pointer-events: none; }
 .image-fallback { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 6px; background: #ece6d6; padding: 5px; font-size: max(10px, .9em); text-align: center; overflow-wrap: anywhere; }
 .image-fallback > span { font-size: 1.6em; }
-.print figcaption, .print-back span { display: block; padding: 1em 0; font-size: max(8px, .72em); letter-spacing: -.02em; overflow-wrap: anywhere; }
-.prints[data-flip="next"] .print-card { animation: print-spin-next .9s cubic-bezier(.3, .1, .2, 1) calc(var(--i) * 90ms) backwards; }
-.prints[data-flip="prev"] .print-card { animation: print-spin-prev .9s cubic-bezier(.3, .1, .2, 1) calc(var(--i) * 90ms) backwards; }
-@keyframes print-spin-next { 0% { transform: rotateY(-180deg); } 45% { transform: rotateY(-90deg) translateZ(3em) scale(1.06); } 100% { transform: rotateY(0); } }
-@keyframes print-spin-prev { 0% { transform: rotateY(180deg); } 45% { transform: rotateY(90deg) translateZ(3em) scale(1.06); } 100% { transform: rotateY(0); } }
+.print figcaption { display: block; padding: .8em 0; font-size: max(8px, .72em); letter-spacing: -.02em; }
+.ring-hint { position: absolute; bottom: -.3em; left: 0; right: 0; margin: 0; text-align: center; color: #9a9384; font-size: max(10px, .78em); letter-spacing: .14em; text-transform: uppercase; pointer-events: none; }
 .showcase-slide { display: flex; align-items: center; justify-content: center; }
 .showcase-video { display: block; flex: 0 1 auto; min-height: 0; height: 100%; width: auto; max-width: 100%; aspect-ratio: 4 / 3; object-fit: contain; background: #efe8d8; border-radius: .8em; box-shadow: 0 1.2em 2.4em #4a3b2426; }
 .model-viewer { display: flex; flex-direction: column; align-items: center; gap: .6em; }
@@ -191,31 +207,35 @@ a:focus-visible, button:focus-visible, h2:focus-visible { outline: 3px solid var
 .model-controls button:hover { background: #fff; }
 .model-controls button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
 .event-title { grid-area: title; justify-self: start; margin: 0; font: 800 max(24px, 3.9em)/1 Arial, Helvetica, sans-serif; letter-spacing: -.045em; white-space: normal; }
-.showcase-dots { grid-area: dots; justify-self: end; display: flex; gap: 2px; }
-.showcase-dots button { position: relative; width: 30px; height: 30px; border: 0; background: none; padding: 0; }
-.showcase-dots button::before { content: ""; position: absolute; left: 50%; top: 50%; width: 8px; height: 8px; translate: -50% -50%; border-radius: 999px; background: #cdc6b3; }
-.showcase-dots button[aria-current="true"]::before { width: 26px; background: var(--ink); }
+.showcase-dots { grid-area: dots; justify-self: end; display: flex; align-items: center; gap: 2px; }
+.event-dot { position: relative; width: 30px; height: 30px; border: 0; background: none; padding: 0; }
+.event-dot::before { content: ""; position: absolute; left: 50%; top: 50%; width: 8px; height: 8px; translate: -50% -50%; border-radius: 999px; background: #cdc6b3; }
+.event-dot[aria-current="true"]::before { width: 26px; background: var(--ink); }
+.event-step { width: 32px; height: 32px; border: 1px solid var(--line); border-radius: 50%; background: #fff; color: var(--ink); font-size: 18px; line-height: 1; padding: 0 0 2px; margin-inline: 4px; }
+.event-step:hover { background: var(--yellow); border-color: var(--yellow); }
 /* The console under the monitor: a line of text, the selfie button and the print slot. */
+/* The console matches the monitor: black glass inside a thin aluminium rim, the
+   hint in quiet light text, a glowing yellow shutter key and a recessed slot. */
 .console {
-  position: relative; width: 66%; margin-top: 2em; min-height: 3.8em; padding: .45em 1.8em .45em 2.2em;
-  display: grid; grid-template-columns: auto auto 1fr; align-items: center; gap: 1.4em;
-  border: 1px solid #d3d5d6; border-radius: 999px; background: linear-gradient(#fcfcfb, #e6e7e7);
-  box-shadow: inset 0 1px 0 #fff, 0 1em 2em -.6em #4a3b2440;
+  position: relative; width: 66%; margin-top: 2em; min-height: 4em; padding: .5em 1.8em .5em 2.2em;
+  display: grid; grid-template-columns: auto auto 1fr; align-items: center; gap: 1.6em;
+  border: .4em solid transparent; border-radius: 999px;
+  background: linear-gradient(#17181a, #0b0c0d) padding-box, linear-gradient(160deg, #f6f7f8, #dcdfe1 38%, #c4c8cb 72%, #e8eaeb) border-box;
+  box-shadow: inset 0 1px 0 #ffffff14, 0 1.6em 2.6em -1.2em #4a3b2466;
 }
-.console-text { color: #55585a; font-size: max(9px, .74em); letter-spacing: .1em; text-transform: uppercase; white-space: nowrap; }
-.selfie-button {
-  display: flex; align-items: center; gap: .8em; min-height: 44px; padding: 0 .5em; border: 0; background: none;
-  color: #4b4e50; font-size: max(8px, .62em); font-weight: 700; letter-spacing: .18em; text-transform: uppercase;
-}
+.console-text { color: #c9c3b4; font-size: max(9px, .74em); letter-spacing: .12em; text-transform: uppercase; white-space: nowrap; }
+.selfie-button { display: grid; place-items: center; min-width: 44px; min-height: 44px; padding: 0; border: 0; background: none; }
 .selfie-button i {
-  flex: 0 0 auto; width: calc(var(--u) * 2.4); height: calc(var(--u) * 2.4); min-width: 18px; min-height: 18px; border-radius: 50%;
-  background: radial-gradient(circle at 40% 35%, #fbe58a, var(--yellow) 55%, #d9b21e);
-  box-shadow: inset 0 -.15em .2em #0002, 0 0 0 .25em #ffffffb0, 0 .15em .4em #4a3b2440;
+  width: calc(var(--u) * 2.5); height: calc(var(--u) * 2.5); min-width: 20px; min-height: 20px; border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #fff2b0, var(--yellow) 52%, #c99f12);
+  box-shadow: 0 0 0 .22em #2a2b2d, 0 0 0 .32em #4a4c4f, 0 0 1.2em .1em #f1cd3c66;
+  animation: shutter-glow 2.6s ease-in-out infinite;
 }
-.selfie-button:hover i { box-shadow: inset 0 -.15em .2em #0002, 0 0 0 .25em #fff, 0 0 1em #f1cd3c; }
-.selfie-button:active i { transform: translateY(.08em); box-shadow: inset 0 .15em .2em #0003, 0 0 0 .25em #ffffffb0; }
+@keyframes shutter-glow { 0%, 100% { box-shadow: 0 0 0 .22em #2a2b2d, 0 0 0 .32em #4a4c4f, 0 0 .8em 0 #f1cd3c4d; } 50% { box-shadow: 0 0 0 .22em #2a2b2d, 0 0 0 .32em #4a4c4f, 0 0 1.6em .25em #f1cd3c8c; } }
+.selfie-button:hover i { filter: brightness(1.08); }
+.selfie-button:active i { transform: scale(.94); }
 .print-slot { justify-self: end; position: relative; width: 13em; height: .55em; }
-.slot-line { position: absolute; inset: 0; z-index: 2; border-radius: .3em; background: #1b1c1a; box-shadow: inset 0 .15em .2em #000, 0 1px 0 #fffc; }
+.slot-line { position: absolute; inset: 0; z-index: 2; border-radius: .3em; background: #000; box-shadow: inset 0 .15em .25em #000, 0 0 0 1px #3a3c3f, 0 1px 0 1px #ffffff1f; }
 /* The polaroid comes out of the slot: clipped above the slot line, free below it. */
 .paper-feed { position: absolute; top: 50%; left: .5em; right: .5em; height: 16em; z-index: 1; pointer-events: none; clip-path: inset(0 -200% -800% -200%); }
 .paper { position: absolute; inset: 0 0 auto; margin: 0; pointer-events: auto; transform-origin: 50% 0; transform-style: preserve-3d; }
@@ -300,6 +320,9 @@ h2 { margin: 0 0 18px; font: 800 clamp(2rem, 3vw, 2.7rem)/1.05 Arial, Helvetica,
   .console { width: 86%; }
   .monitor-screen { height: 74em; grid-template-areas: "title logo" "views views" "stage stage" "dots dots"; padding: 2.4em 2.2em 1.4em; row-gap: .9em; }
   .showcase-dots { justify-self: center; }
+  .ring { --card: 21em; }
+  .slide-arrow { display: none; }
+  .showcase-stage { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 700px) {
   :root { --header: calc(max(76px, 4.75rem) + env(safe-area-inset-top, 0px)); }

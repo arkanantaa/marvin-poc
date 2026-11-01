@@ -52,28 +52,9 @@ export function useJourneyProgress(home: RefObject<HTMLAnchorElement | null>) {
     let scrubTimer = 0;
     let touchProgress = 0;
     const outside = () => !direct.current && scrollY < range() - 2;
-    // Inside the booth, scrolling up is a wall: it never walks you out (trackpads
-    // and long scrolls made that far too easy). The view gives a little and the
-    // "Step outside" button shows; that button (or the logo, PageUp) leaves.
-    const pullRange = 260;
-    let pull = 0;
-    let pullTimer = 0;
-    let hintTimer = 0;
-    function setPull(value: number) {
-      pull = Math.max(0, Math.min(pullRange, value));
-      work.current?.style.setProperty("--pull", (pull / pullRange).toFixed(3));
-    }
-    function showLeaveHint() {
-      window.clearTimeout(hintTimer);
-      if (work.current) work.current.dataset.leaveHint = "true";
-      hintTimer = window.setTimeout(() => { if (work.current) delete work.current.dataset.leaveHint; }, 2600);
-    }
-    function pullBy(amount: number) {
-      window.clearTimeout(pullTimer);
-      setPull(pull + amount);
-      showLeaveHint();
-      pullTimer = window.setTimeout(() => setPull(0), 220);
-    }
+    // Once inside the booth you stay there: scrolling, swiping or paging up does
+    // nothing. The EXIT sign on the wall (or the logo) is the way back out.
+    const inside = () => !transition && !outside() && !below();
     function scrubTo(progress: number) {
       window.scrollTo({ top: clamp(progress) * range(), behavior: "instant" });
       render();
@@ -139,7 +120,6 @@ export function useJourneyProgress(home: RefObject<HTMLAnchorElement | null>) {
     }
     function cancelTransition() {
       window.clearTimeout(scrubTimer);
-      window.clearTimeout(pullTimer);
       cancelAnimationFrame(transition);
       transition = 0;
       transitionTarget = -1;
@@ -224,7 +204,7 @@ export function useJourneyProgress(home: RefObject<HTMLAnchorElement | null>) {
         scrubTimer = window.setTimeout(releaseScrub, 240);
         return;
       }
-      if (!down) { pullBy(-delta); return; }
+      if (!down) return;
       if (now - lastWheel > 180 || Math.sign(delta) !== Math.sign(wheelIntent)) wheelIntent = 0;
       lastWheel = now;
       wheelIntent += delta;
@@ -250,19 +230,12 @@ export function useJourneyProgress(home: RefObject<HTMLAnchorElement | null>) {
         scrubTo(progress);
         return;
       }
-      if (!transition && dy < 0) {
-        // Pulling down inside the booth: resistance first, as with the wheel.
-        window.clearTimeout(pullTimer);
-        setPull((-dy - 12) * .8);
-        showLeaveHint();
-        return;
-      }
+      if (!transition && dy < 0) return;
       playTransition(dy > 0);
     };
     const onTouchEnd = () => {
       const scrubbing = touchStart !== null && !transition && outside();
       touchStart = null;
-      if (pull > 0) setPull(0);
       if (scrubbing) releaseScrub();
     };
     const onKeyDown = (event: KeyboardEvent) => {
@@ -273,6 +246,7 @@ export function useJourneyProgress(home: RefObject<HTMLAnchorElement | null>) {
       const up = event.key === "PageUp" || event.key === "ArrowUp" || event.key === " " && event.shiftKey;
       if (!(down || up) || !transition && !handlesDirection(down)) return;
       event.preventDefault();
+      if (up && inside()) return;
       playTransition(down);
     };
     const navigate = () => {
@@ -340,7 +314,7 @@ export function useJourneyProgress(home: RefObject<HTMLAnchorElement | null>) {
     addEventListener("popstate", onPopState);
     addEventListener("pageshow", onPageShow);
     addEventListener("click", onClick);
-    const onLeave = () => { setPull(0); playTransition(false); };
+    const onLeave = () => playTransition(false);
     addEventListener(leaveEvent, onLeave);
     if (!initialized.current && direct.current) navigate();
     else if (reduced && scrollY > 0 && !direct.current) {
@@ -368,7 +342,6 @@ export function useJourneyProgress(home: RefObject<HTMLAnchorElement | null>) {
       removeEventListener("pageshow", onPageShow);
       removeEventListener("click", onClick);
       removeEventListener(leaveEvent, onLeave);
-      window.clearTimeout(hintTimer);
     };
   }, [home, reduced, initialDirect, sceneProgress]);
   return { journey, stage, surface, work, initialDirect, sceneProgress, onPortal, sceneEnabled: sceneAllowed && !reduced };

@@ -99,7 +99,7 @@ test("clean opening, shortcut, events, views, home and history", async ({
   await page.getByRole("button", { name: "Video" }).click();
   await expect(page.locator("video.showcase-video")).toBeVisible();
   await first.click();
-  await expect(page.locator(".print-front img")).toHaveCount(3);
+  await expect(page.locator(".print img")).toHaveCount(6);
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
   await page.getByRole("link", { name: "Marvin Studio home" }).click();
   await expect(page.locator("#work")).toHaveAttribute("inert", "");
@@ -130,11 +130,11 @@ test("one wheel gesture opens and zooms into the portfolio, and one reverses hom
   await expect(page.getByRole("button", { name: "Photos" })).toBeFocused();
   await openSection(page, "#work");
   await page.mouse.move(180, 400);
-  // Scrolling up inside is a wall; the Step outside button walks you back out.
+  // Scrolling up inside does nothing; the EXIT sign walks you back out.
   await page.mouse.wheel(0, -400);
-  await expect(page.getByRole("button", { name: "Step outside" })).toBeVisible();
-  // The hint fades after a few seconds; slow CI can miss that window for a real click.
-  await page.getByRole("button", { name: "Step outside" }).dispatchEvent("click");
+  await page.waitForTimeout(400);
+  await expect(page.locator("#work")).toHaveAttribute("aria-hidden", "false");
+  await page.getByRole("button", { name: "Exit the booth" }).click();
   await expect(
     page.getByRole("link", { name: "Marvin Studio home" }),
   ).toBeFocused();
@@ -168,7 +168,7 @@ test("reduced motion, resize, failed images and reflow", async ({ page }) => {
   await page.route("**/portfolio/*", (route) => route.abort());
   await page.goto("./#work");
   await expect(page.getByRole("button", { name: "Photos" })).toBeFocused();
-  await expect(page.locator(".image-fallback")).toHaveCount(3);
+  await expect(page.locator(".image-fallback")).toHaveCount(6);
   await expect(page.locator("video")).toHaveCount(0);
   await page.setViewportSize({ width: 320, height: 800 });
   await expect(
@@ -196,11 +196,11 @@ test("scrolling back up from below the monitor stops at the booth instead of lea
   await page.waitForTimeout(600);
   await expect(page.locator("#work")).toHaveAttribute("aria-hidden", "false");
   expect(Math.abs(await page.evaluate(() => scrollY) - top)).toBeLessThan(4);
-  // Even a new, firm upward scroll does not leave; the button does.
+  // Even a new, firm upward scroll does not leave; the EXIT sign does.
   await page.mouse.wheel(0, -400);
   await page.waitForTimeout(600);
   await expect(page.locator("#work")).toHaveAttribute("aria-hidden", "false");
-  await page.getByRole("button", { name: "Step outside" }).dispatchEvent("click");
+  await page.getByRole("button", { name: "Exit the booth" }).click();
   await expect(page.locator("#work")).toHaveAttribute("aria-hidden", "true");
 });
 
@@ -215,17 +215,18 @@ test("a small scroll in front of the booth only nudges the camera and drifts bac
   await expect(page.locator("#work")).toHaveAttribute("aria-hidden", "true");
 });
 
-test("inside the booth scrolling up never leaves; it shows Step outside, which does", async ({ page, isMobile, browserName }) => {
+test("inside the booth scrolling up never leaves; the EXIT sign is always there and does", async ({ page, isMobile, browserName }) => {
   test.skip(isMobile || browserName !== "chromium", "Wheel physics differ per engine; the behaviour is exercised with desktop Chrome's wheel.");
   await page.goto("./#work");
   await expect(page.getByRole("button", { name: "Photos" })).toBeFocused();
-  await page.waitForTimeout(400);
+  const exit = page.getByRole("button", { name: "Exit the booth" });
+  await expect(exit).toBeVisible();
   await page.mouse.move(700, 500);
   for (let step = 0; step < 12; step++) { await page.mouse.wheel(0, -200); await page.waitForTimeout(30); }
-  await expect(page.locator(".leave-hint")).toHaveCSS("opacity", "1");
+  await page.keyboard.press("PageUp");
   await page.waitForTimeout(800);
   await expect(page.locator("#work")).toHaveAttribute("aria-hidden", "false");
-  await expect.poll(() => page.locator("#work").evaluate(work => Number(work.style.getPropertyValue("--pull")))).toBe(0);
-  await page.getByRole("button", { name: "Step outside" }).dispatchEvent("click");
+  await expect(exit).toBeVisible();
+  await exit.click();
   await expect(page.locator("#work")).toHaveAttribute("aria-hidden", "true");
 });

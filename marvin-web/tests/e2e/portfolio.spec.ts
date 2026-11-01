@@ -81,3 +81,31 @@ test("scrolling down the booth wall reaches the booking section with social link
   await expect(page.getByRole("link", { name: /Take another look/ })).toHaveCount(0);
   await expect(page.getByText("THE MARVIN PHOTO CONCEPT")).toHaveCount(0);
 });
+
+test("the photos turn round: arrows, keys and dragging bring another photo to the front", async ({ page, isMobile }) => {
+  await page.goto("./#work");
+  const front = () => page.locator('.ring .print[data-front="true"] img').getAttribute("src");
+  const first = await front();
+  if (!isMobile) {
+    await page.getByRole("button", { name: "Next photo" }).click();
+    await expect.poll(front).not.toBe(first);
+    await page.getByRole("button", { name: "Previous photo" }).click();
+    await expect.poll(front).toBe(first);
+  }
+  await page.locator(".gallery").focus();
+  await page.keyboard.press("ArrowRight");
+  await expect.poll(front).not.toBe(first);
+  await page.keyboard.press("ArrowLeft");
+  await expect.poll(front).toBe(first);
+  // Drag the ring sideways.
+  const box = (await page.locator(".gallery").boundingBox())!;
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(box.x + box.width / 2 - box.width * .3, box.y + box.height / 2, { steps: 8 });
+  await page.mouse.up();
+  await expect.poll(front).not.toBe(first);
+  // Changing event keeps the photos on the ring, now the new event's.
+  await page.getByRole("button", { name: "Next event" }).click();
+  await expect(page.locator(".event-title")).toHaveText("Padel Night");
+  await expect(page.locator(".ring .print")).toHaveCount(6);
+});
