@@ -162,6 +162,31 @@ test("one touch swipe reaches the portfolio", async ({ page, browserName }) => {
     await expect(page.getByRole("button", { name: "Photos" })).toBeFocused();
   } finally { await session.detach(); }
 });
+test("on a phone, scrolling inside the booth never walks you back out", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium" || test.info().project.name !== "mobile", "Touch input is exercised in mobile Chromium.");
+  await page.goto("./");
+  const session = await page.context().newCDPSession(page);
+  const swipe = async (from: number, to: number) => {
+    await session.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x: 180, y: from }] });
+    for (let step = 1; step <= 5; step++)
+      await session.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [{ x: 180, y: from + (to - from) * step / 5 }] });
+    await session.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+  };
+  try {
+    await swipe(540, 220);
+    await expect(page.locator(".room")).toHaveAttribute("data-facing", "monitor");
+    await expect(page.locator("html")).toHaveAttribute("data-locked", "true");
+    // A phone's address bar hiding makes the window taller, which can pull the
+    // window's own scroll position up a little. That must not count as leaving.
+    await page.evaluate(() => window.scrollBy(0, -120));
+    await swipe(600, 250);
+    await swipe(250, 600);
+    await page.waitForTimeout(1200);
+    await expect(page.locator("html")).toHaveAttribute("data-locked", "true");
+    await expect(page.locator("#work")).toHaveAttribute("data-turned", "true");
+    await expect(page.locator(".room")).toHaveAttribute("data-facing", "monitor");
+  } finally { await session.detach(); }
+});
 test("reduced motion, resize, failed images and reflow", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.route("**/portfolio/*", (route) => route.abort());

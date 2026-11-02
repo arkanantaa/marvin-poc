@@ -71,6 +71,13 @@ a:focus-visible, button:focus-visible, h2:focus-visible { outline: 3px solid var
 /* Inside the booth the window stays put; the booth wall and the booking section
    scroll inside their own frame, from the monitor downwards only. */
 :root[data-locked="true"], :root[data-locked="true"] body { overflow: hidden; }
+/* With the booth taken out of the page flow, keep the page tall enough that a
+   phone's address bar hiding (a taller window) can never pull the scroll back. */
+:root[data-locked="true"] body { padding-bottom: 100vh; padding-bottom: 100lvh; }
+/* In front of the booth every swipe is ours (it walks you in); the browser must not
+   also scroll the page, pull to refresh or hide its address bar halfway through. */
+:root { overscroll-behavior-y: none; }
+:root:not([data-locked="true"]) body { touch-action: none; }
 :root[data-locked="true"] .work-scene { position: fixed; inset: 0; margin: 0; overflow-y: auto; overscroll-behavior: contain; }
 :root[data-portal="on"] .stage { z-index: 2; background: transparent; }
 :root[data-portal="on"] .work-scene { z-index: 1; background: transparent; will-change: transform; }

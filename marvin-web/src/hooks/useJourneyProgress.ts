@@ -65,6 +65,7 @@ export function useJourneyProgress(home: RefObject<HTMLAnchorElement | null>) {
     }
     function releaseScrub() {
       scrubTimer = 0;
+      if (locked) return;
       const progress = scrollY / range();
       if (progress > .001 && progress < .999 && !transition) playTransition(progress >= enterAt);
     }
@@ -77,9 +78,9 @@ export function useJourneyProgress(home: RefObject<HTMLAnchorElement | null>) {
     function setLocked(next: boolean) {
       if (next === locked) return;
       locked = next;
+      root.dataset.locked = String(next);
       if (next) window.scrollTo({ top: range(), behavior: "instant" });
       else if (work.current) work.current.scrollTop = 0;
-      root.dataset.locked = String(next);
     }
     const range = () => Math.max(1, (journey.current?.offsetHeight ?? 0) - (stage.current?.offsetHeight ?? innerHeight));
     let previousRange = range();
@@ -105,7 +106,9 @@ export function useJourneyProgress(home: RefObject<HTMLAnchorElement | null>) {
     function render() {
       if (frame) cancelAnimationFrame(frame);
       frame = 0;
-      let progress = clamp(scrollY / range());
+      // While locked inside, the window's own scroll position means nothing (a phone's
+      // address bar appearing or hiding can nudge it); the booth stays the booth.
+      let progress = locked && !transition && !leaving ? 1 : clamp(scrollY / range());
       // Once inside, the booth is one-way: however the page gets scrolled up (wheel,
       // trackpad momentum, scrollbar, keys) it is put back at the monitor. Only the
       // EXIT sign, the logo or the browser's Back button lead out.
@@ -185,6 +188,9 @@ export function useJourneyProgress(home: RefObject<HTMLAnchorElement | null>) {
           transitionTarget = -1;
           turningBack = false;
           ignoreWheelUntil = now + 220;
+          // Settle the final state now (lock inside the booth) instead of waiting
+          // for a scroll event that may never come.
+          render();
           if (forward) focusSection("work");
           else home.current?.focus({ preventScroll: true });
         }
@@ -253,7 +259,7 @@ export function useJourneyProgress(home: RefObject<HTMLAnchorElement | null>) {
       playTransition(dy > 0);
     };
     const onTouchEnd = () => {
-      const scrubbing = touchStart !== null && !transition && outside();
+      const scrubbing = touchStart !== null && !transition && !locked && outside();
       touchStart = null;
       if (scrubbing) releaseScrub();
     };
@@ -283,6 +289,7 @@ export function useJourneyProgress(home: RefObject<HTMLAnchorElement | null>) {
       } else home.current?.focus({ preventScroll: true });
     };
     const onScroll = () => {
+      if (locked && !transition && !leaving) return;
       // Inside the booth any upward scroll is undone at once (see render).
       if (!transition && state.interactive && !leaving && scrollY < range() - 2 && !justNavigated()) {
         window.scrollTo({ top: range(), behavior: "instant" });

@@ -91,7 +91,7 @@ describe("narrow screens", () => {
   };
   it("does not linger on the plain back wall on a phone", () => {
     // Phone in portrait: the camera starts far back, and the view is very slim.
-    expect(wallShare(.46, 16)).toBeLessThan(.27);
+    expect(wallShare(.46, 16)).toBeLessThan(.13);
     expect(cameraPose(1, 16, .46).z).toBeCloseTo(portal.endZ);
   });
   it("keeps the laptop walk-in as it was", () => {

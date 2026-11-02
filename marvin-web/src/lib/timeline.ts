@@ -35,7 +35,10 @@ export const wrap = (index: number, length: number) => ((index % length) + lengt
 // reaches the doorway, all it shows is the plain back wall. `aspect` lets that last,
 // featureless stretch take no longer than it does on a laptop, so a phone does not
 // sit on an empty wall for seconds while walking in or out.
+// A laptop spends about a quarter of the walk-in on the plain wall; a narrower
+// screen gets a shorter stretch than that.
 export const wallOnlyShare = .26;
+const narrowWallShare = .12;
 export function cameraPose(progress: number, distance: number, aspect = 16 / 10) {
   const pose = timeline(progress);
   const near = portal.endZ - portal.backZ;
@@ -46,9 +49,10 @@ export function cameraPose(progress: number, distance: number, aspect = 16 / 10)
   const wallOnly = Math.min(far, Math.max(near, .63 / halfWidth));
   const share = Math.log(wallOnly / near) / Math.log(far / near);
   const t = pose.travel;
+  const tail = narrowWallShare;
   const depth = share <= wallOnlyShare ? far * (near / far) ** t
-    : t < 1 - wallOnlyShare ? far * (wallOnly / far) ** (t / (1 - wallOnlyShare))
-      : wallOnly * (near / wallOnly) ** ((t - 1 + wallOnlyShare) / wallOnlyShare);
+    : t < 1 - tail ? far * (wallOnly / far) ** (t / (1 - tail))
+      : wallOnly * (near / wallOnly) ** ((t - 1 + tail) / tail);
   const z = portal.backZ + depth;
   // Before entering, the camera faces the booth straight on from a little above
   // its middle (the depth comes from lighting and a small pointer parallax), then
