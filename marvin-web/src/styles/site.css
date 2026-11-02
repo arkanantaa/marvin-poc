@@ -40,7 +40,7 @@ a:focus-visible, button:focus-visible, h2:focus-visible { outline: 3px solid var
    smaller line under it. Used for the tagline and for "Book for an event". */
 .stack-main, .stack-sub { display: block; }
 .stack-main { font: 700 1em/1.05 Arial, Helvetica, sans-serif; letter-spacing: .16em; text-transform: uppercase; color: var(--ink); }
-.stack-sub { margin-top: .55em; font: 700 max(.5em, 8.5px)/1.2 Arial, Helvetica, sans-serif; letter-spacing: .26em; text-transform: uppercase; color: #686d61; }
+.stack-sub { margin-top: .5em; font: 700 max(.6em, 9px)/1.2 Arial, Helvetica, sans-serif; letter-spacing: .24em; text-transform: uppercase; color: var(--ink); }
 .header-note { margin: 0; font-size: 1.2rem; text-align: center; }
 .journey { height: calc(100svh + var(--stage-height)); }
 .stage { position: sticky; top: 0; height: var(--stage-height); background: #fff; isolation: isolate; pointer-events: none; }
@@ -313,7 +313,7 @@ h2 { margin: 0 0 18px; font: 800 clamp(2rem, 3vw, 2.7rem)/1.05 Arial, Helvetica,
   transition: height .35s cubic-bezier(.3, .7, .2, 1), border-radius .35s ease;
 }
 .closing-book:hover .closing-mark::before, .closing-book:focus-visible .closing-mark::before { height: .8em; border-radius: .12em; }
-.closing-book .stack-sub { margin-top: 1em; font-size: max(.3em, 10px); }
+.closing-book .stack-sub { margin-top: 1em; font-size: max(.36em, 11px); }
 .closing-social { list-style: none; display: flex; gap: 14px; margin: 44px 0 0; padding: 0; }
 .closing-social a { display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 20px 0 14px; border: 1px solid var(--line); border-radius: 999px; color: var(--ink); font-size: .875rem; }
 .closing-social a:hover { border-color: var(--ink); }
