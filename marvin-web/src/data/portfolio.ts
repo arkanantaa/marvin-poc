@@ -63,22 +63,21 @@ export const showcaseViews = [
   { id: "video", label: "Video" },
 ] as const;
 export type ShowcaseView = (typeof showcaseViews)[number]["id"];
-// Contact links for the closing section. Fill these in and the links work:
-// - whatsapp: the number in international format, digits only (e.g. "6281234567890")
+// Contact links for the booking section.
+// - whatsapp: the number in international format, digits only
 // - instagram / tiktok: the full profile URLs
 export const social = {
-  whatsapp: "",
+  whatsapp: "6282322220007",
   whatsappMessage: "Halo Marvin, saya mau booking photobooth untuk event.",
-  instagram: "",
-  tiktok: "",
+  instagram: "https://www.instagram.com/marvinstudio_id/",
+  tiktok: "https://www.tiktok.com/@marvinstudio.id",
 };
 export const whatsappLink = social.whatsapp
   ? `https://wa.me/${social.whatsapp}?text=${encodeURIComponent(social.whatsappMessage)}` : null;
 export const closing = {
   book: "Book for an event",
-  bookNote: "Chat with us on WhatsApp",
+  bookNote: "chat with us on WhatsApp",
 };
-export const consoleHint = "Click the yellow button for a surprise";
 export const portfolioLabels = {
   printSignature: "marvin studio",
 };

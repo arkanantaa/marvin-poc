@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { closing, consoleHint, social, whatsappLink } from "../data/portfolio";
+import { closing, social, whatsappLink } from "../data/portfolio";
 import { useSelfie } from "../hooks/useSelfie";
 import { asset } from "../lib/assets";
 import { leaveEvent } from "../lib/sections";
@@ -11,7 +11,7 @@ import { PrintSlot, SelfieButton } from "./SelfiePrinter";
 // print slot) below.
 // Scrolling further leads to the closing section.
 export function PortfolioMonitor() {
-  const { prints, flash, snap, close } = useSelfie();
+  const { prints, flash, snap } = useSelfie();
   // Marks which way the room ends up facing once the turn has finished
   // ("monitor" or "door"), so anything that needs the settled view can wait for it.
   const room = useRef<HTMLDivElement>(null);
@@ -54,9 +54,8 @@ export function PortfolioMonitor() {
                   </div>
                 </div>
                 <div className="console">
-                  <span className="console-text">{consoleHint}</span>
                   <SelfieButton onSnap={snap} />
-                  <PrintSlot prints={prints} onClose={close} />
+                  <PrintSlot prints={prints} />
                 </div>
               </div>
             </div>
@@ -78,22 +77,21 @@ export function PortfolioMonitor() {
       <div className="after">
         <section id="hello" className="closing" aria-labelledby="closing-title">
           <h2 id="closing-title" tabIndex={-1}>
-            <a className="closing-book" href={whatsappLink ?? undefined} aria-disabled={whatsappLink ? undefined : true} role={whatsappLink ? undefined : "link"}
-              target="_blank" rel="noopener noreferrer">
-              {closing.book} <span aria-hidden="true">↗</span>
+            <a className="closing-book" href={whatsappLink ?? undefined} target="_blank" rel="noopener noreferrer">
+              <span className="stack-main"><span className="closing-mark">{closing.book}</span> <span aria-hidden="true">↗</span></span>{" "}
+              <span className="stack-sub">{closing.bookNote}</span>
             </a>
           </h2>
-          <p className="closing-note">{closing.bookNote}</p>
           <ul className="closing-social">
             <li>
-              <a href={social.instagram || undefined} aria-disabled={social.instagram ? undefined : true} role={social.instagram ? undefined : "link"}
+              <a href={social.instagram}
                 target="_blank" rel="noopener noreferrer" aria-label="Marvin on Instagram">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" /><circle cx="12" cy="12" r="4.2" /><circle cx="17.4" cy="6.6" r="1" className="fill" /></svg>
                 <span>Instagram</span>
               </a>
             </li>
             <li>
-              <a href={social.tiktok || undefined} aria-disabled={social.tiktok ? undefined : true} role={social.tiktok ? undefined : "link"}
+              <a href={social.tiktok}
                 target="_blank" rel="noopener noreferrer" aria-label="Marvin on TikTok">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3v11.2a3.8 3.8 0 1 1-3.8-3.8" /><path d="M14 3c.6 2.8 2.6 4.6 5.5 4.8" /></svg>
                 <span>TikTok</span>

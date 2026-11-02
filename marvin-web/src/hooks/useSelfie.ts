@@ -4,11 +4,12 @@ import { playPrinter, playShutter, playSwish } from "../lib/sounds";
 
 export type Print = { id: number; photo: (typeof portraits)[number]; closing: boolean };
 
-const flashMs = 650, printDelayMs = 450, closeMs = 1300;
+// The print takes about 1.9s to come out; it then stays 3s before leaving.
+const flashMs = 650, printDelayMs = 450, closeMs = 1300, ejectMs = 1900, stayMs = 3000;
 
 // Pressing the selfie button fires the flash and the shutter, then a polaroid is
-// pushed out of the slot in the console and slowly develops. A print can be put
-// away; a new selfie puts the previous one away first.
+// pushed out of the slot in the console and develops. Three seconds after it is
+// out it flips over and leaves by itself; a new selfie sends the previous one off.
 export function useSelfie() {
   const [prints, setPrints] = useState<Print[]>([]);
   const [flash, setFlash] = useState(0);
@@ -34,7 +35,8 @@ export function useSelfie() {
       open.current.add(id);
       setPrints(list => [...list, { id, photo: portraits[(id * 2 + 1) % portraits.length], closing: false }]);
       playPrinter();
+      later(() => close(id), ejectMs + stayMs);
     }, printDelayMs);
   }
-  return { prints, flash, snap, close };
+  return { prints, flash, snap };
 }

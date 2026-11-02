@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent, type PointerEvent } from "react";
-import { collections, portfolioLabels, showcaseViews, type Portrait as PortraitData, type ShowcaseView } from "../data/portfolio";
+import { collections, showcaseViews, type Portrait as PortraitData, type ShowcaseView } from "../data/portfolio";
 import { asset } from "../lib/assets";
 import { wrap } from "../lib/timeline";
 import { BoothModelViewer } from "./BoothModelViewer";
@@ -19,7 +19,7 @@ function Portrait({ portrait, front, style, onPick }: {
         <img src={asset(portrait.src)} alt={portrait.alt} width={portrait.width} height={portrait.height}
           decoding="async" draggable={false} onError={() => setBroken(true)} />
       )}
-      <figcaption>{portfolioLabels.printSignature}</figcaption>
+      <figcaption><img className="print-logo" src={asset("textures/marvin-logo-studio.png")} alt="" width={1086} height={376} draggable={false} /></figcaption>
     </figure>
   );
 }

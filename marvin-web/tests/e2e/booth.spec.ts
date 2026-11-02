@@ -89,7 +89,7 @@ test("supplied textures load and gentle wind continues while the rail and camera
 
 test("each event shows its own demo photos at their native dimensions", async ({ page }) => {
   await page.goto("./#work");
-  const photos = page.locator(".ring .print img");
+  const photos = page.locator(".ring .print > img");
   await expect(photos).toHaveCount(6);
   const dimensions = [[584, 440], [330, 585], [465, 499], [479, 364], [401, 413], [800, 601]];
   const events = [[1, 2, 3, 4, 5, 6], [4, 5, 6, 1, 2, 3], [3, 5, 6, 2, 1, 4]];

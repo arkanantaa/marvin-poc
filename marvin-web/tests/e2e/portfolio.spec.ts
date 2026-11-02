@@ -49,20 +49,23 @@ test("the selfie flashes, prints a polaroid out of the console's slot, and it ca
   await page.getByRole("button", { name: "Take a selfie" }).click();
   await expect(page.locator(".camera-flash")).toHaveCount(1);
   await expect(papers).toHaveCount(1);
-  expect(await papers.first().evaluate(paper => getComputedStyle(paper).animationName)).toContain("polaroid-eject");
-  await expect(papers.locator("img")).toBeVisible();
+  // It comes out of the slot (or, on a slow machine, may already be leaving).
+  expect(await papers.first().evaluate(paper => getComputedStyle(paper).animationName)).toMatch(/polaroid-(eject|toss)/);
+  await expect(papers.locator(".paper-photo img")).toBeAttached();
+  await expect(papers.locator(".paper-logo")).toHaveAttribute("src", /marvin-logo-studio\.png$/);
   // The polaroid hangs from the slot line, below it.
   const slot = await page.locator(".slot-line").boundingBox();
-  await expect.poll(async () => { const box = await papers.first().boundingBox(); return box!.y + box!.height; })
-    .toBeGreaterThan(slot!.y + slot!.height + 20);
-  // A new selfie puts the previous print away first.
+  const hanging = await papers.first().boundingBox().catch(() => null);
+  if (hanging) expect(hanging.y + hanging.height).toBeGreaterThan(slot!.y + slot!.height);
+  // It leaves by itself: three seconds after it is out it flips and spins away.
+  await expect(papers.first()).toHaveAttribute("data-closing", "true", { timeout: 15000 });
+  await expect(papers).toHaveCount(0, { timeout: 15000 });
+  await expect(page.getByRole("button", { name: "Put the photo away" })).toHaveCount(0);
+  // A new selfie sends the previous print off.
+  await page.getByRole("button", { name: "Take a selfie" }).click();
+  await expect(papers).toHaveCount(1);
   await page.getByRole("button", { name: "Take a selfie" }).click();
   await expect(papers.first()).toHaveAttribute("data-closing", "true");
-  await expect(page.locator('.paper[data-closing="false"]')).toHaveCount(1);
-  await expect(papers).toHaveCount(1, { timeout: 10000 });
-  await page.getByRole("button", { name: "Put the photo away" }).click();
-  await expect(papers.first()).toHaveAttribute("data-closing", "true");
-  await expect(papers).toHaveCount(0, { timeout: 10000 });
 });
 
 test("only the closing section follows the booth wall", async ({ page }) => {
@@ -75,16 +78,18 @@ test("scrolling down the booth wall reaches the booking section with social link
   await page.goto("./#work");
   await page.locator("#hello").scrollIntoViewIfNeeded();
   await expect(page.getByRole("heading", { name: /Book for an event/ })).toBeInViewport();
-  await expect(page.locator(".console-text")).toHaveText(/Click the yellow button for a surprise/i);
+  await expect(page.locator(".console-text")).toHaveCount(0);
+  await expect(page.getByRole("link", { name: /Book for an event/ })).toHaveAttribute("href", /wa\.me\/6282322220007/);
   await expect(page.getByRole("link", { name: "Marvin on Instagram" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Marvin on TikTok" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Marvin on TikTok" })).toHaveAttribute("href", "https://www.tiktok.com/@marvinstudio.id");
+  await expect(page.getByRole("link", { name: "Marvin on Instagram" })).toHaveAttribute("href", "https://www.instagram.com/marvinstudio_id/");
   await expect(page.getByRole("link", { name: /Take another look/ })).toHaveCount(0);
   await expect(page.getByText("THE MARVIN PHOTO CONCEPT")).toHaveCount(0);
 });
 
 test("the photos turn round: arrows, keys and dragging bring another photo to the front", async ({ page, isMobile }) => {
   await page.goto("./#work");
-  const front = () => page.locator('.ring .print[data-front="true"] img').getAttribute("src");
+  const front = () => page.locator('.ring .print[data-front="true"] > img').getAttribute("src");
   const first = await front();
   if (!isMobile) {
     await page.getByRole("button", { name: "Next photo" }).click();

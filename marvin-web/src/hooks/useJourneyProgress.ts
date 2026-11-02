@@ -49,7 +49,9 @@ export function useJourneyProgress(home: RefObject<HTMLAnchorElement | null>) {
     // In front of the booth a little scrolling only nudges the camera forward (and it
     // drifts back when you stop); the full walk-in starts once you have clearly
     // scrolled in, about three mouse-wheel notches or a short swipe.
-    const enterAt = .2;
+    // One wheel notch (about 100px) or a short swipe is enough to walk in; a
+    // light trackpad touch below that only nudges the camera and drifts back.
+    const enterAt = .04;
     const wheelPerProgress = 1500;
     let scrubTimer = 0;
     let touchProgress = 0;
@@ -68,6 +70,17 @@ export function useJourneyProgress(home: RefObject<HTMLAnchorElement | null>) {
     }
     let state = timeline(0);
     const root = document.documentElement;
+    // Inside the booth the page is steady: the window no longer scrolls at all and
+    // the booth wall (with the booking section below it) scrolls on its own, from
+    // the monitor downwards only. Leaving is the EXIT sign's job.
+    let locked = false;
+    function setLocked(next: boolean) {
+      if (next === locked) return;
+      locked = next;
+      if (next) window.scrollTo({ top: range(), behavior: "instant" });
+      else if (work.current) work.current.scrollTop = 0;
+      root.dataset.locked = String(next);
+    }
     const range = () => Math.max(1, (journey.current?.offsetHeight ?? 0) - (stage.current?.offsetHeight ?? innerHeight));
     let previousRange = range();
     function schedule() {
@@ -102,6 +115,7 @@ export function useJourneyProgress(home: RefObject<HTMLAnchorElement | null>) {
       }
       state = timeline(direct.current || (reduced && progress > 0) ? 1 : progress);
       if (!state.interactive) leaving = false;
+      setLocked(state.interactive && !transition && !leaving && !turningBack);
       sceneProgress.set(state.progress);
       // Keep the booth beneath the incoming portfolio throughout the entrance;
       // fading both layers out would expose a bright, empty background.
@@ -179,6 +193,7 @@ export function useJourneyProgress(home: RefObject<HTMLAnchorElement | null>) {
     }
     const handlesDirection = (down: boolean) => down ? scrollY < range() - 2 : scrollY <= range() + 2 && scrollY > 0;
     const onWheel = (event: WheelEvent) => {
+      if (locked && !transition) return;
       if (event.ctrlKey || Math.abs(event.deltaX) > Math.abs(event.deltaY) || event.deltaY === 0) return;
       const now = performance.now();
       if (now - lastWheelEvent > 300) gestureFromBelow = below();
@@ -219,6 +234,7 @@ export function useJourneyProgress(home: RefObject<HTMLAnchorElement | null>) {
       touchProgress = scrollY / range();
     };
     const onTouchMove = (event: TouchEvent) => {
+      if (locked && !transition) return;
       if (!touchStart || event.touches.length !== 1) return;
       const dx = touchStart.x - event.touches[0].clientX;
       const dy = touchStart.y - event.touches[0].clientY;
@@ -229,7 +245,7 @@ export function useJourneyProgress(home: RefObject<HTMLAnchorElement | null>) {
       if (!transition && outside()) {
         // The swipe moves the camera with your finger; letting go decides.
         const progress = touchProgress + (dy - Math.sign(dy) * 12) / (innerHeight * .9);
-        if (progress >= enterAt * 1.6) { touchStart = null; playTransition(true); return; }
+        if (progress >= enterAt * 2) { touchStart = null; playTransition(true); return; }
         scrubTo(progress);
         return;
       }
@@ -242,6 +258,7 @@ export function useJourneyProgress(home: RefObject<HTMLAnchorElement | null>) {
       if (scrubbing) releaseScrub();
     };
     const onKeyDown = (event: KeyboardEvent) => {
+      if (locked && !transition) return;
       const target = event.target instanceof HTMLElement ? event.target : null;
       if (event.defaultPrevented || event.ctrlKey || event.metaKey || event.altKey || target?.isContentEditable
         || target?.matches("input, textarea, select, video, button, [role='tab']")) return;
@@ -316,7 +333,7 @@ export function useJourneyProgress(home: RefObject<HTMLAnchorElement | null>) {
     addEventListener("popstate", onPopState);
     addEventListener("pageshow", onPageShow);
     addEventListener("click", onClick);
-    const onLeave = () => { leaving = true; playTransition(false); };
+    const onLeave = () => { leaving = true; setLocked(false); playTransition(false); };
     addEventListener(leaveEvent, onLeave);
     if (!initialized.current && direct.current) navigate();
     else if (reduced && scrollY > 0 && !direct.current) {
@@ -331,6 +348,7 @@ export function useJourneyProgress(home: RefObject<HTMLAnchorElement | null>) {
       cancelTransition();
       paintWork.current = () => {};
       delete root.dataset.portal;
+      delete root.dataset.locked;
       removeEventListener("scroll", onScroll);
       removeEventListener("wheel", onWheel);
       removeEventListener("touchstart", onTouchStart);

@@ -17,8 +17,8 @@ test("long content and enlarged text remain reachable at 320 pixels", async ({ p
   })).toBe(true);
   await page.getByRole("button", { name: "Next event" }).click();
   await expect(page.locator(".event-title")).toHaveText("Padel Night");
-  await page.locator(".closing-note").scrollIntoViewIfNeeded();
-  await expect(page.locator(".closing-note")).toBeInViewport();
+  await page.locator(".closing-book").scrollIntoViewIfNeeded();
+  await expect(page.locator(".closing-book")).toBeInViewport();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
 
@@ -52,9 +52,8 @@ test("motion preference changes preserve focus and scroll position", async ({ pa
 test("resize preserves portfolio reading offset", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 600 });
   await page.goto("./#work");
-  const readingOffset = () => page.evaluate(() => scrollY -
-    (document.querySelector<HTMLElement>(".journey")!.offsetHeight -
-      document.querySelector<HTMLElement>(".stage")!.offsetHeight));
+  // Inside the booth the wall scrolls in its own frame (the window stays put).
+  const readingOffset = () => page.evaluate(() => document.querySelector<HTMLElement>("#work")!.scrollTop);
   await expect(page.getByRole("button", { name: "Photos" })).toBeFocused();
   await page.mouse.move(180, 400);
   await page.mouse.wheel(0, 180);
@@ -99,7 +98,7 @@ test("clean opening, shortcut, events, views, home and history", async ({
   await page.getByRole("button", { name: "Video" }).click();
   await expect(page.locator("video.showcase-video")).toBeVisible();
   await first.click();
-  await expect(page.locator(".print img")).toHaveCount(6);
+  await expect(page.locator(".print > img")).toHaveCount(6);
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
   await page.getByRole("link", { name: "Marvin Studio home" }).click();
   await expect(page.locator("#work")).toHaveAttribute("inert", "");
@@ -183,36 +182,40 @@ test("reduced motion, resize, failed images and reflow", async ({ page }) => {
   await expect(page.getByRole("button", { name: "Photos" })).toBeVisible();
 });
 
-test("scrolling back up from below the monitor stops at the booth instead of leaving", async ({ page, isMobile, browserName }) => {
+test("inside the booth the page is steady: scrolling up never moves it, the booking section is below", async ({ page, isMobile, browserName }) => {
   test.skip(isMobile || browserName !== "chromium", "Wheel physics differ per engine; the behaviour is exercised with desktop Chrome's wheel.");
   await page.goto("./#work");
   await expect(page.getByRole("button", { name: "Photos" })).toBeFocused();
+  const top = await page.evaluate(() => scrollY);
+  const wall = page.locator("#work");
   await page.mouse.move(700, 500);
-  for (let step = 0; step < 8; step++) { await page.mouse.wheel(0, 120); await page.waitForTimeout(40); }
-  const top = await page.evaluate(() => document.querySelector<HTMLElement>(".journey")!.offsetHeight - document.querySelector<HTMLElement>(".stage")!.offsetHeight);
-  await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(top + 100);
-  // One long upward gesture (with momentum) only scrolls back to the top of the booth.
-  for (let step = 0; step < 30; step++) { await page.mouse.wheel(0, -90); await page.waitForTimeout(40); }
-  await page.waitForTimeout(600);
-  await expect(page.locator("#work")).toHaveAttribute("aria-hidden", "false");
-  expect(Math.abs(await page.evaluate(() => scrollY) - top)).toBeLessThan(4);
-  // Even a new, firm upward scroll does not leave; the EXIT sign does.
-  await page.mouse.wheel(0, -400);
-  await page.waitForTimeout(600);
-  await expect(page.locator("#work")).toHaveAttribute("aria-hidden", "false");
+  // Up at the monitor: nothing moves at all.
+  for (let step = 0; step < 10; step++) { await page.mouse.wheel(0, -300); await page.waitForTimeout(30); }
+  await page.waitForTimeout(400);
+  expect(await page.evaluate(() => scrollY)).toBe(top);
+  expect(await wall.evaluate(element => element.scrollTop)).toBe(0);
+  // Down to the booking section and back up to the monitor, and no further.
+  for (let step = 0; step < 8; step++) { await page.mouse.wheel(0, 200); await page.waitForTimeout(30); }
+  await expect.poll(() => wall.evaluate(element => element.scrollTop)).toBeGreaterThan(100);
+  for (let step = 0; step < 30; step++) { await page.mouse.wheel(0, -300); await page.waitForTimeout(20); }
+  await expect.poll(() => wall.evaluate(element => element.scrollTop)).toBe(0);
+  expect(await page.evaluate(() => scrollY)).toBe(top);
+  await expect(wall).toHaveAttribute("aria-hidden", "false");
   await page.getByRole("button", { name: "Exit the booth" }).click();
-  await expect(page.locator("#work")).toHaveAttribute("aria-hidden", "true");
+  await expect(wall).toHaveAttribute("aria-hidden", "true");
 });
 
-test("a small scroll in front of the booth only nudges the camera and drifts back", async ({ page, browserName, isMobile }) => {
+test("a light touch in front of the booth only nudges the camera and drifts back; one wheel notch walks in", async ({ page, browserName, isMobile }) => {
   test.skip(browserName !== "chromium" || isMobile, "Wheel input with the 3D scene is exercised in desktop Chrome.");
   await page.goto("./");
   await expect(page.locator(".booth-renderer")).toHaveAttribute("data-renderer", "ready", { timeout: 60000 });
   await page.mouse.move(180, 400);
-  await page.mouse.wheel(0, 100);
+  await page.mouse.wheel(0, 25);
   await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(0);
   await expect.poll(() => page.evaluate(() => scrollY), { timeout: 30000 }).toBe(0);
   await expect(page.locator("#work")).toHaveAttribute("aria-hidden", "true");
+  await page.mouse.wheel(0, 100);
+  await expect(page.locator("#work")).toHaveAttribute("aria-hidden", "false", { timeout: 60000 });
 });
 
 test("inside the booth scrolling up never leaves; the EXIT sign is always there and does", async ({ page, isMobile, browserName }) => {
