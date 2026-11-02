@@ -78,7 +78,7 @@ export function PortfolioMonitor() {
         <section id="hello" className="closing" aria-labelledby="closing-title">
           <h2 id="closing-title" tabIndex={-1}>
             <a className="closing-book" href={whatsappLink ?? undefined} target="_blank" rel="noopener noreferrer">
-              <span className="stack-main"><span className="closing-mark">{closing.book}</span> <span aria-hidden="true">↗</span></span>{" "}
+              <span className="stack-main"><span className="closing-mark">{closing.book}</span></span>{" "}
               <span className="stack-sub">{closing.bookNote}</span>
             </a>
           </h2>
