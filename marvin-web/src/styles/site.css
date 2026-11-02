@@ -39,9 +39,9 @@ a:focus-visible, button:focus-visible, h2:focus-visible { outline: 3px solid var
 /* Two-line lettering in the manner of the logo: a heavy first line and a lighter,
    smaller line under it. Used for the tagline and for "Book for an event". */
 .stack-main, .stack-sub { display: block; }
-.stack-main { font: 900 1em/1 "Arial Black", Arial, Helvetica, sans-serif; letter-spacing: -.03em; color: var(--ink); }
-.stack-sub { margin-top: .5em; font: 700 max(.42em, 8.5px)/1.2 Arial, Helvetica, sans-serif; letter-spacing: .26em; text-transform: uppercase; color: #686d61; }
-.header-note { margin: 0; font-size: 1.55rem; text-align: center; }
+.stack-main { font: 700 1em/1.05 Arial, Helvetica, sans-serif; letter-spacing: .16em; text-transform: uppercase; color: var(--ink); }
+.stack-sub { margin-top: .55em; font: 700 max(.5em, 8.5px)/1.2 Arial, Helvetica, sans-serif; letter-spacing: .26em; text-transform: uppercase; color: #686d61; }
+.header-note { margin: 0; font-size: 1.2rem; text-align: center; }
 .journey { height: calc(100svh + var(--stage-height)); }
 .stage { position: sticky; top: 0; height: var(--stage-height); background: #fff; isolation: isolate; pointer-events: none; }
 .media-surface { position: absolute; inset: var(--header) 0 0; pointer-events: none; }
@@ -300,7 +300,8 @@ a:focus-visible, button:focus-visible, h2:focus-visible { outline: 3px solid var
 .eyebrow { margin: 0 0 18px; color: var(--gold); font-size: .6875rem; letter-spacing: .2rem; line-height: 1.7; }
 h2 { margin: 0 0 18px; font: 800 clamp(2rem, 3vw, 2.7rem)/1.05 Arial, Helvetica, sans-serif; letter-spacing: -.045em; white-space: pre-line; overflow-wrap: anywhere; text-wrap: balance; }
 .closing { min-height: 70svh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 96px 28px; scroll-margin-top: var(--header); }
-.closing h2 { margin: 0; font-size: clamp(2.6rem, 6.4vw, 5rem); white-space: normal; }
+.closing h2 { margin: 0; font-size: clamp(1.7rem, 4.2vw, 3.4rem); white-space: normal; }
+.closing-book .stack-main { letter-spacing: .12em; }
 .closing-book { display: inline-block; color: var(--ink); text-decoration: none; }
 /* One yellow stroke: a thin straight line under the words at rest, which rises
    behind them to the top of the capitals on hover or focus. */
@@ -312,7 +313,7 @@ h2 { margin: 0 0 18px; font: 800 clamp(2rem, 3vw, 2.7rem)/1.05 Arial, Helvetica,
   transition: height .35s cubic-bezier(.3, .7, .2, 1), border-radius .35s ease;
 }
 .closing-book:hover .closing-mark::before, .closing-book:focus-visible .closing-mark::before { height: .8em; border-radius: .12em; }
-.closing-book .stack-sub { margin-top: .9em; font-size: max(.2em, 10px); }
+.closing-book .stack-sub { margin-top: 1em; font-size: max(.3em, 10px); }
 .closing-social { list-style: none; display: flex; gap: 14px; margin: 44px 0 0; padding: 0; }
 .closing-social a { display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 20px 0 14px; border: 1px solid var(--line); border-radius: 999px; color: var(--ink); font-size: .875rem; }
 .closing-social a:hover { border-color: var(--ink); }
@@ -336,7 +337,8 @@ h2 { margin: 0 0 18px; font: 800 clamp(2rem, 3vw, 2.7rem)/1.05 Arial, Helvetica,
   :root { --header: calc(max(76px, 4.75rem) + env(safe-area-inset-top, 0px)); }
   .site-header { padding-inline: 6%; gap: 14px; }
   .wordmark img { height: 2.6rem; }
-  .header-note { font-size: .95rem; text-align: right; justify-self: end; }
+  .header-note { font-size: .78rem; text-align: right; justify-self: end; }
+  .header-note .stack-main { letter-spacing: .08em; }
   .site-header { grid-template-columns: auto 1fr; }
   .console { width: 64%; }
   .closing { min-height: 60svh; padding-block: 72px; }
