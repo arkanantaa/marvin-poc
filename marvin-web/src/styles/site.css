@@ -39,8 +39,8 @@ a:focus-visible, button:focus-visible, h2:focus-visible { outline: 3px solid var
 /* Two-line lettering in the manner of the logo: a heavy first line and a lighter,
    smaller line under it. Used for the tagline and for "Book for an event". */
 .stack-main, .stack-sub { display: block; }
-.stack-main { font: 900 1em/1 Arial, Helvetica, sans-serif; letter-spacing: -.035em; color: var(--ink); }
-.stack-sub { margin-top: .18em; font: 500 .62em/1.1 Arial, Helvetica, sans-serif; letter-spacing: .02em; color: #4f5149; }
+.stack-main { font: 700 1em/1 "Rubik Variable", Arial, Helvetica, sans-serif; letter-spacing: -.02em; color: var(--ink); }
+.stack-sub { margin-top: .12em; font: 500 .66em/1.1 "Rubik Variable", Arial, Helvetica, sans-serif; letter-spacing: 0; color: var(--ink); }
 .header-note { margin: 0; font-size: 1.65rem; text-align: center; }
 .journey { height: calc(100svh + var(--stage-height)); }
 .stage { position: sticky; top: 0; height: var(--stage-height); background: #fff; isolation: isolate; pointer-events: none; }
@@ -87,7 +87,7 @@ a:focus-visible, button:focus-visible, h2:focus-visible { outline: 3px solid var
    same look on a laptop, a desktop and a phone; only the overall scale changes. */
 .interior {
   --room-h: calc(var(--stage-height) - var(--header));
-  --u: min(calc((100vw - 64px) / 74), calc((var(--room-h) - 24px) / 72));
+  --u: min(calc((100vw - 48px) / 90), calc((var(--room-h) - 16px) / 68));
   position: relative; height: var(--stage-height); padding-top: var(--header); overflow: hidden;
   font-size: var(--u); background: var(--wall);
 }
@@ -127,7 +127,7 @@ a:focus-visible, button:focus-visible, h2:focus-visible { outline: 3px solid var
    darker corners where it meets the back and front walls. */
 .room-left {
   transform: rotateY(90deg) translateZ(-50vw); backface-visibility: hidden;
-  display: flex; flex-direction: column; align-items: center; justify-content: center; padding-bottom: 15em;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1.5em 0 11.5em;
   background:
     radial-gradient(ellipse 42% 38% at 50% 0%, #fff7e6d9, transparent 72%),
     radial-gradient(ellipse 70% 30% at 50% 100%, #b9a27c40, transparent 70%),
@@ -136,7 +136,7 @@ a:focus-visible, button:focus-visible, h2:focus-visible { outline: 3px solid var
 .room-ceiling, .room-floor { inset: auto; left: 0; top: calc(50% - 50vw); width: 100vw; height: 100vw; }
 .room-ceiling { transform: translateY(calc(var(--room-h) / -2)) rotateX(-90deg); background: radial-gradient(circle, #f6eedf, #e1d1b5 70%); }
 .room-floor { transform: translateY(calc(var(--room-h) / 2)) rotateX(90deg); background: radial-gradient(circle, #dccaaa, #c7b18c 75%); }
-.monitor-mount { position: relative; width: 70em; display: flex; flex-direction: column; align-items: center; }
+.monitor-mount { position: relative; width: 86em; display: flex; flex-direction: column; align-items: center; }
 /* A slim, modern display: a thin aluminium edge around a black glass bezel, the
    camera set into the top of the bezel, and a soft reflection across the glass. */
 .monitor-shell {
@@ -153,9 +153,9 @@ a:focus-visible, button:focus-visible, h2:focus-visible { outline: 3px solid var
 .lens { width: .56em; height: .56em; border-radius: 50%; background: radial-gradient(circle at 35% 32%, #5d7f8c, #13202a 55%, #050708); box-shadow: 0 0 0 .14em #1f2124; }
 .camera-dot { width: .24em; height: .24em; border-radius: 50%; background: #3a3c3f; }
 .monitor-screen {
-  position: relative; height: 42em; overflow: hidden; padding: 2.2em 3em 1.6em;
-  display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: auto auto minmax(0, 1fr) auto;
-  grid-template-areas: "title logo" "views ." "stage stage" ". dots"; row-gap: 1em; column-gap: 2em; align-items: center;
+  position: relative; height: 44em; overflow: hidden; padding: 2.2em 3em 1.2em;
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: auto auto minmax(0, 1fr);
+  grid-template-areas: "title logo" "views ." "stage stage"; row-gap: 1em; column-gap: 2em; align-items: center;
   background: var(--paper); color: var(--ink); border-radius: .6em;
 }
 .showcase { display: contents; }
@@ -178,7 +178,7 @@ a:focus-visible, button:focus-visible, h2:focus-visible { outline: 3px solid var
 .gallery { display: grid; place-items: center; cursor: grab; touch-action: pan-y; user-select: none; outline: none; }
 .gallery[data-dragging="true"] { cursor: grabbing; }
 .gallery:focus-visible .print[data-front="true"] { outline: 3px solid var(--focus); outline-offset: 4px; }
-.ring { --card: 15.5em; position: relative; width: var(--card); height: calc(var(--card) * 1.36); margin-top: -1em; }
+.ring { --card: 18em; position: relative; width: var(--card); height: calc(var(--card) * 1.36); margin-top: -1em; }
 .print {
   position: absolute; inset: 0; margin: 0; padding: .7em .7em 0; background: #fff; color: #2a2c26;
   border: 1px solid #ebe5d5; box-shadow: 0 1.2em 2.4em #4a3b2426; will-change: transform;
@@ -206,7 +206,9 @@ a:focus-visible, button:focus-visible, h2:focus-visible { outline: 3px solid var
 .model-controls button:hover { background: #fff; }
 .model-controls button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
 .event-title { grid-area: title; justify-self: start; margin: 0; font: 800 max(24px, 3.9em)/1 Arial, Helvetica, sans-serif; letter-spacing: -.045em; white-space: normal; }
-.showcase-dots { grid-area: dots; justify-self: end; display: flex; align-items: center; gap: 2px; }
+/* The event switcher sits in the screen's lower right corner, over the stage, so
+   the photos, 3D model and video get the full height of the screen. */
+.showcase-dots { position: absolute; z-index: 3; right: 2.4em; bottom: 1.2em; display: flex; align-items: center; gap: 2px; }
 .event-dot { position: relative; width: 30px; height: 30px; border: 0; background: none; padding: 0; }
 .event-dot::before { content: ""; position: absolute; left: 50%; top: 50%; width: 8px; height: 8px; translate: -50% -50%; border-radius: 999px; background: #cdc6b3; }
 .event-dot[aria-current="true"]::before { width: 26px; background: var(--ink); }
@@ -216,7 +218,7 @@ a:focus-visible, button:focus-visible, h2:focus-visible { outline: 3px solid var
 /* The console matches the monitor: black glass inside a thin aluminium rim, the
    hint in quiet light text, a glowing yellow shutter key and a recessed slot. */
 .console {
-  position: relative; width: 40%; margin-top: 2em; min-height: 4em; padding: .5em 1.8em .5em .9em;
+  position: relative; width: 40%; margin-top: 2em; min-height: 4em; padding: .5em 1.8em .5em 3.2em;
   display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 1.6em;
   border: .4em solid transparent; border-radius: 999px;
   background: linear-gradient(#17181a, #0b0c0d) padding-box, linear-gradient(160deg, #f6f7f8, #dcdfe1 38%, #c4c8cb 72%, #e8eaeb) border-box;
@@ -235,7 +237,7 @@ a:focus-visible, button:focus-visible, h2:focus-visible { outline: 3px solid var
 .selfie-button svg { width: 52%; height: 52%; fill: none; stroke: #1d1f1a; stroke-width: 1.9; stroke-linejoin: round; }
 .selfie-button:hover i { background: #f6d84f; box-shadow: 0 0 0 .18em #0b0c0d, 0 0 0 .34em #e8eaeb, 0 0 1.4em .2em #f1cd3c80; }
 .selfie-button:active i { transform: scale(.9); }
-.print-slot { justify-self: end; position: relative; width: 13em; height: .55em; }
+.print-slot { justify-self: end; position: relative; width: 11em; height: .55em; }
 .slot-line { position: absolute; inset: 0; z-index: 2; border-radius: .3em; background: #000; box-shadow: inset 0 .15em .25em #000, 0 0 0 1px #3a3c3f, 0 1px 0 1px #ffffff1f; }
 /* The polaroid comes out of the slot: clipped above the slot line, free below it. */
 .paper-feed { position: absolute; top: 50%; left: .5em; right: .5em; height: 16em; z-index: 1; pointer-events: none; clip-path: inset(0 -200% -800% -200%); }
@@ -303,12 +305,12 @@ h2 { margin: 0 0 18px; font: 800 clamp(2rem, 3vw, 2.7rem)/1.05 Arial, Helvetica,
 .closing-book .stack-main > span[aria-hidden] { font-size: .55em; vertical-align: .6em; color: var(--gold); }
 /* A yellow marker under the words, which fills up behind them on hover/focus. */
 .closing-mark {
-  background: linear-gradient(var(--yellow), var(--yellow)) 0 92% / 100% .16em no-repeat;
+  background: linear-gradient(var(--yellow), var(--yellow)) 0 94% / 100% .07em no-repeat;
   transition: background-size .28s cubic-bezier(.3, .7, .2, 1);
   -webkit-box-decoration-break: clone; box-decoration-break: clone; padding: 0 .06em;
 }
-.closing-book:hover .closing-mark, .closing-book:focus-visible .closing-mark { background-size: 100% 62%; }
-.closing-book .stack-sub { margin-top: .35em; font-size: .3em; color: var(--muted); }
+.closing-book:hover .closing-mark, .closing-book:focus-visible .closing-mark { background-size: 100% 55%; }
+.closing-book .stack-sub { margin-top: .5em; font-size: .34em; color: #4f5149; }
 .closing-social { list-style: none; display: flex; gap: 14px; margin: 44px 0 0; padding: 0; }
 .closing-social a { display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 20px 0 14px; border: 1px solid var(--line); border-radius: 999px; color: var(--ink); font-size: .875rem; }
 .closing-social a:hover { border-color: var(--ink); }
@@ -319,9 +321,10 @@ h2 { margin: 0 0 18px; font: 800 clamp(2rem, 3vw, 2.7rem)/1.05 Arial, Helvetica,
 @media (max-width: 860px) {
   .interior { --u: min(calc((100vw - 24px) / 72), calc((var(--room-h) - 16px) / 104)); }
   .room-left { padding-bottom: 14em; }
+  .monitor-mount { width: 70em; }
   .console { width: 60%; }
-  .monitor-screen { height: 74em; grid-template-areas: "title logo" "views views" "stage stage" "dots dots"; padding: 2.4em 2.2em 1.4em; row-gap: .9em; }
-  .showcase-dots { justify-self: center; }
+  .monitor-screen { height: 74em; grid-template-rows: auto auto minmax(0, 1fr) auto; grid-template-areas: "title logo" "views views" "stage stage" "dots dots"; padding: 2.4em 2.2em 1.4em; row-gap: .9em; }
+  .showcase-dots { position: static; grid-area: dots; justify-self: center; }
   .ring { --card: 21em; }
   .slide-arrow { display: none; }
   .showcase-stage { grid-template-columns: minmax(0, 1fr); }
