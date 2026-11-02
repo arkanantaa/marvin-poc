@@ -114,11 +114,18 @@ a:focus-visible, button:focus-visible, h2:focus-visible { outline: 3px solid var
 .exit-word { font: 800 .8125rem/1 Arial, Helvetica, sans-serif; letter-spacing: .22em; text-transform: uppercase; text-shadow: 0 0 10px #f1cd3c80; }
 .exit-sign:hover { box-shadow: 0 .9rem 1.8rem -.8rem #4a3b2473, 0 0 1.4rem -.2rem #f1cd3c80; }
 .exit-sign:hover .exit-door svg { transform: translateX(-2px); }
-.room { position: absolute; inset: 0; transform-style: preserve-3d; transform: translateZ(50vw) rotateY(0deg); transition: transform .95s cubic-bezier(.5, 0, .3, 1); }
-.work-scene[data-turned="true"] .room { transform: translateZ(50vw) rotateY(-90deg); transition: transform 1.8s cubic-bezier(.6, 0, .22, 1) .25s; }
+/* The turn itself is animated from PortfolioMonitor. */
+.room { position: absolute; inset: 0; transform-style: preserve-3d; transform: translateZ(50vw) rotateY(0deg); }
+.room[data-facing="turning"] { will-change: transform; }
+/* Settled on the monitor: no 3D at all, just the wall as a flat page. It looks the
+   same as the last frame of the turn, but phones draw and scroll it reliably. */
+.room[data-facing="monitor"] { transform: none; transform-style: flat; }
+.room[data-facing="monitor"] > .room-left { transform: none; }
+.room[data-facing="monitor"] > .room-face:not(.room-left) { display: none; }
+.room-view:has(> .room[data-facing="monitor"]) { perspective: none; }
 /* While the page is seen through the doorway it always faces the back wall, so the
    room never shows up as a turned box inside the doorway. */
-:root[data-portal="on"] .room { transform: translateZ(50vw) rotateY(0deg); transition: none; }
+:root[data-portal="on"] .room { transform: translateZ(50vw) rotateY(0deg); }
 .room-face { position: absolute; inset: 0; }
 /* Back wall: plain wall colour, the same colour the booth shows through the
    doorway, so no light spot or edge appears while you walk in or out. */
@@ -162,7 +169,7 @@ a:focus-visible, button:focus-visible, h2:focus-visible { outline: 3px solid var
 .screen-header { grid-area: logo; justify-self: end; align-self: start; padding-top: .6em; }
 .screen-logo { display: block; height: max(13px, 1.55em); width: auto; opacity: .9; }
 .showcase-views { grid-area: views; justify-self: start; display: inline-flex; gap: .3em; padding: .3em; border-radius: 999px; background: #eee8d9; }
-.showcase-views button { min-height: max(40px, calc(var(--u) * 3.4)); padding: 0 max(14px, calc(var(--u) * 1.6)); border: 0; border-radius: 999px; background: none; color: var(--muted); font-size: max(11px, .95em); letter-spacing: .09em; text-transform: uppercase; }
+.showcase-views button { white-space: nowrap; min-height: max(40px, calc(var(--u) * 3.4)); padding: 0 max(14px, calc(var(--u) * 1.6)); border: 0; border-radius: 999px; background: none; color: var(--muted); font-size: max(11px, .95em); letter-spacing: .09em; text-transform: uppercase; }
 .showcase-views button:hover { color: var(--ink); }
 .showcase-views button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
 .showcase-stage { grid-area: stage; align-self: stretch; min-height: 0; display: grid; grid-template-columns: max(30px, 4em) minmax(0, 1fr) max(30px, 4em); align-items: center; touch-action: pan-y; }
@@ -321,17 +328,34 @@ h2 { margin: 0 0 18px; font: 800 clamp(2rem, 3vw, 2.7rem)/1.05 Arial, Helvetica,
 .closing-social svg .fill { fill: currentColor; stroke: none; }
 
 
-@media (max-width: 860px) {
-  .interior { --u: min(calc((100vw - 24px) / 72), calc((var(--room-h) - 16px) / 104)); }
-  .room-left { padding-bottom: 14em; }
-  .monitor-mount { width: 70em; }
-  .console { width: 60%; }
-  .monitor-screen { height: 74em; grid-template-rows: auto auto minmax(0, 1fr) auto; grid-template-areas: "title logo" "views views" "stage stage" "dots dots"; padding: 2.4em 2.2em 1.4em; row-gap: .9em; }
-  .showcase-dots { position: static; grid-area: dots; justify-self: center; }
+/* Phones and narrow windows keep the laptop's monitor exactly as it is (title and
+   logo on top, the view switch under the title, the photo ring with its arrows,
+   the event dots bottom right, the console below). The monitor fills the width;
+   on a tall screen it simply gets taller so the photos stay a good size. */
+@media (max-width: 700px) {
+  .interior { --u: min(calc((100vw - 20px) / 87), calc((var(--room-h) - 16px) / 68)); }
+}
+@media (max-width: 700px) and (max-aspect-ratio: 4 / 5) {
+  /* Room above the monitor for the EXIT sign. */
+  .room-left { padding: 76px 0 13em; }
+  .monitor-screen { height: clamp(44em, calc(var(--room-h) - 46em - 76px), 92em); padding-bottom: 4.6em; }
   .ring { --card: 21em; }
-  .slide-arrow { display: none; }
-  .showcase-stage { grid-template-columns: minmax(0, 1fr); }
-  .showcase-stage .showcase-media { grid-column: 1; }
+  /* The hint sits right under the photos, clear of the event dots. */
+  .ring-hint { bottom: auto; top: calc(50% + var(--u) * 14.6); }
+  .console { width: 46%; }
+}
+/* Phones held sideways: a short screen, so the header and controls get slimmer. */
+@media (max-height: 520px) and (min-aspect-ratio: 1 / 1) {
+  :root { --header: calc(56px + env(safe-area-inset-top, 0px)); }
+  .wordmark img { height: 2.1rem; }
+  .header-note { font-size: .8rem; }
+  .exit-sign { top: calc(var(--header) + 10px); min-height: 36px; }
+  .showcase-views button { min-height: 26px; padding: 0 10px; font-size: 9px; }
+  .slide-arrow { width: 24px; height: 24px; font-size: 15px; }
+  .event-dot { width: 22px; height: 24px; }
+  .event-step { width: 24px; height: 24px; font-size: 14px; }
+  .showcase-dots { bottom: .4em; }
+  .ring-hint { display: none; }
 }
 @media (max-width: 700px) {
   :root { --header: calc(max(76px, 4.75rem) + env(safe-area-inset-top, 0px)); }
@@ -340,7 +364,6 @@ h2 { margin: 0 0 18px; font: 800 clamp(2rem, 3vw, 2.7rem)/1.05 Arial, Helvetica,
   .header-note { font-size: .66rem; text-align: right; justify-self: end; }
   .header-note .stack-main { letter-spacing: .06em; line-height: 1.45; }
   .site-header { grid-template-columns: auto 1fr; }
-  .console { width: 64%; }
   .closing { min-height: 60svh; padding-block: 72px; }
   .closing-social { flex-direction: column; align-items: center; }
 }

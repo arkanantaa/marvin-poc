@@ -12,20 +12,51 @@ import { PrintSlot, SelfieButton } from "./SelfiePrinter";
 // Scrolling further leads to the closing section.
 export function PortfolioMonitor() {
   const { prints, flash, snap } = useSelfie();
-  // Marks which way the room ends up facing once the turn has finished
-  // ("monitor" or "door"), so anything that needs the settled view can wait for it.
+  // Turning to the monitor (and back to the doorway before leaving) is a short 3D
+  // camera turn inside a CSS room. The room is only drawn in 3D while it turns: once
+  // it has settled on the monitor the wall is an ordinary flat page again
+  // (data-facing="monitor"), which phones scroll and redraw without glitches.
   const room = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const element = room.current;
-    if (!element) return;
-    const turning = (event: TransitionEvent) => { if (event.target === element) element.dataset.facing = "turning"; };
-    const settled = (event: TransitionEvent) => {
-      if (event.target !== element) return;
-      element.dataset.facing = element.closest<HTMLElement>(".work-scene")?.dataset.turned === "true" ? "monitor" : "door";
-    };
-    element.addEventListener("transitionrun", turning);
-    element.addEventListener("transitionend", settled);
-    return () => { element.removeEventListener("transitionrun", turning); element.removeEventListener("transitionend", settled); };
+    const scene = element?.closest<HTMLElement>(".work-scene");
+    if (!element || !scene) return;
+    const door = "translateZ(50vw) rotateY(0deg)";
+    const monitor = "translateZ(50vw) rotateY(-90deg)";
+    let goal = "";
+    let animation: Animation | null = null;
+    function sync(first = false) {
+      if (!element || !scene) return;
+      const next = scene.dataset.turned === "true" ? "monitor" : "door";
+      if (next === goal) return;
+      goal = next;
+      // Where the room is right now: mid-turn, settled on the monitor or at the door.
+      const from = animation ? getComputedStyle(element).transform
+        : element.dataset.facing === "monitor" ? monitor : door;
+      animation?.cancel();
+      animation = null;
+      const portal = document.documentElement.dataset.portal === "on";
+      if (first || portal || typeof element.animate !== "function") {
+        element.dataset.facing = next;
+        return;
+      }
+      element.dataset.facing = "turning";
+      const toMonitor = next === "monitor";
+      const turn = element.animate([{ transform: from }, { transform: toMonitor ? monitor : door }], toMonitor
+        ? { duration: 1800, delay: 250, easing: "cubic-bezier(.6, 0, .22, 1)", fill: "both" }
+        : { duration: 950, easing: "cubic-bezier(.5, 0, .3, 1)", fill: "both" });
+      animation = turn;
+      turn.onfinish = () => {
+        if (animation !== turn) return;
+        element.dataset.facing = next;
+        turn.cancel();
+        animation = null;
+      };
+    }
+    sync(true);
+    const observer = new MutationObserver(() => sync());
+    observer.observe(scene, { attributes: true, attributeFilter: ["data-turned"] });
+    return () => { observer.disconnect(); animation?.cancel(); };
   }, []);
   return (
     <>

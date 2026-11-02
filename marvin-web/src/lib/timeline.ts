@@ -30,11 +30,26 @@ export const wrap = (index: number, length: number) => ((index % length) + lengt
 // One continuous dolly. The distance to the back wall shrinks by a constant
 // ratio per unit of progress, so the apparent zoom rate never changes: no
 // stop-and-go "zoom, pause, zoom again".
-export function cameraPose(progress: number, distance: number) {
+//
+// On a narrow (portrait) screen the view is so slim that, well before the camera
+// reaches the doorway, all it shows is the plain back wall. `aspect` lets that last,
+// featureless stretch take no longer than it does on a laptop, so a phone does not
+// sit on an empty wall for seconds while walking in or out.
+export const wallOnlyShare = .26;
+export function cameraPose(progress: number, distance: number, aspect = 16 / 10) {
   const pose = timeline(progress);
   const near = portal.endZ - portal.backZ;
   const far = Math.max(distance - portal.backZ, near * 1.5);
-  const z = portal.backZ + far * (near / far) ** pose.travel;
+  // Distance from the back wall at which the view no longer shows anything but the
+  // wall (its half width reaches the interior side wall, .63 m from the doorway centre).
+  const halfWidth = Math.tan(cameraFov * Math.PI / 360) * Math.max(.1, aspect);
+  const wallOnly = Math.min(far, Math.max(near, .63 / halfWidth));
+  const share = Math.log(wallOnly / near) / Math.log(far / near);
+  const t = pose.travel;
+  const depth = share <= wallOnlyShare ? far * (near / far) ** t
+    : t < 1 - wallOnlyShare ? far * (wallOnly / far) ** (t / (1 - wallOnlyShare))
+      : wallOnly * (near / wallOnly) ** ((t - 1 + wallOnlyShare) / wallOnlyShare);
+  const z = portal.backZ + depth;
   // Before entering, the camera faces the booth straight on from a little above
   // its middle (the depth comes from lighting and a small pointer parallax), then
   // moves across to face the doorway square-on before crossing it.

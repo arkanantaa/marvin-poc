@@ -149,7 +149,7 @@ export function createBoothScene(
     previousTime = time;
     windTime += Math.max(0, Math.min(elapsed, .05));
     booth.setCurtain(pose.curtain, cloth.displacement, windTime, touch);
-    const view = cameraPose(motion.progress, distance);
+    const view = cameraPose(motion.progress, distance, camera.aspect);
     const step = Math.max(0, Math.min(elapsed, .05));
     const follow = 1 - Math.exp(-step * 3.2);
     look.x += (look.targetX - look.x) * follow;

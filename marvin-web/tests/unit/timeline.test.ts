@@ -78,3 +78,35 @@ describe("3D entrance choreography", () => {
     expect(wrap(3, 3)).toBe(0);
   });
 });
+
+describe("narrow screens", () => {
+  // Depth from the back wall at which a view of this aspect shows nothing but the wall.
+  const wallOnly = (aspect: number) => .63 / (Math.tan(17 * Math.PI / 180) * aspect);
+  const wallShare = (aspect: number, distance: number) => {
+    let steps = 0;
+    for (let step = 0; step <= 1000; step++) {
+      if (cameraPose(step / 1000, distance, aspect).z - portal.backZ < wallOnly(aspect)) steps++;
+    }
+    return steps / 1001;
+  };
+  it("does not linger on the plain back wall on a phone", () => {
+    // Phone in portrait: the camera starts far back, and the view is very slim.
+    expect(wallShare(.46, 16)).toBeLessThan(.27);
+    expect(cameraPose(1, 16, .46).z).toBeCloseTo(portal.endZ);
+  });
+  it("keeps the laptop walk-in as it was", () => {
+    for (let step = 0; step <= 100; step++) {
+      expect(cameraPose(step / 100, 6.7, 1.6).z).toBeCloseTo(cameraPose(step / 100, 6.7).z, 6);
+    }
+  });
+  it("stays one continuous zoom on any screen", () => {
+    for (const aspect of [.4, .46, .75, 1, 1.33]) {
+      let previous = Infinity;
+      for (let step = 0; step <= 400; step++) {
+        const z = cameraPose(step / 400, 12, aspect).z;
+        expect(z).toBeLessThanOrEqual(previous + 1e-9);
+        previous = z;
+      }
+    }
+  });
+});

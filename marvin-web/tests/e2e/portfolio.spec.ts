@@ -114,3 +114,36 @@ test("the photos turn round: arrows, keys and dragging bring another photo to th
   await expect(page.locator(".event-title")).toHaveText("Padel Night");
   await expect(page.locator(".ring .print")).toHaveCount(6);
 });
+
+test("every screen gets the laptop's monitor: same layout, settled as a flat page", async ({ page }) => {
+  await page.goto("./#work");
+  const screen = page.locator(".monitor-screen");
+  await expect(page.locator(".room")).toHaveAttribute("data-facing", "monitor");
+  // No 3D once settled: the wall is an ordinary page that phones scroll smoothly.
+  expect(await page.locator(".room").evaluate(element => getComputedStyle(element).transform)).toBe("none");
+  const box = await screen.boundingBox();
+  const viewport = page.viewportSize()!;
+  expect(box!.x).toBeGreaterThanOrEqual(0);
+  expect(box!.x + box!.width).toBeLessThanOrEqual(viewport.width);
+  // Title top left, logo top right, the photo arrows either side, the event dots
+  // in the bottom right corner, the console under the screen.
+  const title = (await page.locator(".event-title").boundingBox())!;
+  const logo = (await page.locator(".screen-logo").boundingBox())!;
+  expect(logo.x).toBeGreaterThan(title.x + title.width);
+  await expect(page.getByRole("button", { name: "Previous photo" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Next photo" })).toBeVisible();
+  const dots = (await page.locator(".showcase-dots").boundingBox())!;
+  expect(dots.x + dots.width).toBeGreaterThan(box!.x + box!.width * .8);
+  expect(dots.y + dots.height).toBeGreaterThan(box!.y + box!.height * .8);
+  // The words of the hint (its box spans the stage) stay clear of the dots.
+  const hint = await page.locator(".ring-hint").evaluate(element => {
+    const range = document.createRange();
+    range.selectNodeContents(element);
+    const { x, y, width, height } = range.getBoundingClientRect();
+    return { x, y, width, height };
+  });
+  expect(hint.y + hint.height <= dots.y || hint.x + hint.width <= dots.x).toBe(true);
+  const console = (await page.locator(".console").boundingBox())!;
+  expect(console.y).toBeGreaterThan(box!.y + box!.height);
+  expect(console.y + console.height).toBeLessThanOrEqual(viewport.height);
+});
