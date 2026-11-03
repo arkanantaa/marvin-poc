@@ -44,7 +44,8 @@ export function BoothModelViewer({ theme, backdrop }: { theme: EventTheme; backd
         aria-label={backdrop
           ? `Interactive three-dimensional model of the Marvin photobooth with the event's backdrop (${portfolioLabels.backdropBy[backdrop.by].toLowerCase()})`
           : "Interactive three-dimensional model of the Marvin photobooth"} />
-      {backdrop && state === "ready" && <p className="model-note">{portfolioLabels.backdropBy[backdrop.by]}</p>}
+      {/* Only a backdrop the client brought is labelled. */}
+      {backdrop?.by === "client" && state === "ready" && <p className="model-note">{portfolioLabels.backdropBy.client}</p>}
       {state === "unavailable" && (
         <img className="model-fallback" src={asset(boothPoster.src)} alt="The Marvin photobooth"
           width={boothPoster.width} height={boothPoster.height} />
