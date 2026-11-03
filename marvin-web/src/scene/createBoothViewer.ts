@@ -11,7 +11,7 @@ const targetY = 1.95;
 
 // A small, interactive copy of the booth for the portfolio: drag to turn it, open
 // and close the curtain. With a backdrop, the booth stands on the left and the
-// event's backdrop on the right, as one set that turns together.
+// event's backdrop on the right, each turning on its own spot.
 // It renders only while something moves.
 export function createBoothViewer(host: HTMLElement, { autoRotate, theme, backdrop }: { autoRotate: boolean; theme?: BoothTheme; backdrop?: Backdrop }) {
   const renderer = new WebGLRenderer({ antialias: true, alpha: true, powerPreference: "low-power" });
@@ -31,21 +31,23 @@ export function createBoothViewer(host: HTMLElement, { autoRotate, theme, backdr
   booth.root.position.z = -.05;
   pivot.add(booth.root);
   const set = backdrop ? buildBackdrop(backdrop) : null;
+  // The backdrop has a turntable of its own next to the booth's.
+  const backdropPivot = new Group();
   if (set) {
-    booth.root.position.x = -1.55;
-    set.root.position.set(1.75, 0, -.35);
-    set.root.rotation.y = -.18;
-    pivot.add(set.root);
+    pivot.position.x = -1.8;
+    backdropPivot.position.x = 1.9;
+    backdropPivot.add(set.root);
+    scene.add(backdropPivot);
   }
   scene.add(pivot);
-  // The set as a whole: wider than the booth alone.
-  const frameWidth = set ? 7.6 : 3.8;
-  // Facing: the booth alone starts turned a little; the set starts nearly front-on
-  // and, while idle, sways gently instead of spinning so the backdrop stays in view.
-  const restYaw = set ? -.12 : -.5;
-  let swayTime = 0;
+  // Both models side by side: wider than the booth alone.
+  const frameWidth = set ? 7.8 : 3.8;
 
-  let yaw = restYaw;
+  let yaw = -.5;
+  let backdropYaw = .35;
+  let backdropSpin = 0;
+  // Which model a drag turns: the one under the pointer.
+  let dragTarget: "booth" | "backdrop" = "booth";
   let pitch = .1;
   let spin = 0;
   let opening = 0;
@@ -78,20 +80,19 @@ export function createBoothViewer(host: HTMLElement, { autoRotate, theme, backdr
     windTime += dt;
     // Gentle turntable until the visitor takes over; resumes after a pause.
     const resting = !dragging && time - idleSince > 2500;
-    if (rotates && resting && set) {
-      swayTime += dt;
-      const home = restYaw + Math.PI * 2 * Math.round((yaw - restYaw) / (Math.PI * 2));
-      const target = home + Math.sin(swayTime * .4) * .5;
-      yaw += (target - yaw) * (1 - Math.exp(-dt * 1.2));
-    } else if (rotates && resting) yaw += dt * .3;
+    if (rotates && resting) { yaw += dt * .3; backdropYaw += dt * .3; }
     yaw += spin * Math.min(1, dt * 8);
     spin *= Math.max(0, 1 - dt * 8);
     if (Math.abs(spin) < .0005) spin = 0;
+    backdropYaw += backdropSpin * Math.min(1, dt * 8);
+    backdropSpin *= Math.max(0, 1 - dt * 8);
+    if (Math.abs(backdropSpin) < .0005) backdropSpin = 0;
     opening += (openTarget - opening) * (1 - Math.exp(-dt * 3));
     if (Math.abs(openTarget - opening) < .0005) opening = openTarget;
     const motion = cloth.step(opening, dt);
     booth.setCurtain(opening, motion.displacement, windTime);
     pivot.rotation.y = yaw;
+    backdropPivot.rotation.y = backdropYaw;
     camera.position.set(0, targetY + Math.sin(pitch) * distance, Math.cos(pitch) * distance);
     camera.lookAt(0, targetY, 0);
     renderer.render(scene, camera);
@@ -100,7 +101,7 @@ export function createBoothViewer(host: HTMLElement, { autoRotate, theme, backdr
     host.dataset.open = String(openTarget);
     host.dataset.frames = String(++frames);
     // Keep drawing while anything moves or the turntable runs; otherwise sleep.
-    moving = dragging || spin !== 0 || opening !== openTarget || motion.active;
+    moving = dragging || spin !== 0 || backdropSpin !== 0 || opening !== openTarget || motion.active;
     if (moving || rotates) schedule();
   }
   function resize() {
@@ -115,6 +116,8 @@ export function createBoothViewer(host: HTMLElement, { autoRotate, theme, backdr
   }
   const down = (event: PointerEvent) => {
     dragging = true;
+    const bounds = canvas.getBoundingClientRect();
+    dragTarget = set && event.clientX > bounds.left + bounds.width / 2 ? "backdrop" : "booth";
     lastX = event.clientX;
     lastY = event.clientY;
     canvas.setPointerCapture(event.pointerId);
@@ -123,7 +126,8 @@ export function createBoothViewer(host: HTMLElement, { autoRotate, theme, backdr
   };
   const move = (event: PointerEvent) => {
     if (!dragging) return;
-    yaw += (event.clientX - lastX) * .009;
+    if (dragTarget === "backdrop") backdropYaw += (event.clientX - lastX) * .009;
+    else yaw += (event.clientX - lastX) * .009;
     pitch = Math.min(.4, Math.max(-.05, pitch + (event.clientY - lastY) * .003));
     lastX = event.clientX;
     lastY = event.clientY;
