@@ -92,5 +92,4 @@ export const closing = {
 };
 export const portfolioLabels = {
   printSignature: "marvin studio",
-  backdropBy: { marvin: "Backdrop by Marvin", client: "Client's own backdrop" },
 };

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { portfolioLabels, type EventBackdrop, type EventTheme } from "../data/portfolio";
+import type { EventBackdrop, EventTheme } from "../data/portfolio";
 import { asset, boothPoster } from "../lib/assets";
 
 type Viewer = { turn(radians: number): void; setOpen(open: boolean): void };
@@ -21,7 +21,8 @@ export function BoothModelViewer({ theme, backdrop }: { theme: EventTheme; backd
     void import("../scene/createBoothViewer").then(({ createBoothViewer }) => {
       if (cancelled) return;
       try {
-        const created = createBoothViewer(container, { autoRotate: !matchMedia("(prefers-reduced-motion: reduce)").matches, theme, backdrop });
+        // Like the entrance, the turntable plays whatever the OS motion setting.
+        const created = createBoothViewer(container, { autoRotate: true, theme, backdrop });
         viewer.current = created;
         dispose = created.dispose;
         setState("ready");
@@ -42,10 +43,8 @@ export function BoothModelViewer({ theme, backdrop }: { theme: EventTheme; backd
     <div className="model-viewer" data-state={state}>
       <div className="model-canvas" ref={host} role="img"
         aria-label={backdrop
-          ? `Interactive three-dimensional model of the Marvin photobooth with the event's backdrop (${portfolioLabels.backdropBy[backdrop.by].toLowerCase()})`
+          ? "Interactive three-dimensional models of the Marvin photobooth and the event's backdrop"
           : "Interactive three-dimensional model of the Marvin photobooth"} />
-      {/* Only a backdrop the client brought is labelled. */}
-      {backdrop?.by === "client" && state === "ready" && <p className="model-note">{portfolioLabels.backdropBy.client}</p>}
       {state === "unavailable" && (
         <img className="model-fallback" src={asset(boothPoster.src)} alt="The Marvin photobooth"
           width={boothPoster.width} height={boothPoster.height} />

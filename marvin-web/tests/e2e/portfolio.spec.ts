@@ -35,12 +35,18 @@ test("each event has photos, video and a 3D booth, and slides left and right", a
   await expect(viewer).not.toHaveAttribute("data-state", "loading", { timeout: 60000 });
   if ((await viewer.getAttribute("data-state")) === "ready") {
     await expect(page.getByRole("button", { name: "Open the curtain" })).toBeVisible();
-    // The booth stands next to the event's backdrop; the wedding's own decor is labelled.
-    await expect(title).toHaveText("Wedding");
-    await expect(viewer.locator(".model-note")).toHaveText("Client's own backdrop");
-    await page.getByRole("button", { name: "Next event" }).click();
-    await expect(title).toHaveText("IKEA");
-    await expect(viewer).toHaveAttribute("data-state", "ready", { timeout: 60000 });
+    // Every event's models turn on their own until touched, then stay put.
+    const canvas = viewer.locator(".model-canvas");
+    for (const name of ["Wedding", "IKEA"]) {
+      if (name === "IKEA") await page.getByRole("button", { name: "Next event" }).click();
+      await expect(title).toHaveText(name);
+      await expect(viewer).toHaveAttribute("data-state", "ready", { timeout: 60000 });
+      await expect(canvas).toHaveAttribute("data-turntable", "on", { timeout: 60000 });
+      const start = Number(await canvas.getAttribute("data-yaw"));
+      await expect.poll(async () => Number(await canvas.getAttribute("data-yaw")), { timeout: 60000 }).toBeGreaterThan(start);
+    }
+    await page.getByRole("button", { name: "Turn the booth left" }).click();
+    await expect(canvas).toHaveAttribute("data-turntable", "off");
     await expect(viewer.locator(".model-note")).toHaveCount(0);
   } else {
     await expect(viewer.getByRole("status")).toContainText("isn’t available");

@@ -53,7 +53,8 @@ export function createBoothViewer(host: HTMLElement, { autoRotate, theme, backdr
   let opening = 0;
   let openTarget = 0;
   let windTime = 0;
-  let idleSince = performance.now();
+  // The models turn on their own until the visitor touches them, then stay put.
+  let touched = false;
   let dragging = false;
   let lastX = 0;
   let lastY = 0;
@@ -78,9 +79,12 @@ export function createBoothViewer(host: HTMLElement, { autoRotate, theme, backdr
     const dt = Math.min(.05, Math.max(0, elapsed));
     previous = time;
     windTime += dt;
-    // Gentle turntable until the visitor takes over; resumes after a pause.
-    const resting = !dragging && time - idleSince > 2500;
-    if (rotates && resting) { yaw += dt * .3; backdropYaw += dt * .3; }
+    // Gentle turntable at the same speed however slowly the device draws.
+    const turning = rotates && !touched;
+    if (turning) {
+      const step = Math.min(.25, Math.max(0, elapsed)) * .3;
+      yaw += step; backdropYaw += step;
+    }
     yaw += spin * Math.min(1, dt * 8);
     spin *= Math.max(0, 1 - dt * 8);
     if (Math.abs(spin) < .0005) spin = 0;
@@ -99,10 +103,11 @@ export function createBoothViewer(host: HTMLElement, { autoRotate, theme, backdr
     host.dataset.renderer = "ready";
     host.dataset.yaw = yaw.toFixed(3);
     host.dataset.open = String(openTarget);
+    host.dataset.turntable = turning ? "on" : "off";
     host.dataset.frames = String(++frames);
     // Keep drawing while anything moves or the turntable runs; otherwise sleep.
     moving = dragging || spin !== 0 || backdropSpin !== 0 || opening !== openTarget || motion.active;
-    if (moving || rotates) schedule();
+    if (moving || turning) schedule();
   }
   function resize() {
     const width = Math.max(1, host.clientWidth), height = Math.max(1, host.clientHeight);
@@ -121,7 +126,7 @@ export function createBoothViewer(host: HTMLElement, { autoRotate, theme, backdr
     lastX = event.clientX;
     lastY = event.clientY;
     canvas.setPointerCapture(event.pointerId);
-    idleSince = performance.now();
+    touched = true;
     schedule();
   };
   const move = (event: PointerEvent) => {
@@ -131,12 +136,10 @@ export function createBoothViewer(host: HTMLElement, { autoRotate, theme, backdr
     pitch = Math.min(.4, Math.max(-.05, pitch + (event.clientY - lastY) * .003));
     lastX = event.clientX;
     lastY = event.clientY;
-    idleSince = performance.now();
     schedule();
   };
   const up = (event: PointerEvent) => {
     dragging = false;
-    idleSince = performance.now();
     if (canvas.hasPointerCapture(event.pointerId)) canvas.releasePointerCapture(event.pointerId);
   };
   const onVisibility = () => { if (!document.hidden) { previous = performance.now(); schedule(); } };
@@ -150,7 +153,7 @@ export function createBoothViewer(host: HTMLElement, { autoRotate, theme, backdr
   resize();
   void booth.ready.then(() => { if (!disposed) { host.dataset.textures = "loaded"; schedule(); } });
   return {
-    turn(radians: number) { spin += radians; idleSince = performance.now(); schedule(); },
+    turn(radians: number) { spin += radians; touched = true; schedule(); },
     setOpen(open: boolean) { openTarget = open ? 1 : 0; schedule(); },
     dispose() {
       disposed = true;
