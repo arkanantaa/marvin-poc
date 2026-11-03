@@ -108,7 +108,10 @@ export function useJourneyProgress(home: RefObject<HTMLAnchorElement | null>) {
       frame = 0;
       // While locked inside, the window's own scroll position means nothing (a phone's
       // address bar appearing or hiding can nudge it); the booth stays the booth.
-      let progress = locked && !transition && !leaving ? 1 : clamp(scrollY / range());
+      // Phones snap scroll positions to device pixels, so the end of the walk-in can
+      // land a fraction of a pixel short: within 2px of the end counts as inside.
+      const reached = scrollY >= range() - 2 ? 1 : scrollY / range();
+      let progress = locked && !transition && !leaving ? 1 : clamp(reached);
       // Once inside, the booth is one-way: however the page gets scrolled up (wheel,
       // trackpad momentum, scrollbar, keys) it is put back at the monitor. Only the
       // EXIT sign, the logo or the browser's Back button lead out.

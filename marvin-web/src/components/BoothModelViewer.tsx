@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import type { EventTheme } from "../data/portfolio";
+import { portfolioLabels, type EventBackdrop, type EventTheme } from "../data/portfolio";
 import { asset, boothPoster } from "../lib/assets";
 
 type Viewer = { turn(radians: number): void; setOpen(open: boolean): void };
 
 // The booth as a small, playable 3D model, dressed in the event's colours. Three.js
 // is loaded only when this view is opened, and released again when it closes.
-export function BoothModelViewer({ theme }: { theme: EventTheme }) {
+export function BoothModelViewer({ theme, backdrop }: { theme: EventTheme; backdrop?: EventBackdrop }) {
   const host = useRef<HTMLDivElement>(null);
   const viewer = useRef<Viewer | null>(null);
   const [state, setState] = useState<"loading" | "ready" | "unavailable">("loading");
@@ -21,7 +21,7 @@ export function BoothModelViewer({ theme }: { theme: EventTheme }) {
     void import("../scene/createBoothViewer").then(({ createBoothViewer }) => {
       if (cancelled) return;
       try {
-        const created = createBoothViewer(container, { autoRotate: !matchMedia("(prefers-reduced-motion: reduce)").matches, theme });
+        const created = createBoothViewer(container, { autoRotate: !matchMedia("(prefers-reduced-motion: reduce)").matches, theme, backdrop });
         viewer.current = created;
         dispose = created.dispose;
         setState("ready");
@@ -32,7 +32,7 @@ export function BoothModelViewer({ theme }: { theme: EventTheme }) {
       viewer.current = null;
       dispose?.();
     };
-  }, [theme]);
+  }, [theme, backdrop]);
   function toggle() {
     const next = !open;
     setOpen(next);
@@ -41,7 +41,10 @@ export function BoothModelViewer({ theme }: { theme: EventTheme }) {
   return (
     <div className="model-viewer" data-state={state}>
       <div className="model-canvas" ref={host} role="img"
-        aria-label="Interactive three-dimensional model of the Marvin photobooth" />
+        aria-label={backdrop
+          ? `Interactive three-dimensional model of the Marvin photobooth with the event's backdrop (${portfolioLabels.backdropBy[backdrop.by].toLowerCase()})`
+          : "Interactive three-dimensional model of the Marvin photobooth"} />
+      {backdrop && state === "ready" && <p className="model-note">{portfolioLabels.backdropBy[backdrop.by]}</p>}
       {state === "unavailable" && (
         <img className="model-fallback" src={asset(boothPoster.src)} alt="The Marvin photobooth"
           width={boothPoster.width} height={boothPoster.height} />

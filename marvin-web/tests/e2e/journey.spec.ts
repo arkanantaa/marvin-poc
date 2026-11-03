@@ -187,6 +187,26 @@ test("on a phone, scrolling inside the booth never walks you back out", async ({
     await expect(page.locator(".room")).toHaveAttribute("data-facing", "monitor");
   } finally { await session.detach(); }
 });
+test("on a phone, a walk-in that lands a fraction of a pixel short still arrives inside", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium" || test.info().project.name !== "mobile", "Touch input is exercised in mobile Chromium.");
+  // Phones snap scroll positions to device pixels, so asking for the end of the
+  // walk-in can land just short of it. That must still count as inside.
+  await page.addInitScript(() => {
+    const scrollTo = window.scrollTo.bind(window);
+    window.scrollTo = ((options: ScrollToOptions) =>
+      scrollTo(typeof options === "object" && (options.top ?? 0) > 100 ? { ...options, top: (options.top ?? 0) - .6 } : options)) as typeof window.scrollTo;
+  });
+  await page.goto("./");
+  const session = await page.context().newCDPSession(page);
+  try {
+    await session.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x: 180, y: 540 }] });
+    await session.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [{ x: 180, y: 220 }] });
+    await session.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+    await expect(page.locator("html")).toHaveAttribute("data-locked", "true");
+    await expect(page.locator("html")).toHaveAttribute("data-portal", "off");
+    await expect(page.locator(".room")).toHaveAttribute("data-facing", "monitor");
+  } finally { await session.detach(); }
+});
 test("reduced motion, resize, failed images and reflow", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.route("**/portfolio/*", (route) => route.abort());

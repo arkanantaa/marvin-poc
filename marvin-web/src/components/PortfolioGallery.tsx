@@ -163,7 +163,7 @@ export function PortfolioGallery() {
               </video>
             </div>
           )}
-          {view === "model" && <BoothModelViewer theme={current.theme} />}
+          {view === "model" && <BoothModelViewer theme={current.theme} backdrop={current.backdrop} />}
         </div>
         {view === "photos" && (
           <button type="button" className="slide-arrow" data-side="next" aria-label="Next photo" onClick={() => spin(1)}>›</button>

@@ -214,6 +214,8 @@ a:focus-visible, button:focus-visible, h2:focus-visible { outline: 3px solid var
 .model-fallback { position: absolute; inset: 0 0 4em; width: 100%; height: calc(100% - 4em); object-fit: contain; }
 .model-status { position: absolute; inset: auto 0 4.4em; margin: 0; text-align: center; color: var(--muted); font-size: max(11px, .95em); }
 .model-viewer[data-state="loading"] .model-status { inset: 0; display: grid; place-items: center; }
+/* Who provided the backdrop, quietly in the top right of the 3D view. */
+.model-note { position: absolute; top: 0; right: 0; margin: 0; padding: .45em 1em; border-radius: 999px; background: #eee8d9; color: var(--muted); font-size: max(10px, .8em); letter-spacing: .1em; text-transform: uppercase; pointer-events: none; }
 .model-controls { display: flex; gap: .3em; padding: .3em; border-radius: 999px; background: #eee8d9; }
 .model-controls button { min-width: max(40px, 3.4em); min-height: max(40px, calc(var(--u) * 3.4)); padding: 0 max(14px, calc(var(--u) * 1.6)); border: 0; border-radius: 999px; background: none; font-size: max(11px, .95em); letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
 .model-controls button:first-child, .model-controls button:last-child { padding: 0; font-size: max(16px, 1.3em); letter-spacing: 0; }
@@ -349,6 +351,8 @@ h2 { margin: 0 0 18px; font: 800 clamp(2rem, 3vw, 2.7rem)/1.05 Arial, Helvetica,
   .ring { --card: 21em; }
   /* The hint sits right under the photos, clear of the event dots. */
   .ring-hint { bottom: auto; top: calc(50% + var(--u) * 14.6); }
+  /* The 3D model and the video stop above the event dots. */
+  .model-viewer, .showcase-slide { inset: 0 0 4.2em; }
   .console { width: 46%; }
 }
 /* Phones held sideways: a short screen, so the header and controls get slimmer. */

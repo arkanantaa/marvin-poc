@@ -1,6 +1,7 @@
 import {
   ACESFilmicToneMapping, Group, PCFSoftShadowMap, PerspectiveCamera, Scene, SRGBColorSpace, WebGLRenderer,
 } from "three";
+import { buildBackdrop, type Backdrop } from "./buildBackdrop";
 import { buildBooth, type BoothTheme } from "./buildBooth";
 import { createCurtainMotion } from "./curtainMotion";
 import { createStudioRig } from "./studioRig";
@@ -9,8 +10,10 @@ const fov = 30;
 const targetY = 1.95;
 
 // A small, interactive copy of the booth for the portfolio: drag to turn it, open
-// and close the curtain. It renders only while something moves.
-export function createBoothViewer(host: HTMLElement, { autoRotate, theme }: { autoRotate: boolean; theme?: BoothTheme }) {
+// and close the curtain. With a backdrop, the booth stands on the left and the
+// event's backdrop on the right, as one set that turns together.
+// It renders only while something moves.
+export function createBoothViewer(host: HTMLElement, { autoRotate, theme, backdrop }: { autoRotate: boolean; theme?: BoothTheme; backdrop?: Backdrop }) {
   const renderer = new WebGLRenderer({ antialias: true, alpha: true, powerPreference: "low-power" });
   renderer.outputColorSpace = SRGBColorSpace;
   renderer.toneMapping = ACESFilmicToneMapping;
@@ -22,14 +25,27 @@ export function createBoothViewer(host: HTMLElement, { autoRotate, theme }: { au
   host.appendChild(canvas);
   const scene = new Scene();
   const camera = new PerspectiveCamera(fov, 1, .1, 60);
-  const rig = createStudioRig(renderer, scene, 1024);
+  const rig = createStudioRig(renderer, scene, 1024, { span: backdrop ? 4 : 2.5 });
   const booth = buildBooth(schedule, { theme });
   const pivot = new Group();
   booth.root.position.z = -.05;
   pivot.add(booth.root);
+  const set = backdrop ? buildBackdrop(backdrop) : null;
+  if (set) {
+    booth.root.position.x = -1.55;
+    set.root.position.set(1.75, 0, -.35);
+    set.root.rotation.y = -.18;
+    pivot.add(set.root);
+  }
   scene.add(pivot);
+  // The set as a whole: wider than the booth alone.
+  const frameWidth = set ? 7.6 : 3.8;
+  // Facing: the booth alone starts turned a little; the set starts nearly front-on
+  // and, while idle, sways gently instead of spinning so the backdrop stays in view.
+  const restYaw = set ? -.12 : -.5;
+  let swayTime = 0;
 
-  let yaw = -.5;
+  let yaw = restYaw;
   let pitch = .1;
   let spin = 0;
   let opening = 0;
@@ -62,7 +78,12 @@ export function createBoothViewer(host: HTMLElement, { autoRotate, theme }: { au
     windTime += dt;
     // Gentle turntable until the visitor takes over; resumes after a pause.
     const resting = !dragging && time - idleSince > 2500;
-    if (rotates && resting) yaw += dt * .3;
+    if (rotates && resting && set) {
+      swayTime += dt;
+      const home = restYaw + Math.PI * 2 * Math.round((yaw - restYaw) / (Math.PI * 2));
+      const target = home + Math.sin(swayTime * .4) * .5;
+      yaw += (target - yaw) * (1 - Math.exp(-dt * 1.2));
+    } else if (rotates && resting) yaw += dt * .3;
     yaw += spin * Math.min(1, dt * 8);
     spin *= Math.max(0, 1 - dt * 8);
     if (Math.abs(spin) < .0005) spin = 0;
@@ -89,7 +110,7 @@ export function createBoothViewer(host: HTMLElement, { autoRotate, theme }: { au
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
     const tangent = Math.tan(fov * Math.PI / 360);
-    distance = Math.max(4.4 / (2 * tangent), 3.8 / (2 * tangent * camera.aspect));
+    distance = Math.max(4.4 / (2 * tangent), frameWidth / (2 * tangent * camera.aspect));
     schedule();
   }
   const down = (event: PointerEvent) => {
@@ -137,6 +158,7 @@ export function createBoothViewer(host: HTMLElement, { autoRotate, theme }: { au
       canvas.removeEventListener("pointercancel", up);
       document.removeEventListener("visibilitychange", onVisibility);
       booth.dispose();
+      set?.dispose();
       rig.dispose();
       renderer.dispose();
       renderer.forceContextLoss();

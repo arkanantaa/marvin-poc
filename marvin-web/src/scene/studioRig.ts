@@ -8,7 +8,8 @@ import { studioEnvironment } from "./studioEnvironment";
 // scene and the interactive 3D model in the portfolio.
 // With `stage`, the booth stands on a visible warm floor (for the entrance);
 // without it the floor only catches shadows (the transparent 3D viewer).
-export function createStudioRig(renderer: WebGLRenderer, scene: Scene, shadowSize: number, { stage = false } = {}) {
+// `span` is how far (metres) either side of the centre shadows are cast.
+export function createStudioRig(renderer: WebGLRenderer, scene: Scene, shadowSize: number, { stage = false, span = 2.5 } = {}) {
   const environmentScene = studioEnvironment();
   const pmrem = new PMREMGenerator(renderer);
   const environment = pmrem.fromScene(environmentScene, .025, .1, 50, { size: 256 });
@@ -21,8 +22,8 @@ export function createStudioRig(renderer: WebGLRenderer, scene: Scene, shadowSiz
   key.position.set(-3, 6, 5);
   key.castShadow = true;
   key.shadow.mapSize.setScalar(shadowSize);
-  key.shadow.camera.left = -2.5;
-  key.shadow.camera.right = 2.5;
+  key.shadow.camera.left = -span;
+  key.shadow.camera.right = span;
   key.shadow.camera.top = 3;
   key.shadow.camera.bottom = -2.5;
   key.shadow.normalBias = .006;
@@ -60,7 +61,7 @@ export function createStudioRig(renderer: WebGLRenderer, scene: Scene, shadowSiz
   shadowContext.fillStyle = gradient;
   shadowContext.fillRect(0, 0, 128, 128);
   const contactTexture = new CanvasTexture(shadowCanvas);
-  const contact = new Mesh(new PlaneGeometry(4.8, 3.1), new MeshBasicMaterial({
+  const contact = new Mesh(new PlaneGeometry(span * 1.92, 3.1), new MeshBasicMaterial({
     map: contactTexture, transparent: true, depthWrite: false, toneMapped: false,
   }));
   contact.rotation.x = -Math.PI / 2;

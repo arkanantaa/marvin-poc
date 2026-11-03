@@ -10,12 +10,21 @@ export type Portrait = {
 export type PortfolioVideo = { src: string; label: string };
 // Colours of the 3D booth for an event (curtain tint, sign glow, curtain sheen).
 export type EventTheme = { curtain?: string; sign?: string; sheen?: string };
+// The backdrop the booth stood in front of (see scene/buildBackdrop): its look,
+// and whether the client brought it or Marvin provided it.
+export type EventBackdrop = {
+  style: "repeat" | "greenery" | "floral";
+  by: "marvin" | "client";
+  colors: readonly [string, string, string];
+  title?: string;
+};
 export type Collection = {
   id: string;
   name: string;
   images: readonly Portrait[];
   video?: PortfolioVideo;
   theme: EventTheme;
+  backdrop: EventBackdrop;
 };
 
 export const portraits: readonly Portrait[] = [
@@ -40,6 +49,7 @@ export const collections: readonly Collection[] = [
     images: [0, 1, 2, 3, 4, 5].map(i => portraits[i]),
     video: { src: "portfolio/videos/ikea.mp4", label: "IKEA event, a short highlight clip" },
     theme: { curtain: "#6f8fe8", sign: "#ffd94a", sheen: "#5d78c9" },
+    backdrop: { style: "repeat", by: "marvin", colors: ["#0b4ea2", "#ffd94a", "#ffffff"], title: "IKEA" },
   },
   {
     id: "padel",
@@ -47,6 +57,7 @@ export const collections: readonly Collection[] = [
     images: [3, 4, 5, 0, 1, 2].map(i => portraits[i]),
     video: { src: "portfolio/videos/padel.mp4", label: "Padel Night, a short highlight clip" },
     theme: { curtain: "#7db04f", sign: "#e6ff8f", sheen: "#8fbf63" },
+    backdrop: { style: "greenery", by: "marvin", colors: ["#3f6f35", "#6e9e4c", "#e6ff8f"], title: "Padel Night" },
   },
   {
     id: "wedding",
@@ -54,6 +65,7 @@ export const collections: readonly Collection[] = [
     images: [2, 4, 5, 1, 0, 3].map(i => portraits[i]),
     video: { src: "portfolio/videos/wedding.mp4", label: "Wedding, a short highlight clip" },
     theme: { curtain: "#e9b9c6", sign: "#fff0e4", sheen: "#d9a0b0" },
+    backdrop: { style: "floral", by: "client", colors: ["#f6eee8", "#e9b9c6", "#fff6f0"] },
   },
 ];
 // Ways to look at an event on the monitor.
@@ -80,4 +92,5 @@ export const closing = {
 };
 export const portfolioLabels = {
   printSignature: "marvin studio",
+  backdropBy: { marvin: "Backdrop by Marvin", client: "Client's own backdrop" },
 };
