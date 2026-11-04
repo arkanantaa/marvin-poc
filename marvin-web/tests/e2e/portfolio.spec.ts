@@ -20,8 +20,6 @@ test("each event has photos, video and a 3D booth, and slides left and right", a
   const title = page.locator(".event-title");
   await expect(title).toHaveText("IKEA");
   await page.getByRole("button", { name: "Next event" }).click();
-  await expect(title).toHaveText("Padel Night");
-  await page.getByRole("button", { name: "Next event" }).click();
   await expect(title).toHaveText("Wedding");
   await page.getByRole("button", { name: "Next event" }).click();
   await expect(title).toHaveText("IKEA");
@@ -45,9 +43,10 @@ test("each event has photos, video and a 3D booth, and slides left and right", a
       const start = Number(await canvas.getAttribute("data-yaw"));
       await expect.poll(async () => Number(await canvas.getAttribute("data-yaw")), { timeout: 60000 }).toBeGreaterThan(start);
     }
+    // IKEA's own printed booth has its door printed on: no curtain to open.
+    await expect(page.getByRole("button", { name: "Open the curtain" })).toHaveCount(0);
     await page.getByRole("button", { name: "Turn the booth left" }).click();
     await expect(canvas).toHaveAttribute("data-turntable", "off");
-    await expect(viewer.locator(".model-note")).toHaveCount(0);
   } else {
     await expect(viewer.getByRole("status")).toContainText("isn’t available");
   }
@@ -124,7 +123,7 @@ test("the photos turn round: arrows, keys and dragging bring another photo to th
   await expect.poll(front).not.toBe(first);
   // Changing event keeps the photos on the ring, now the new event's.
   await page.getByRole("button", { name: "Next event" }).click();
-  await expect(page.locator(".event-title")).toHaveText("Padel Night");
+  await expect(page.locator(".event-title")).not.toHaveText("IKEA");
   await expect(page.locator(".ring .print")).toHaveCount(6);
 });
 

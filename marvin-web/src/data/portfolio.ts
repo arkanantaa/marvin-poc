@@ -10,21 +10,22 @@ export type Portrait = {
 export type PortfolioVideo = { src: string; label: string };
 // Colours of the 3D booth for an event (curtain tint, sign glow, curtain sheen).
 export type EventTheme = { curtain?: string; sign?: string; sheen?: string };
-// The backdrop the booth stood in front of (see scene/buildBackdrop): its look,
-// and whether the client brought it or Marvin provided it.
-export type EventBackdrop = {
-  style: "repeat" | "greenery" | "floral";
-  by: "marvin" | "client";
-  colors: readonly [string, string, string];
-  title?: string;
-};
+// For the 3D view (see scene/buildBackdrop and scene/buildWrappedBooth):
+// - backdrop: a photo of the event's backdrop with a transparent background, shown
+//   next to the booth; `width` is its width in the scene (the booth is about 3.1).
+// - wrap: a booth made for the event, printed with its own design: the drawings of
+//   the front, back and both sides, the sign on the roof box, and the colour of
+//   the unprinted parts. It is shown instead of the standard Marvin booth.
+export type EventBackdrop = { src: string; width: number };
+export type EventBoothWrap = { front: string; back: string; left: string; right: string; sign: string; color: string };
 export type Collection = {
   id: string;
   name: string;
   images: readonly Portrait[];
   video?: PortfolioVideo;
   theme: EventTheme;
-  backdrop: EventBackdrop;
+  backdrop?: EventBackdrop;
+  wrap?: EventBoothWrap;
 };
 
 export const portraits: readonly Portrait[] = [
@@ -49,15 +50,14 @@ export const collections: readonly Collection[] = [
     images: [0, 1, 2, 3, 4, 5].map(i => portraits[i]),
     video: { src: "portfolio/videos/ikea.mp4", label: "IKEA event, a short highlight clip" },
     theme: { curtain: "#6f8fe8", sign: "#ffd94a", sheen: "#5d78c9" },
-    backdrop: { style: "repeat", by: "marvin", colors: ["#0b4ea2", "#ffd94a", "#ffffff"], title: "IKEA" },
-  },
-  {
-    id: "padel",
-    name: "Padel Night",
-    images: [3, 4, 5, 0, 1, 2].map(i => portraits[i]),
-    video: { src: "portfolio/videos/padel.mp4", label: "Padel Night, a short highlight clip" },
-    theme: { curtain: "#7db04f", sign: "#e6ff8f", sheen: "#8fbf63" },
-    backdrop: { style: "greenery", by: "marvin", colors: ["#3f6f35", "#6e9e4c", "#e6ff8f"], title: "Padel Night" },
+    wrap: {
+      front: "portfolio/booths/ikea-front.jpg",
+      back: "portfolio/booths/ikea-back.jpg",
+      left: "portfolio/booths/ikea-left.jpg",
+      right: "portfolio/booths/ikea-right.jpg",
+      sign: "portfolio/booths/ikea-sign.jpg",
+      color: "#1f4f9e",
+    },
   },
   {
     id: "wedding",
@@ -65,7 +65,7 @@ export const collections: readonly Collection[] = [
     images: [2, 4, 5, 1, 0, 3].map(i => portraits[i]),
     video: { src: "portfolio/videos/wedding.mp4", label: "Wedding, a short highlight clip" },
     theme: { curtain: "#e9b9c6", sign: "#fff0e4", sheen: "#d9a0b0" },
-    backdrop: { style: "floral", by: "client", colors: ["#f6eee8", "#e9b9c6", "#fff6f0"] },
+    backdrop: { src: "portfolio/backdrops/wedding.webp", width: 4.4 },
   },
 ];
 // Ways to look at an event on the monitor.

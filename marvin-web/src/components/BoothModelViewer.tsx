@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import type { EventBackdrop, EventTheme } from "../data/portfolio";
+import type { EventBackdrop, EventBoothWrap, EventTheme } from "../data/portfolio";
 import { asset, boothPoster } from "../lib/assets";
 
 type Viewer = { turn(radians: number): void; setOpen(open: boolean): void };
 
 // The booth as a small, playable 3D model, dressed in the event's colours. Three.js
 // is loaded only when this view is opened, and released again when it closes.
-export function BoothModelViewer({ theme, backdrop }: { theme: EventTheme; backdrop?: EventBackdrop }) {
+export function BoothModelViewer({ theme, backdrop, wrap }: { theme: EventTheme; backdrop?: EventBackdrop; wrap?: EventBoothWrap }) {
   const host = useRef<HTMLDivElement>(null);
   const viewer = useRef<Viewer | null>(null);
   const [state, setState] = useState<"loading" | "ready" | "unavailable">("loading");
@@ -22,7 +22,7 @@ export function BoothModelViewer({ theme, backdrop }: { theme: EventTheme; backd
       if (cancelled) return;
       try {
         // Like the entrance, the turntable plays whatever the OS motion setting.
-        const created = createBoothViewer(container, { autoRotate: true, theme, backdrop });
+        const created = createBoothViewer(container, { autoRotate: true, theme, backdrop, wrap });
         viewer.current = created;
         dispose = created.dispose;
         setState("ready");
@@ -33,7 +33,7 @@ export function BoothModelViewer({ theme, backdrop }: { theme: EventTheme; backd
       viewer.current = null;
       dispose?.();
     };
-  }, [theme, backdrop]);
+  }, [theme, backdrop, wrap]);
   function toggle() {
     const next = !open;
     setOpen(next);
@@ -42,9 +42,9 @@ export function BoothModelViewer({ theme, backdrop }: { theme: EventTheme; backd
   return (
     <div className="model-viewer" data-state={state}>
       <div className="model-canvas" ref={host} role="img"
-        aria-label={backdrop
-          ? "Interactive three-dimensional models of the Marvin photobooth and the event's backdrop"
-          : "Interactive three-dimensional model of the Marvin photobooth"} />
+        aria-label={wrap ? "Interactive three-dimensional model of the photobooth made for this event"
+          : backdrop ? "Interactive three-dimensional models of the Marvin photobooth and the event's backdrop"
+            : "Interactive three-dimensional model of the Marvin photobooth"} />
       {state === "unavailable" && (
         <img className="model-fallback" src={asset(boothPoster.src)} alt="The Marvin photobooth"
           width={boothPoster.width} height={boothPoster.height} />
@@ -54,7 +54,8 @@ export function BoothModelViewer({ theme, backdrop }: { theme: EventTheme; backd
       {state === "ready" && (
         <div className="model-controls">
           <button type="button" aria-label="Turn the booth left" onClick={() => viewer.current?.turn(-.7)}>↺</button>
-          <button type="button" aria-pressed={open} onClick={toggle}>{open ? "Close the curtain" : "Open the curtain"}</button>
+          {/* A wrapped booth has its door printed on: no curtain to open. */}
+          {!wrap && <button type="button" aria-pressed={open} onClick={toggle}>{open ? "Close the curtain" : "Open the curtain"}</button>}
           <button type="button" aria-label="Turn the booth right" onClick={() => viewer.current?.turn(.7)}>↻</button>
         </div>
       )}
