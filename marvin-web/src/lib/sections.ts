@@ -8,3 +8,7 @@ export const sectionFromHash = (hash: string): Section | null => byHash[hash] ??
 
 // Asks the journey to walk back out of the booth (the "Step outside" button).
 export const leaveEvent = "marvin:leave";
+
+// Opens the "Book a session" form (from the header and the closing section).
+export const bookEvent = "marvin:book";
+export const openBooking = () => window.dispatchEvent(new Event(bookEvent));

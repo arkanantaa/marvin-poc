@@ -200,9 +200,11 @@ export function useJourneyProgress(home: RefObject<HTMLAnchorElement | null>) {
       }
       transition = requestAnimationFrame(step);
     }
+    // While the booking form is open the page underneath stays where it is.
+    const booking = () => document.documentElement.dataset.booking === "open";
     const handlesDirection = (down: boolean) => down ? scrollY < range() - 2 : scrollY <= range() + 2 && scrollY > 0;
     const onWheel = (event: WheelEvent) => {
-      if (locked && !transition) return;
+      if (locked && !transition || booking()) return;
       if (event.ctrlKey || Math.abs(event.deltaX) > Math.abs(event.deltaY) || event.deltaY === 0) return;
       const now = performance.now();
       if (now - lastWheelEvent > 300) gestureFromBelow = below();
@@ -238,12 +240,13 @@ export function useJourneyProgress(home: RefObject<HTMLAnchorElement | null>) {
       if (Math.abs(wheelIntent) >= 10) { wheelIntent = 0; playTransition(down); }
     };
     const onTouchStart = (event: TouchEvent) => {
+      if (booking()) { touchStart = null; return; }
       touchStart = event.touches.length === 1 ? { x: event.touches[0].clientX, y: event.touches[0].clientY } : null;
       touchFromBelow = below();
       touchProgress = scrollY / range();
     };
     const onTouchMove = (event: TouchEvent) => {
-      if (locked && !transition) return;
+      if (locked && !transition || booking()) return;
       if (!touchStart || event.touches.length !== 1) return;
       const dx = touchStart.x - event.touches[0].clientX;
       const dy = touchStart.y - event.touches[0].clientY;
@@ -267,7 +270,7 @@ export function useJourneyProgress(home: RefObject<HTMLAnchorElement | null>) {
       if (scrubbing) releaseScrub();
     };
     const onKeyDown = (event: KeyboardEvent) => {
-      if (locked && !transition) return;
+      if (locked && !transition || booking()) return;
       const target = event.target instanceof HTMLElement ? event.target : null;
       if (event.defaultPrevented || event.ctrlKey || event.metaKey || event.altKey || target?.isContentEditable
         || target?.matches("input, textarea, select, video, button, [role='tab']")) return;
